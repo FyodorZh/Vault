@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vault", "Vault\Vault.csproj", "{1A2D56FC-C3D7-4B81-A32A-A626CCEBAC20}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vault.Core", "Vault.Core\Vault.Core.csproj", "{2B6A730A-BD04-4F46-9888-B535561BA2AF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{1A2D56FC-C3D7-4B81-A32A-A626CCEBAC20}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A2D56FC-C3D7-4B81-A32A-A626CCEBAC20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A2D56FC-C3D7-4B81-A32A-A626CCEBAC20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B6A730A-BD04-4F46-9888-B535561BA2AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B6A730A-BD04-4F46-9888-B535561BA2AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B6A730A-BD04-4F46-9888-B535561BA2AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B6A730A-BD04-4F46-9888-B535561BA2AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
