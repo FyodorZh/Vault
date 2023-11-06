@@ -1,4 +1,4 @@
-using Vault.Core;
+using Vault.Content;
 
 namespace Vault.Repository
 {

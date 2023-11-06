@@ -1,4 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Vault.Content;
 using Vault.Core;
+using Vault.Encryption;
 using Vault.Repository;
 
 namespace Vault
@@ -51,7 +56,7 @@ namespace Vault
 
         public void Command_cat(string name)
         {
-            using var child = CurrentNode.RequestChild(name);
+            var child = CurrentNode.FindChild(name);
             if (child == null)
             {
                 Console.WriteLine("File " + name + " not found");
@@ -67,7 +72,7 @@ namespace Vault
                 {
                     Console.WriteLine("Not a file!");
                 }
-                child.Dispose();
+                //child.Dispose();
             }
         }
 
@@ -77,12 +82,12 @@ namespace Vault
             {
                 if (_stack.Count > 1)
                 {
-                    _stack.Pop().Dispose();
+                    _stack.Pop();//.Dispose();
                 }
                 return;
             }
 
-            var child = CurrentNode.RequestChild(name);
+            var child = CurrentNode.FindChild(name);
             if (child == null)
             {
                 Console.WriteLine("Directory " + name + " not found");
@@ -96,33 +101,33 @@ namespace Vault
                 else
                 {
                     Console.WriteLine("Not a directory!");
-                    child.Dispose();
+                    //child.Dispose();
                 }
             }
         }
 
         public void Command_add(string name, string text)
         {
-            using var child = CurrentNode.RequestChild(name);
+            var child = CurrentNode.FindChild(name);
             if (child != null)
             {
                 Console.WriteLine("File or directory already exists");
                 return;
             }
             
-            CurrentNode.AddChildFile(name, new ValueContent<string>(text));
+            CurrentNode.AddChildFile(name, new StringContent(text));
         }
         
         public void Command_mkdir(string name)
         {
-            using var child = CurrentNode.RequestChild(name);
+            var child = CurrentNode.FindChild(name);
             if (child != null)
             {
                 Console.WriteLine("File or directory already exists");
                 return;
             }
             
-            CurrentNode.AddChildDirectory(name);
+            CurrentNode.AddChildDirectory(name, new PlaneDataEncryptionSource());
         }
     }
 }

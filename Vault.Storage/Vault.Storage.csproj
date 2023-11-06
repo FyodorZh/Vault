@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
@@ -10,11 +9,8 @@
     <ItemGroup>
       <ProjectReference Include="..\OrderedSerializer\Package\Runtime\OrderedSerializer\OrderedSerializer.csproj" />
       <ProjectReference Include="..\Vault.Content\Vault.Content.csproj" />
-      <ProjectReference Include="..\Vault.Core\Vault.Core.csproj" />
       <ProjectReference Include="..\Vault.Encryption\Vault.Encryption.csproj" />
-      <ProjectReference Include="..\Vault.Repository\Vault.Repository.csproj" />
       <ProjectReference Include="..\Vault.Serialization\Vault.Serialization.csproj" />
-      <ProjectReference Include="..\Vault.Storage\Vault.Storage.csproj" />
     </ItemGroup>
 
 </Project>

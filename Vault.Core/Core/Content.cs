@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace Vault.Core
 {
     public interface IContent

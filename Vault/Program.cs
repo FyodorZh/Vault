@@ -1,29 +1,41 @@
-﻿using Vault;
+﻿using System;
+using Vault;
+using Vault.Content;
 using Vault.Core;
+using Vault.Encryption;
 using Vault.Repository;
-using Vault.Repository.InMemory;
+using Vault.Repository.V1;
+using Vault.Storage;
+using Vault.Storage.InMemory;
 
 public static class VaultEntryPoint
 {
     public static void Main()
     {
-        IRepository repository = new InMemoryRepository();
-        IDirectoryNode root = repository.InitNew();
+        Box<StringContent> encodedRootName = new Box<StringContent>(new StringContent("root"));
+        Box<EncryptionSource> rootEncryption = new Box<EncryptionSource>(new XorEncryptionSource());
         
-        var a = root.AddChildFile("a", new ValueContent<string>("Text for A"));
-        var b = root.AddChildDirectory("b");
-        var c = root.AddChildFile("c", new ValueContent<string>("Text for C"));
+        InMemoryStorage storage = new InMemoryStorage(
+            encodedRootName,
+            rootEncryption,
+            false);
 
-        b.AddChildFile("bb", new ValueContent<string>("Text for BBBB"));
+        IRepository repository = new RepositoryV1(storage, () => System.Console.ReadLine());
+        var root = repository.GetRoot();
+        var a = root.AddChildFile("a", new StringContent("Text for A"));
+        var b = root.AddChildDirectory("b", new XorEncryptionSource());
+        var c = root.AddChildFile("c", new StringContent("Text for C"));
+
+        b.AddChildFile("bb", new StringContent("Text for BBBB"));
 
         VaultConsole vaultConsole = new VaultConsole(root); 
         
         
-        Console.Clear();
+        System.Console.Clear();
         while (true)
         {
             vaultConsole.Prompt();
-            var str = Console.ReadLine()?.Trim(' ');
+            var str = System.Console.ReadLine()?.Trim(' ');
             if (str == null)
             {
                 break;
