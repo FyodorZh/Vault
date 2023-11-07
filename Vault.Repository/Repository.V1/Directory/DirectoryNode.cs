@@ -23,6 +23,7 @@ namespace Vault.Repository.V1
             Parent?.CollectEncryptors(_encryptorsChain);
             var encryption = Data.ContentEncryption.Deserialize(_decryptorsChain);
             _encryption = encryption ?? throw new InvalidOperationException();
+            _encryption.SetCredentials(repository.CredentialsProvider);
         }
 
         public bool IsLocked => _decryptor == null || _encryptor == null;
@@ -32,25 +33,7 @@ namespace Vault.Repository.V1
             if (IsLocked)
             {
                 _decryptor = _encryption.ConstructDecryptor();
-                if (_decryptor == null)
-                {
-                    throw new InvalidOperationException();
-                }
-                
                 _encryptor = _encryption.ConstructEncryptor();
-                if (_encryptor == null)
-                {
-                    throw new InvalidOperationException();
-                }
-
-                if (_decryptor.RequireCredentials || _encryptor.RequireCredentials)
-                {
-                    var credentials = _repository.CredentialsProvider();
-                    if (_decryptor.RequireCredentials)
-                        _decryptor.SetCredentials(credentials);
-                    if (_encryptor.RequireCredentials)
-                        _encryptor.SetCredentials(credentials);
-                }
 
                 _decryptorsChain.Add(_decryptor);
                 _encryptorsChain.Add(_encryptor);
@@ -85,9 +68,6 @@ namespace Vault.Repository.V1
             }
         }
         
-
-        
-
         public INode? FindChild(string name)
         {
             if (IsLocked)
@@ -114,19 +94,25 @@ namespace Vault.Repository.V1
 
         public IFileNode AddChildFile(string name, IContent content)
         {
-            return _repository.AddFile(Id,
+            var fileNode = _repository.AddFile(Id,
                 new Box<StringContent>(new StringContent(name), _encryptorsChain),
                 new Box<IContent>(content, _encryptorsChain));
+            fileNode.DecryptName(_decryptorsChain);
+            fileNode.Unlock();
+            return fileNode;
         }
 
         public IDirectoryNode AddChildDirectory(string name, EncryptionSource encryptionSource)
         {
-            return _repository.AddDirectory(Id,
+            var dirNode = _repository.AddDirectory(Id,
                 new Box<StringContent>(new StringContent(name), _encryptorsChain),
                 new Box<EncryptionSource>(encryptionSource, _encryptorsChain));
+            dirNode.DecryptName(_decryptorsChain);
+            dirNode.Unlock();
+            return dirNode;
         }
         
-        private void CollectDecryptors(List<Decryptor> decryptors)
+        public void CollectDecryptors(List<Decryptor> decryptors)
         {
             if (_decryptor == null)
             {
@@ -142,7 +128,7 @@ namespace Vault.Repository.V1
             decryptors.Add(_decryptor);
         }
         
-        private void CollectEncryptors(List<Encryptor> encryptors)
+        public void CollectEncryptors(List<Encryptor> encryptors)
         {
             if (_encryptor == null)
             {

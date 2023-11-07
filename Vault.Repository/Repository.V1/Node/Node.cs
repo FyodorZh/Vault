@@ -27,7 +27,7 @@ namespace Vault.Repository.V1
 
         string? INode.Name => _name;
 
-        public bool DecryptName(IEnumerable<Decryptor> decryptorsChain)
+        public bool DecryptName(IEnumerable<Decryptor>? decryptorsChain = null)
         {
             _name = Data.EncryptedName.Deserialize(decryptorsChain)?.Content;
             return _name != null;

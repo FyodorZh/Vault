@@ -10,18 +10,29 @@ using Vault.Storage.InMemory;
 
 public static class VaultEntryPoint
 {
+    private class TmpCredentialsProvider : ICredentialsProvider
+    {
+        public string GetCredentials()
+        {
+            Console.Write("Enter credentials: ");
+            return Console.ReadLine()!;
+        }
+    }
+
     public static void Main()
     {
         Box<StringContent> encodedRootName = new Box<StringContent>(new StringContent("root"));
-        Box<EncryptionSource> rootEncryption = new Box<EncryptionSource>(new XorEncryptionSource());
+        Box<EncryptionSource> rootEncryption = new Box<EncryptionSource>(new XorEncryptionSource("123"));
         
         InMemoryStorage storage = new InMemoryStorage(
             encodedRootName,
             rootEncryption,
             false);
 
-        IRepository repository = new RepositoryV1(storage, () => System.Console.ReadLine());
+        IRepository repository = new RepositoryV1(storage, new TmpCredentialsProvider());
         var root = repository.GetRoot();
+        root.Unlock();
+        root.DecryptName();
         var a = root.AddChildFile("a", new StringContent("Text for A"));
         var b = root.AddChildDirectory("b", new XorEncryptionSource());
         var c = root.AddChildFile("c", new StringContent("Text for C"));

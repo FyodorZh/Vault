@@ -5,16 +5,14 @@ namespace Vault.Encryption
 {
     public class XorEncryptor : Encryptor
     {
-        private bool _initializedSeed;
-        private byte _xor;
+        private readonly bool _initializedSeed;
+        private readonly byte _xor;
         
-        public override bool RequireCredentials => true;
-        
-        public override void SetCredentials(string seed)
+        public XorEncryptor(string credentials)
         {
             _initializedSeed = true;
             _xor = 0;
-            foreach (var ch in seed)
+            foreach (var ch in credentials)
             {
                 _xor ^= (byte)ch;
             }

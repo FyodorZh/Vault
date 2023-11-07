@@ -10,7 +10,7 @@ namespace Vault.Repository
         Guid Id { get; }
         
         string? Name { get; }
-        bool DecryptName(IEnumerable<Decryptor> decryptorsChain);
+        bool DecryptName(IEnumerable<Decryptor>? decryptorsChain = null);
         
         IDirectoryNode? Parent { get; }
     }

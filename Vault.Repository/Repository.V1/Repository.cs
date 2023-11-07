@@ -9,7 +9,7 @@ namespace Vault.Repository.V1
 {
     internal interface IRepositoryCtl : IRepository
     {
-        Func<string> CredentialsProvider { get; }
+        ICredentialsProvider CredentialsProvider { get; }
         DirectoryNode? FindDirectory(Guid id);
         FileNode? FindFile(Guid id);
         IEnumerable<Guid> FindChildren(Guid parentId);
@@ -25,9 +25,9 @@ namespace Vault.Repository.V1
         private readonly Dictionary<Guid, DirectoryNode> _directories = new Dictionary<Guid, DirectoryNode>();
         private readonly Dictionary<Guid, FileNode> _files = new Dictionary<Guid, FileNode>();
 
-        public Func<string> CredentialsProvider { get; }
+        public ICredentialsProvider CredentialsProvider { get; }
 
-        public RepositoryV1(IStorage storage, Func<string> credentialProvider)
+        public RepositoryV1(IStorage storage, ICredentialsProvider credentialProvider)
         {
             _storage = storage;
             CredentialsProvider = credentialProvider;
@@ -92,7 +92,10 @@ namespace Vault.Repository.V1
         
         public IEnumerable<Guid> FindChildren(Guid parentId)
         {
-            throw new NotImplementedException();
+            foreach (var child in _storage.GetChildren(parentId))
+            {
+                yield return child.Id;
+            }
         }
 
         public IDirectoryNode AddDirectory(Guid parentId, Box<StringContent> encryptedName, Box<EncryptionSource> encryption)

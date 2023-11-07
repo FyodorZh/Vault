@@ -7,13 +7,6 @@ namespace Vault.Encryption
 {
     public class PlaneDataDecryptor : Decryptor
     {
-        public override bool RequireCredentials => false;
-        
-        public override void SetCredentials(string seed)
-        {
-            throw new InvalidOperationException();
-        }
-
         public override IReadOnlyList<byte> Decrypt(IReadOnlyList<byte> encryptedData)
         {
             byte[] res = new byte[encryptedData.Count];

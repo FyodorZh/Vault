@@ -36,13 +36,14 @@ namespace Vault
             bool bWritten = false;
             foreach (var element in CurrentNode.Children.OrderBy(ch => ch.Name))
             {
+                string name = element.Name ?? (element.Id.ToString() + "*");
                 if (element is IFileNode)
                 {
-                    Console.Write(element.Name);
+                    Console.Write(name);
                 }
                 else
                 {
-                    Console.Write("<" + element.Name + ">");
+                    Console.Write("<" + name + ">");
                 }
                 Console.Write(" ");
                 bWritten = true;

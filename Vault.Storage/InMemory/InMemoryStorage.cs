@@ -48,7 +48,7 @@ namespace Vault.Storage.InMemory
         
         IDirectoryData IStorage.AddDirectory(Guid parentId, Box<StringContent> encryptedName, Box<EncryptionSource> contentEncryption, bool encryptChildrenNames)
         {
-            if (_nodes.TryGetValue(parentId, out var parent) || !(parent is DirectoryData))
+            if (!_nodes.TryGetValue(parentId, out var parent) || !(parent is DirectoryData))
             {
                 throw new InvalidOperationException();
             }
@@ -60,7 +60,7 @@ namespace Vault.Storage.InMemory
 
         IFileData IStorage.AddFile(Guid parentId, Box<StringContent> encryptedName, Box<IContent> encryptedContent)
         {
-            if (_nodes.TryGetValue(parentId, out var parent) || !(parent is DirectoryData))
+            if (!_nodes.TryGetValue(parentId, out var parent) || !(parent is DirectoryData))
             {
                 throw new InvalidOperationException();
             }
