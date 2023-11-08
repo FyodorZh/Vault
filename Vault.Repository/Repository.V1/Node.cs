@@ -9,16 +9,16 @@ namespace Vault.Repository.V1
     internal abstract class Node<TNodeData> : INode
         where TNodeData : class, INodeData
     {
-        protected readonly IRepositoryCtl _repository;
-
         private string? _name;
-
+        
         protected TNodeData Data { get; }
+        
+        protected IRepositoryCtl Repository { get; }
 
         protected Node(TNodeData data, IRepositoryCtl repository)
         {
             Data = data;
-            _repository = repository;
+            Repository = repository;
         }
 
         public bool IsValid => Data.IsValid;
@@ -29,26 +29,26 @@ namespace Vault.Repository.V1
 
         public virtual void Unlock(LockState stateChange)
         {
-            if ((stateChange & LockState.Name) != 0)
+            if ((stateChange & LockState.SelfName) != 0)
             {
-                if ((State & LockState.Name) != 0)
+                if ((State & LockState.SelfName) != 0)
                 {
-                    var decryptorsChain = new List<Decryptor>();
+                    var decryptorsChain = new List<EncryptionSource>();
                     Parent!.CollectDecryptors(decryptorsChain);
                     _name = Data.EncryptedName.Deserialize(decryptorsChain)?.Content;
-                    State &= ~LockState.Name;
+                    State &= ~LockState.SelfName;
                 }
             }
         }
 
         public virtual void Lock(LockState stateChange)
         {
-            if ((stateChange & LockState.Name) != 0)
+            if ((stateChange & LockState.SelfName) != 0)
             {
-                if ((State & LockState.Name) == 0)
+                if ((State & LockState.SelfName) == 0)
                 {
                     _name = null;
-                    State |= LockState.Name;
+                    State |= LockState.SelfName;
                 }
             }
         }
@@ -57,6 +57,6 @@ namespace Vault.Repository.V1
 
         IDirectoryNode? INode.Parent => Parent;
         public DirectoryNode? Parent =>
-            Data.ParentId != null ? _repository.FindDirectory(Data.ParentId.Value) : null;
+            Data.ParentId != null ? Repository.FindDirectory(Data.ParentId.Value) : null;
     }
 }

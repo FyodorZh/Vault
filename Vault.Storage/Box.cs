@@ -15,7 +15,7 @@ namespace Vault.Storage
             Data = data;
         }
 
-        public Box(T data, IEnumerable<Encryptor>? encryptorsChain = null)
+        public Box(T data, IEnumerable<IEncryptionSource>? encryptorsChain = null)
         {
             var bytes = Serializer.Serialize(data);
             if (encryptorsChain != null)
@@ -29,7 +29,7 @@ namespace Vault.Storage
             Data = bytes;
         }
 
-        public T? Deserialize(IEnumerable<Decryptor>? decryptorsChain = null)
+        public T? Deserialize(IEnumerable<IEncryptionSource>? decryptorsChain = null)
         {
             var data = Data;
             if (decryptorsChain != null)

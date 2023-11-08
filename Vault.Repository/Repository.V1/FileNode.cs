@@ -17,7 +17,7 @@ namespace Vault.Repository.V1
             {
                 if ((State & LockState.Content) != 0)
                 {
-                    var decryptors = new List<Decryptor>();
+                    var decryptors = new List<EncryptionSource>();
                     Parent!.CollectDecryptors(decryptors);
                     _content = Data.EncryptedContent.Deserialize(decryptors);
                     

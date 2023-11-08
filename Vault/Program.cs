@@ -22,7 +22,7 @@ public static class VaultEntryPoint
     public static void Main()
     {
         Box<StringContent> encodedRootName = new Box<StringContent>(new StringContent("root"));
-        Box<EncryptionSource> rootEncryption = new Box<EncryptionSource>(new XorEncryptionSource("123"));
+        Box<EncryptionSource> rootEncryption = new Box<EncryptionSource>(new XorEncryptionSource());
         
         InMemoryStorage storage = new InMemoryStorage(
             encodedRootName,

@@ -8,9 +8,10 @@ namespace Vault.Repository
     public enum LockState
     {
         Open = 0,
-        Name = 1,
-        Content = 2,
-        Closed = Name | Content, 
+        SelfName = 1,               // имя ноды
+        ChildrenName = 2,           // имена чилдов ноды (если папка)
+        Content = 4,                // для файлов контент, для папки контент всех чилдов
+        Closed = SelfName | ChildrenName | Content, 
         All = Closed
     }
 
@@ -24,7 +25,6 @@ namespace Vault.Repository
         void Lock(LockState stateChange);
         
         string? Name { get; }
-        
         IDirectoryNode? Parent { get; }
     }
 }

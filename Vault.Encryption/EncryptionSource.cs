@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using OrderedSerializer;
 
 namespace Vault.Encryption
@@ -5,8 +6,8 @@ namespace Vault.Encryption
     public interface IEncryptionSource
     {
         void SetCredentials(ICredentialsProvider credentialsProvider);
-        Encryptor ConstructEncryptor();
-        Decryptor ConstructDecryptor();
+        IReadOnlyList<byte> Encrypt(IReadOnlyList<byte> plainData);
+        IReadOnlyList<byte> Decrypt(IReadOnlyList<byte> encryptedData);
     }
     
     public abstract class EncryptionSource : IEncryptionSource, IVersionedDataStruct
@@ -18,8 +19,9 @@ namespace Vault.Encryption
             CredentialsProvider = credentialsProvider;
         }
         
-        public abstract Encryptor ConstructEncryptor();
-        public abstract Decryptor ConstructDecryptor();
+        public abstract IReadOnlyList<byte> Encrypt(IReadOnlyList<byte> plainData);
+        public abstract IReadOnlyList<byte> Decrypt(IReadOnlyList<byte> encryptedData);
+
         public abstract void Serialize(IOrderedSerializer serializer);
         public virtual byte Version => 0;
     }
