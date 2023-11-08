@@ -25,13 +25,35 @@ namespace Vault.Repository.V1
 
         public Guid Id => Data.Id;
 
-        string? INode.Name => _name;
+        public LockState State { get; protected set; } = LockState.Closed;
 
-        public bool DecryptName(IEnumerable<Decryptor>? decryptorsChain = null)
+        public virtual void Unlock(LockState stateChange)
         {
-            _name = Data.EncryptedName.Deserialize(decryptorsChain)?.Content;
-            return _name != null;
+            if ((stateChange & LockState.Name) != 0)
+            {
+                if ((State & LockState.Name) != 0)
+                {
+                    var decryptorsChain = new List<Decryptor>();
+                    Parent!.CollectDecryptors(decryptorsChain);
+                    _name = Data.EncryptedName.Deserialize(decryptorsChain)?.Content;
+                    State &= ~LockState.Name;
+                }
+            }
         }
+
+        public virtual void Lock(LockState stateChange)
+        {
+            if ((stateChange & LockState.Name) != 0)
+            {
+                if ((State & LockState.Name) == 0)
+                {
+                    _name = null;
+                    State |= LockState.Name;
+                }
+            }
+        }
+
+        string? INode.Name => _name;
 
         IDirectoryNode? INode.Parent => Parent;
         public DirectoryNode? Parent =>

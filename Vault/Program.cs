@@ -31,8 +31,7 @@ public static class VaultEntryPoint
 
         IRepository repository = new RepositoryV1(storage, new TmpCredentialsProvider());
         var root = repository.GetRoot();
-        root.Unlock();
-        root.DecryptName();
+        root.Unlock(LockState.All);
         var a = root.AddChildFile("a", new StringContent("Text for A"));
         var b = root.AddChildDirectory("b", new XorEncryptionSource());
         var c = root.AddChildFile("c", new StringContent("Text for C"));

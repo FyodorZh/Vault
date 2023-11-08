@@ -6,9 +6,6 @@ namespace Vault.Repository
 {
     public interface IDirectoryNode : INode
     {
-        bool IsLocked { get; }
-        bool Unlock();
-        
         IEnumerable<INode> Children { get; }
         INode? FindChild(string name);
         IFileNode AddChildFile(string name, IContent content);

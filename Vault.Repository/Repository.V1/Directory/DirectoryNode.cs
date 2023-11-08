@@ -25,28 +25,53 @@ namespace Vault.Repository.V1
             _encryption = encryption ?? throw new InvalidOperationException();
             _encryption.SetCredentials(repository.CredentialsProvider);
         }
-
-        public bool IsLocked => _decryptor == null || _encryptor == null;
-
-        public bool Unlock()
+        
+        public override void Unlock(LockState stateChange)
         {
-            if (IsLocked)
+            base.Unlock(stateChange);
+            if ((stateChange & LockState.Content) != 0)
             {
-                _decryptor = _encryption.ConstructDecryptor();
-                _encryptor = _encryption.ConstructEncryptor();
-
-                _decryptorsChain.Add(_decryptor);
-                _encryptorsChain.Add(_encryptor);
-
-                foreach (var child in Children)
+                if ((State & LockState.Content) != 0)
                 {
-                    child.DecryptName(_decryptorsChain);
-                    // todo log error
+                    _decryptor = _encryption.ConstructDecryptor();
+                    _encryptor = _encryption.ConstructEncryptor();
+
+                    _decryptorsChain.Add(_decryptor);
+                    _encryptorsChain.Add(_encryptor);
+
+                    foreach (var child in Children)
+                    {
+                        child.Unlock(LockState.Name);
+                    }
+                    
+                    State &= ~LockState.Content;
                 }
             }
-            return true;
         }
-        
+
+        public override void Lock(LockState stateChange)
+        {
+            base.Lock(stateChange);
+            if ((stateChange & LockState.Content) != 0)
+            {
+                if ((State & LockState.Content) == 0)
+                {
+                    foreach (var child in Children)
+                    {
+                        child.Lock(LockState.All);
+                    }
+
+                    _decryptorsChain.RemoveAt(_decryptorsChain.Count - 1);
+                    _encryptorsChain.RemoveAt(_encryptorsChain.Count - 1);
+
+                    _encryptor = null;
+                    _decryptor = null;
+                    
+                    State |= LockState.Content;
+                }
+            }
+        }
+
         public IEnumerable<INode> Children
         {
             get
@@ -70,7 +95,7 @@ namespace Vault.Repository.V1
         
         public INode? FindChild(string name)
         {
-            if (IsLocked)
+            if ((State & LockState.Content) != 0)
             {
                 throw new InvalidOperationException();
             }
@@ -97,8 +122,7 @@ namespace Vault.Repository.V1
             var fileNode = _repository.AddFile(Id,
                 new Box<StringContent>(new StringContent(name), _encryptorsChain),
                 new Box<IContent>(content, _encryptorsChain));
-            fileNode.DecryptName(_decryptorsChain);
-            fileNode.Unlock();
+            fileNode.Unlock(LockState.All);
             return fileNode;
         }
 
@@ -107,8 +131,7 @@ namespace Vault.Repository.V1
             var dirNode = _repository.AddDirectory(Id,
                 new Box<StringContent>(new StringContent(name), _encryptorsChain),
                 new Box<EncryptionSource>(encryptionSource, _encryptorsChain));
-            dirNode.DecryptName(_decryptorsChain);
-            dirNode.Unlock();
+            dirNode.Unlock(LockState.All);
             return dirNode;
         }
         

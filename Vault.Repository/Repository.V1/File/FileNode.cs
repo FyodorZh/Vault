@@ -10,15 +10,32 @@ namespace Vault.Repository.V1
     {
         private IContent? _content;
 
-        public bool IsLocked => _content == null;
-
-        public void Unlock()
+        public override void Unlock(LockState stateChange)
         {
-            if (IsLocked)
+            base.Unlock(stateChange);
+            if ((stateChange & LockState.Content) != 0)
             {
-                var decryptors = new List<Decryptor>();
-                Parent!.CollectDecryptors(decryptors);
-                _content = Data.EncryptedContent.Deserialize(decryptors);
+                if ((State & LockState.Content) != 0)
+                {
+                    var decryptors = new List<Decryptor>();
+                    Parent!.CollectDecryptors(decryptors);
+                    _content = Data.EncryptedContent.Deserialize(decryptors);
+                    
+                    State &= ~LockState.Content;
+                }
+            }
+        }
+
+        public override void Lock(LockState stateChange)
+        {
+            base.Lock(stateChange);
+            if ((stateChange & LockState.Content) != 0)
+            {
+                if ((State & LockState.Content) == 0)
+                {
+                    _content = null;                    
+                    State |= LockState.Content;
+                }
             }
         }
 
