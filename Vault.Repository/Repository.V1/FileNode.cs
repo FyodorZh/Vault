@@ -10,6 +10,14 @@ namespace Vault.Repository.V1
     {
         private IContent? _content;
 
+        public IContent Content => _content ?? throw new Exception();
+        
+        public FileNode(IFileData data, IRepositoryCtl repository) 
+            : base(data, repository)
+        {
+            State &= ~LockState.ChildrenName;
+        }
+
         public override void Unlock(LockState stateChange)
         {
             base.Unlock(stateChange);
@@ -35,13 +43,6 @@ namespace Vault.Repository.V1
                     State |= LockState.Content;
                 }
             }
-        }
-
-        public IContent Content => _content ?? throw new Exception();
-        
-        public FileNode(IFileData data, IRepositoryCtl repository) 
-            : base(data, repository)
-        {
         }
     }
 }

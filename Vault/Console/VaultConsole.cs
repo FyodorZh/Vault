@@ -21,20 +21,27 @@ namespace Vault
 
         public void Prompt()
         {
-            string prompt = CurrentNode.Name;
+            string prompt = CurrentNode.Name ?? CurrentNode.Id.ToString();
             INode? c = CurrentNode.Parent;
             while (c != null)
             {
                 prompt = c.Name + "/" + prompt;
                 c = c.Parent;
             }
+
+            prompt += "[";
+            prompt += ((CurrentNode.State & LockState.ChildrenName) != 0) ? "?" : "n";
+            prompt += ",";
+            prompt += ((CurrentNode.State & LockState.Content) != 0) ? "?" : "c";
+            prompt += "]";
+            
             Console.Write(prompt + "> ");
         }
 
         public void Command_ls()
         {
             bool bWritten = false;
-            foreach (var element in CurrentNode.Children.OrderBy(ch => ch.Name))
+            foreach (var element in CurrentNode.Children.OrderBy(ch => ch.Name ?? ch.Id.ToString()))
             {
                 string name = element.Name ?? (element.Id.ToString() + "*");
                 if (element is IFileNode)

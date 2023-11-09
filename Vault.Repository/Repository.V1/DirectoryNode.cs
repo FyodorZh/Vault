@@ -85,7 +85,7 @@ namespace Vault.Repository.V1
                 {
                     foreach (var child in Children)
                     {
-                        child.Lock(LockState.ChildrenName);
+                        child.Lock(LockState.ChildrenName | LockState.SelfName);
                     }
                     _childNameEncryptionChain.RemoveAt(_childNameEncryptionChain.Count - 1);
                     State |= LockState.ChildrenName;
@@ -117,7 +117,7 @@ namespace Vault.Repository.V1
         
         public INode? FindChild(string name)
         {
-            if ((State & LockState.Content) != 0)
+            if ((State & LockState.ChildrenName) != 0)
             {
                 throw new InvalidOperationException();
             }

@@ -19,6 +19,11 @@ namespace Vault.Repository.V1
         {
             Data = data;
             Repository = repository;
+            if (data.ParentId == null)
+            {
+                _name = Data.EncryptedName.Deserialize()?.Content;
+                State &= ~LockState.SelfName;
+            }
         }
 
         public bool IsValid => Data.IsValid;
@@ -45,8 +50,11 @@ namespace Vault.Repository.V1
             {
                 if ((State & LockState.SelfName) == 0)
                 {
-                    _name = null;
-                    State |= LockState.SelfName;
+                    if (Data.ParentId != null)
+                    {
+                        _name = null;
+                        State |= LockState.SelfName;
+                    }
                 }
             }
         }
