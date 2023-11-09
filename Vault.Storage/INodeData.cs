@@ -14,8 +14,8 @@ namespace Vault.Storage
 
     public interface IDirectoryData : INodeData
     {
-        bool EncryptChildrenNames { get; }
         Box<EncryptionSource> ContentEncryption { get; }
+        Box<EncryptionSource>? ChildrenNameEncryption { get; }
     }
 
     public interface IFileData : INodeData

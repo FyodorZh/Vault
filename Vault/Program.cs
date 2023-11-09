@@ -1,7 +1,6 @@
 ﻿using System;
 using Vault;
 using Vault.Content;
-using Vault.Core;
 using Vault.Encryption;
 using Vault.Repository;
 using Vault.Repository.V1;
@@ -27,7 +26,7 @@ public static class VaultEntryPoint
         InMemoryStorage storage = new InMemoryStorage(
             encodedRootName,
             rootEncryption,
-            false);
+            null);
 
         IRepository repository = new RepositoryV1(storage, new TmpCredentialsProvider());
         var root = repository.GetRoot();

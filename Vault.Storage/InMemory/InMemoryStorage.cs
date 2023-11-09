@@ -11,9 +11,9 @@ namespace Vault.Storage.InMemory
         private readonly DirectoryData _root;
 
         public InMemoryStorage(Box<StringContent> encryptedName,
-            Box<EncryptionSource> contentEncryption, bool encryptChildrenNames)
+            Box<EncryptionSource> contentEncryption, Box<EncryptionSource>? nameEncryption = null)
         {
-            _root = new DirectoryData(Guid.NewGuid(), null, encryptedName, contentEncryption, encryptChildrenNames);
+            _root = new DirectoryData(Guid.NewGuid(), null, encryptedName, contentEncryption, nameEncryption);
             _nodes.Add(_root.Id, _root);
         }
 
@@ -46,14 +46,14 @@ namespace Vault.Storage.InMemory
             }
         }
         
-        IDirectoryData IStorage.AddDirectory(Guid parentId, Box<StringContent> encryptedName, Box<EncryptionSource> contentEncryption, bool encryptChildrenNames)
+        IDirectoryData IStorage.AddDirectory(Guid parentId, Box<StringContent> encryptedName, Box<EncryptionSource> contentEncryption, Box<EncryptionSource>? nameEncryption)
         {
             if (!_nodes.TryGetValue(parentId, out var parent) || !(parent is DirectoryData))
             {
                 throw new InvalidOperationException();
             }
             
-            var node = new DirectoryData(Guid.NewGuid(), parentId, encryptedName, contentEncryption, encryptChildrenNames);
+            var node = new DirectoryData(Guid.NewGuid(), parentId, encryptedName, contentEncryption, nameEncryption);
             _nodes.Add(node.Id, node);
             return node;
         }

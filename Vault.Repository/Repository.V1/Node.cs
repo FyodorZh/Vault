@@ -33,9 +33,7 @@ namespace Vault.Repository.V1
             {
                 if ((State & LockState.SelfName) != 0)
                 {
-                    var decryptorsChain = new List<EncryptionSource>();
-                    Parent!.CollectDecryptors(decryptorsChain);
-                    _name = Data.EncryptedName.Deserialize(decryptorsChain)?.Content;
+                    _name = Data.EncryptedName.Deserialize(Parent?.ChildrenNameEncryptionChain)?.Content;
                     State &= ~LockState.SelfName;
                 }
             }

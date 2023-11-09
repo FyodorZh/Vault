@@ -8,23 +8,19 @@ namespace Vault.Repository.V1
 {
     internal class DirectoryNode : Node<IDirectoryData>, IDirectoryNode
     {
-        private readonly List<EncryptionSource> _decryptorsChain = new List<EncryptionSource>();
-        private readonly List<EncryptionSource> _encryptorsChain = new List<EncryptionSource>();
-
         private readonly EncryptionSource? _childrenNamesEncryption;
         private readonly EncryptionSource _contentEncryption;
-        
-        
-        private EncryptionSource? _decryptor;
-        private EncryptionSource? _encryptor;
+
+        private readonly List<IEncryptionSource> _contentEncryptionChain = new List<IEncryptionSource>();
+        private readonly List<IEncryptionSource> _childNameEncryptionChain = new List<IEncryptionSource>();
         
         public DirectoryNode(IDirectoryData data, IRepositoryCtl repository)
             : base(data, repository)
         {
-            Parent?.CollectDecryptors(_decryptorsChain);
-            Parent?.CollectEncryptors(_encryptorsChain);
-            var encryption = Data.ContentEncryption.Deserialize(_decryptorsChain);
+            var encryption = Data.ContentEncryption.Deserialize(Parent?.EncryptionChain);
             _contentEncryption = encryption ?? throw new InvalidOperationException();
+            _childrenNamesEncryption = Data.ChildrenNameEncryption?.Deserialize(Parent?.EncryptionChain);
+            
             _contentEncryption.SetCredentials(repository.CredentialsProvider);
         }
         
@@ -35,53 +31,67 @@ namespace Vault.Repository.V1
             {
                 if ((State & LockState.ChildrenName) != 0)
                 {
-                    
-                    
+                    if (Parent != null)
+                    {
+                        _childNameEncryptionChain.AddRange(Parent.EncryptionChain);
+                    }
+                    _childNameEncryptionChain.Add(_childrenNamesEncryption ?? _contentEncryption);
                     
                     State &= ~LockState.ChildrenName;
+                    
+                    foreach (var child in Children)
+                    {
+                        child.Unlock(LockState.SelfName);
+                    }
                 }
             }
             if ((stateChange & LockState.Content) != 0)
             {
                 if ((State & LockState.Content) != 0)
                 {
-                    _decryptor = _contentEncryption;
-                    _encryptor = _contentEncryption;
-
-                    _decryptorsChain.Add(_decryptor);
-                    _encryptorsChain.Add(_encryptor);
-
-                    foreach (var child in Children)
+                    if (Parent != null)
                     {
-                        child.Unlock(LockState.SelfName);
+                        _contentEncryptionChain.AddRange(Parent.EncryptionChain);
                     }
+                    _contentEncryptionChain.Add(_contentEncryption);
                     
                     State &= ~LockState.Content;
+                    
+                    foreach (var child in Children)
+                    {
+                        child.Unlock(LockState.Content);
+                    }
                 }
             }
         }
 
         public override void Lock(LockState stateChange)
         {
-            base.Lock(stateChange);
             if ((stateChange & LockState.Content) != 0)
             {
                 if ((State & LockState.Content) == 0)
                 {
                     foreach (var child in Children)
                     {
-                        child.Lock(LockState.All);
+                        child.Lock(LockState.Content);
                     }
-
-                    _decryptorsChain.RemoveAt(_decryptorsChain.Count - 1);
-                    _encryptorsChain.RemoveAt(_encryptorsChain.Count - 1);
-
-                    _encryptor = null;
-                    _decryptor = null;
-                    
+                    _contentEncryptionChain.RemoveAt(_contentEncryptionChain.Count - 1);
                     State |= LockState.Content;
                 }
             }
+            if ((stateChange & LockState.ChildrenName) != 0)
+            {
+                if ((State & LockState.ChildrenName) == 0)
+                {
+                    foreach (var child in Children)
+                    {
+                        child.Lock(LockState.ChildrenName);
+                    }
+                    _childNameEncryptionChain.RemoveAt(_childNameEncryptionChain.Count - 1);
+                    State |= LockState.ChildrenName;
+                }
+            }
+            base.Lock(stateChange);
         }
 
         public IEnumerable<INode> Children
@@ -131,59 +141,55 @@ namespace Vault.Repository.V1
 
         public IFileNode AddChildFile(string name, IContent content)
         {
+            if (State != LockState.Open)
+            {
+                throw new InvalidOperationException();
+            }
+            
             var fileNode = Repository.AddFile(Id,
-                new Box<StringContent>(new StringContent(name), _encryptorsChain),
-                new Box<IContent>(content, _encryptorsChain));
+                new Box<StringContent>(new StringContent(name), ChildrenNameEncryptionChain),
+                new Box<IContent>(content, EncryptionChain));
             fileNode.Unlock(LockState.All);
             return fileNode;
         }
 
         public IDirectoryNode AddChildDirectory(string name, EncryptionSource encryptionSource)
-        {
+        {            
+            if (State != LockState.Open)
+            {
+                throw new InvalidOperationException();
+            }
+            
             var dirNode = Repository.AddDirectory(Id,
-                new Box<StringContent>(new StringContent(name), _encryptorsChain),
-                new Box<EncryptionSource>(encryptionSource, _encryptorsChain));
+                new Box<StringContent>(new StringContent(name), ChildrenNameEncryptionChain),
+                new Box<EncryptionSource>(encryptionSource, EncryptionChain));
             dirNode.Unlock(LockState.All);
             return dirNode;
         }
 
-        // public IEnumerable<Decryptor> DecryptorsChain
-        // {
-        //     get
-        //     {
-        //         if ((State & LockState.Content))
-        //     }
-        // }
-
-        public void CollectDecryptors(List<EncryptionSource> decryptors)
+        public IEnumerable<IEncryptionSource> EncryptionChain
         {
-            if (_decryptor == null)
+            get
             {
-                throw new InvalidOperationException();
-            }
-            
-            var parent = Parent;
-            if (parent != null)
-            {
-                parent.CollectDecryptors(decryptors);
-            }
+                if ((State & LockState.Content) != 0)
+                {
+                    throw new InvalidOperationException();
+                }
 
-            decryptors.Add(_decryptor);
+                return _contentEncryptionChain;
+            }
         }
         
-        public void CollectEncryptors(List<EncryptionSource> encryptors)
+        public IEnumerable<IEncryptionSource> ChildrenNameEncryptionChain
         {
-            if (_encryptor == null)
+            get
             {
-                throw new InvalidOperationException();
-            }
-            
-            encryptors.Add(_encryptor);
-            
-            var parent = Parent;
-            if (parent != null)
-            {
-                parent.CollectEncryptors(encryptors);
+                if ((State & LockState.ChildrenName) != 0)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                return _childNameEncryptionChain;
             }
         }
     }

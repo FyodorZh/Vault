@@ -5,7 +5,7 @@ namespace Vault.Encryption
 {
     public interface IEncryptionSource
     {
-        void SetCredentials(ICredentialsProvider credentialsProvider);
+        //void SetCredentials(ICredentialsProvider credentialsProvider);
         IReadOnlyList<byte> Encrypt(IReadOnlyList<byte> plainData);
         IReadOnlyList<byte> Decrypt(IReadOnlyList<byte> encryptedData);
     }

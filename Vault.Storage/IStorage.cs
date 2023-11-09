@@ -14,7 +14,7 @@ namespace Vault.Storage
         IEnumerable<INodeData> GetChildren(Guid parentId);
         
         IDirectoryData AddDirectory(Guid parentId, Box<StringContent> encryptedName, 
-            Box<EncryptionSource> contentEncryption, bool encryptChildrenNames);
+            Box<EncryptionSource> contentEncryption, Box<EncryptionSource>? nameEncryption = null);
         
         IFileData AddFile(Guid parentId, Box<StringContent> encryptedName, 
             Box<IContent> encryptedContent);
