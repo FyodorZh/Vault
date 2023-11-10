@@ -24,9 +24,7 @@ public static class VaultEntryPoint
         Box<EncryptionSource> rootEncryption = new Box<EncryptionSource>(new PlaneDataEncryptionSource());
         
         InMemoryStorage storage = new InMemoryStorage(
-            encodedRootName,
-            new Box<EncryptionSource>(new XorEncryptionSource()),
-            new Box<EncryptionSource>(new PlaneDataEncryptionSource()));
+            new Box<StringContent>(new StringContent("root")));
 
         IRepository repository = new RepositoryV1(storage, new TmpCredentialsProvider());
         var root = repository.GetRoot();

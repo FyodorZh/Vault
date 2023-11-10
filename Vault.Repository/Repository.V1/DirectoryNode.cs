@@ -87,7 +87,12 @@ namespace Vault.Repository.V1
                     {
                         child.Lock(LockState.Content);
                     }
-                    _contentEncryptionChain.RemoveAt(_contentEncryptionChain.Count - 1);
+
+                    if (_contentEncryption != null)
+                    {
+                        _contentEncryptionChain.RemoveAt(_contentEncryptionChain.Count - 1);
+                    }
+
                     State |= LockState.Content;
                 }
             }
@@ -99,7 +104,12 @@ namespace Vault.Repository.V1
                     {
                         child.Lock(LockState.ChildrenName | LockState.SelfName);
                     }
-                    _childNameEncryptionChain.RemoveAt(_childNameEncryptionChain.Count - 1);
+                    
+                    if ((_childrenNamesEncryption ?? _contentEncryption) != null)
+                    {
+                        _childNameEncryptionChain.RemoveAt(_childNameEncryptionChain.Count - 1);
+                    }
+
                     State |= LockState.ChildrenName;
                 }
             }
