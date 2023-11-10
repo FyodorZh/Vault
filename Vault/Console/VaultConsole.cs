@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Vault.Content;
-using Vault.Core;
 using Vault.Encryption;
 using Vault.Repository;
 
@@ -19,9 +18,35 @@ namespace Vault
             _stack.Push(root);
         }
 
+        private static string FormatName(INode node, bool showDirectory)
+        {
+            string name = node.Name ?? (node.Id.ToString()+ "*");
+
+            if (node is IDirectoryNode)
+            {
+                name += "[";
+                name += ((node.State & LockState.ChildrenName) != 0) ? "?" : "n";
+                name += ",";
+                name += ((node.State & LockState.Content) != 0) ? "?" : "c";
+                name += "]";
+                if (showDirectory)
+                {
+                    name = "<" + name + ">";
+                }
+            }
+            else
+            {
+                name += "[";
+                name += ((node.State & LockState.Content) != 0) ? "?" : "c";
+                name += "]";
+            }
+            
+            return name;
+        }
+
         public void Prompt()
         {
-            string prompt = CurrentNode.Name ?? CurrentNode.Id.ToString();
+            string prompt = FormatName(CurrentNode, false);
             INode? c = CurrentNode.Parent;
             while (c != null)
             {
@@ -29,29 +54,15 @@ namespace Vault
                 c = c.Parent;
             }
 
-            prompt += "[";
-            prompt += ((CurrentNode.State & LockState.ChildrenName) != 0) ? "?" : "n";
-            prompt += ",";
-            prompt += ((CurrentNode.State & LockState.Content) != 0) ? "?" : "c";
-            prompt += "]";
-            
             Console.Write(prompt + "> ");
         }
 
         public void Command_ls()
         {
             bool bWritten = false;
-            foreach (var element in CurrentNode.Children.OrderBy(ch => ch.Name ?? ch.Id.ToString()))
+            foreach (var elementName in CurrentNode.Children.Select(node => FormatName(node, true)).Order())
             {
-                string name = element.Name ?? (element.Id.ToString() + "*");
-                if (element is IFileNode)
-                {
-                    Console.Write(name);
-                }
-                else
-                {
-                    Console.Write("<" + name + ">");
-                }
+                Console.Write(elementName);
                 Console.Write(" ");
                 bWritten = true;
             }
