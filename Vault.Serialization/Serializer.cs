@@ -30,7 +30,7 @@ namespace Vault.Serialization
             try
             {
                 Init();
-                _serializer.AddClass(ref dataStruct);
+                _serializer.AddClass(ref dataStruct!);
                 return _writer.GetBuffer();
             }
             catch (Exception e)

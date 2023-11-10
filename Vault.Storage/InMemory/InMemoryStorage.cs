@@ -10,8 +10,10 @@ namespace Vault.Storage.InMemory
         private readonly Dictionary<NodeId, NodeData> _nodes = new Dictionary<NodeId, NodeData>();
         private readonly DirectoryData _root;
 
-        public InMemoryStorage(Box<StringContent> encryptedName,
-            Box<EncryptionSource> contentEncryption, Box<EncryptionSource>? nameEncryption = null)
+        public InMemoryStorage(
+            Box<StringContent> encryptedName,
+            Box<EncryptionSource>? contentEncryption = null,
+            Box<EncryptionSource>? nameEncryption = null)
         {
             _root = new DirectoryData(NodeId.NewId(), NodeId.Invalid, encryptedName, contentEncryption, nameEncryption);
             _nodes.Add(_root.Id, _root);

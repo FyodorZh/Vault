@@ -21,12 +21,13 @@ namespace Vault.Storage.InMemory
 
     public class DirectoryData : NodeData, IDirectoryData
     {
-        public Box<EncryptionSource> ContentEncryption { get; }
+        public Box<EncryptionSource>? ContentEncryption { get; }
         
         public Box<EncryptionSource>? ChildrenNameEncryption { get; }
         
         public DirectoryData(NodeId id, NodeId parentId, Box<StringContent> encryptedName,
-            Box<EncryptionSource> contentEncryption, Box<EncryptionSource>? childrenNameEncryption = null) 
+            Box<EncryptionSource>? contentEncryption = null, 
+            Box<EncryptionSource>? childrenNameEncryption = null) 
             : base(id, parentId, encryptedName)
         {
             ContentEncryption = contentEncryption;

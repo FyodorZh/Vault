@@ -68,17 +68,29 @@ namespace Vault
             }
             Console.WriteLine();
         }
+
         private void PrintDirInfo(IDirectoryNode dir)
         {
             Console.WriteLine("Name: " + (dir.Name ?? "???"));
-            Console.WriteLine("Encryption:");
-            if (dir.ChildrenNamesEncryption != null)
+            Console.Write("Encryption: ");
+            if (dir.ContentEncryption == null && dir.ChildrenNamesEncryption == null)
             {
-                Console.Write($"- Children: ");
-                PrintEncryptionInfo((dir.State & LockState.ChildrenName) != 0, dir.ChildrenNamesEncryption);
+                Console.WriteLine("NONE");
             }
-            Console.Write($"- Content: ");
-            PrintEncryptionInfo((dir.State & LockState.Content) != 0, dir.ContentEncryption);
+            else
+            {
+                if (dir.ChildrenNamesEncryption != null)
+                {
+                    Console.Write($"- Children: ");
+                    PrintEncryptionInfo((dir.State & LockState.ChildrenName) != 0, dir.ChildrenNamesEncryption);
+                }
+
+                if (dir.ContentEncryption != null)
+                {
+                    Console.Write($"- Content: ");
+                    PrintEncryptionInfo((dir.State & LockState.Content) != 0, dir.ContentEncryption);
+                }
+            }
         }
 
         public void Command_ls()

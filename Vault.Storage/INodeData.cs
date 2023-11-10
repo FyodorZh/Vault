@@ -13,7 +13,7 @@ namespace Vault.Storage
 
     public interface IDirectoryData : INodeData
     {
-        Box<EncryptionSource> ContentEncryption { get; }
+        Box<EncryptionSource>? ContentEncryption { get; }
         Box<EncryptionSource>? ChildrenNameEncryption { get; }
     }
 

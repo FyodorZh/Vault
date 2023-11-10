@@ -9,22 +9,22 @@ namespace Vault.Repository.V1
     internal class DirectoryNode : Node<IDirectoryData>, IDirectoryNode
     {
         private readonly EncryptionSource? _childrenNamesEncryption;
-        private readonly EncryptionSource _contentEncryption;
+        private readonly EncryptionSource? _contentEncryption;
 
         private readonly List<IEncryptionSource> _contentEncryptionChain = new List<IEncryptionSource>();
         private readonly List<IEncryptionSource> _childNameEncryptionChain = new List<IEncryptionSource>();
 
         public EncryptionDesc? ChildrenNamesEncryption => _childrenNamesEncryption?.GetDescription();
-        public EncryptionDesc ContentEncryption => _contentEncryption.GetDescription();
+        public EncryptionDesc? ContentEncryption => _contentEncryption?.GetDescription();
 
         public DirectoryNode(IDirectoryData data, IRepositoryCtl repository)
             : base(data, repository)
         {
-            var encryption = Data.ContentEncryption.Deserialize(Parent?.EncryptionChain);
-            _contentEncryption = encryption ?? throw new InvalidOperationException();
+            _contentEncryption = Data.ContentEncryption?.Deserialize(Parent?.EncryptionChain);
             _childrenNamesEncryption = Data.ChildrenNameEncryption?.Deserialize(Parent?.EncryptionChain);
             
-            _contentEncryption.SetCredentials(repository.CredentialsProvider);
+            _contentEncryption?.SetCredentials(repository.CredentialsProvider);
+            _childrenNamesEncryption?.SetCredentials(repository.CredentialsProvider);
         }
         
         public override void Unlock(LockState stateChange)
@@ -38,7 +38,12 @@ namespace Vault.Repository.V1
                     {
                         _childNameEncryptionChain.AddRange(Parent.EncryptionChain);
                     }
-                    _childNameEncryptionChain.Add(_childrenNamesEncryption ?? _contentEncryption);
+
+                    var childNameEncryption = _childrenNamesEncryption ?? _contentEncryption;
+                    if (childNameEncryption != null)
+                    {
+                        _childNameEncryptionChain.Add(childNameEncryption);
+                    }
                     
                     State &= ~LockState.ChildrenName;
                     
@@ -56,7 +61,11 @@ namespace Vault.Repository.V1
                     {
                         _contentEncryptionChain.AddRange(Parent.EncryptionChain);
                     }
-                    _contentEncryptionChain.Add(_contentEncryption);
+
+                    if (_contentEncryption != null)
+                    {
+                        _contentEncryptionChain.Add(_contentEncryption);
+                    }
                     
                     State &= ~LockState.Content;
                     

@@ -7,7 +7,7 @@ namespace Vault.Repository
     public interface IDirectoryNode : INode
     {
         EncryptionDesc? ChildrenNamesEncryption { get; }
-        EncryptionDesc ContentEncryption { get; }
+        EncryptionDesc? ContentEncryption { get; }
         
         IEnumerable<INode> Children { get; }
         INode? FindChild(string name);
