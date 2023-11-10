@@ -10,6 +10,11 @@ namespace Vault.Encryption
         private bool _initializedCredentials;
         private byte _xor;
 
+        public override EncryptionDesc GetDescription()
+        {
+            return new EncryptionDesc("Xor", true, _initializedCredentials);
+        }
+
         private void InitCredentials()
         {
             if (!_initializedCredentials)

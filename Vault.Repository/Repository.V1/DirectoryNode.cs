@@ -13,7 +13,10 @@ namespace Vault.Repository.V1
 
         private readonly List<IEncryptionSource> _contentEncryptionChain = new List<IEncryptionSource>();
         private readonly List<IEncryptionSource> _childNameEncryptionChain = new List<IEncryptionSource>();
-        
+
+        public EncryptionDesc? ChildrenNamesEncryption => _childrenNamesEncryption?.GetDescription();
+        public EncryptionDesc ContentEncryption => _contentEncryption.GetDescription();
+
         public DirectoryNode(IDirectoryData data, IRepositoryCtl repository)
             : base(data, repository)
         {

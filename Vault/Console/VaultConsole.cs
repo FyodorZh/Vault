@@ -57,8 +57,34 @@ namespace Vault
             Console.Write(prompt + "> ");
         }
 
+
+        private void PrintEncryptionInfo(bool locked, EncryptionDesc encryptionDesc)
+        {
+            Console.Write($"Method='{encryptionDesc.MethodName}' ");
+            Console.Write($"State='{(locked ? "Locked" : "Unlocked")}' ");
+            if (encryptionDesc.RequireCredentials)
+            {
+                Console.Write($"Credentials={(encryptionDesc.HasCredentials ? "PRESENT" : "ABSENT")}");
+            }
+            Console.WriteLine();
+        }
+        private void PrintDirInfo(IDirectoryNode dir)
+        {
+            Console.WriteLine("Name: " + (dir.Name ?? "???"));
+            Console.WriteLine("Encryption:");
+            if (dir.ChildrenNamesEncryption != null)
+            {
+                Console.Write($"- Children: ");
+                PrintEncryptionInfo((dir.State & LockState.ChildrenName) != 0, dir.ChildrenNamesEncryption);
+            }
+            Console.Write($"- Content: ");
+            PrintEncryptionInfo((dir.State & LockState.Content) != 0, dir.ContentEncryption);
+        }
+
         public void Command_ls()
         {
+            PrintDirInfo(CurrentNode);
+            
             bool bWritten = false;
             foreach (var elementName in CurrentNode.Children.Select(node => FormatName(node, true)).Order())
             {
