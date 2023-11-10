@@ -17,5 +17,10 @@ namespace Vault.Storage
         
         IFileData AddFile(NodeId parentId, Box<StringContent> encryptedName, 
             Box<IContent> encryptedContent);
+
+        bool SetNodeName(NodeId id, Box<StringContent> encryptedName);
+        bool SetDirectoryContentEncryption(NodeId id, Box<EncryptionSource>? contentEncryption = null);
+        bool SetDirectoryChildrenNameEncryption(NodeId id, Box<EncryptionSource>? childrenNameEncryption = null);
+        bool SetFileContent(NodeId id, Box<IContent> content);
     }
 }

@@ -8,6 +8,7 @@ namespace Vault.Repository.V1
 {
     internal interface IRepositoryCtl : IRepository
     {
+        IStorage Storage { get; }
         ICredentialsProvider CredentialsProvider { get; }
         DirectoryNode? FindDirectory(NodeId id);
         FileNode? FindFile(NodeId id);
@@ -25,6 +26,8 @@ namespace Vault.Repository.V1
         private readonly Dictionary<NodeId, DirectoryNode> _directories = new Dictionary<NodeId, DirectoryNode>();
         private readonly Dictionary<NodeId, FileNode> _files = new Dictionary<NodeId, FileNode>();
 
+        public IStorage Storage => _storage;
+        
         public ICredentialsProvider CredentialsProvider { get; }
 
         public RepositoryV1(IStorage storage, ICredentialsProvider credentialProvider)

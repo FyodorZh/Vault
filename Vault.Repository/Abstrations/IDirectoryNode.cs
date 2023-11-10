@@ -11,6 +11,7 @@ namespace Vault.Repository
         
         IEnumerable<INode> Children { get; }
         INode? FindChild(string name);
+        
         IFileNode AddChildFile(string name, IContent content);
         IDirectoryNode AddChildDirectory(string name, EncryptionSource encryptionSource);
     }

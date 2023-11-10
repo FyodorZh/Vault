@@ -71,5 +71,49 @@ namespace Vault.Storage.InMemory
             _nodes.Add(node.Id, node);
             return node;
         }
+
+        public bool SetNodeName(NodeId id, Box<StringContent> encryptedName)
+        {
+            if (!_nodes.TryGetValue(id, out var node))
+            {
+                return false;
+            }
+
+            node.EncryptedName = encryptedName;
+            return true;
+        }
+
+        public bool SetDirectoryContentEncryption(NodeId id, Box<EncryptionSource>? contentEncryption = null)
+        {
+            if (!_nodes.TryGetValue(id, out var node) || !(node is DirectoryData dir))
+            {
+                return false;
+            }
+
+            dir.ContentEncryption = contentEncryption;
+            return true;
+        }
+
+        public bool SetDirectoryChildrenNameEncryption(NodeId id, Box<EncryptionSource>? childrenNameEncryption = null)
+        {
+            if (!_nodes.TryGetValue(id, out var node) || !(node is DirectoryData dir))
+            {
+                return false;
+            }
+
+            dir.ChildrenNameEncryption = childrenNameEncryption;
+            return true;
+        }
+        
+        public bool SetFileContent(NodeId id, Box<IContent> content)
+        {
+            if (!_nodes.TryGetValue(id, out var node) || !(node is FileData file))
+            {
+                return false;
+            }
+
+            file.EncryptedContent = content;
+            return true;
+        }
     }
 }

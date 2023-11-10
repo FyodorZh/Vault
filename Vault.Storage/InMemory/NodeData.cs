@@ -21,9 +21,9 @@ namespace Vault.Storage.InMemory
 
     public class DirectoryData : NodeData, IDirectoryData
     {
-        public Box<EncryptionSource>? ContentEncryption { get; }
+        public Box<EncryptionSource>? ContentEncryption { get; set; }
         
-        public Box<EncryptionSource>? ChildrenNameEncryption { get; }
+        public Box<EncryptionSource>? ChildrenNameEncryption { get; set; }
         
         public DirectoryData(NodeId id, NodeId parentId, Box<StringContent> encryptedName,
             Box<EncryptionSource>? contentEncryption = null, 
@@ -37,7 +37,7 @@ namespace Vault.Storage.InMemory
 
     public class FileData : NodeData, IFileData
     {
-        public Box<IContent> EncryptedContent { get; }
+        public Box<IContent> EncryptedContent { get; set; }
         
         public FileData(NodeId id, NodeId parentId, Box<StringContent> encryptedName,
             Box<IContent> encryptedContent) 
