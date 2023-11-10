@@ -13,13 +13,13 @@ namespace Vault.Storage.InMemory
         public InMemoryStorage(Box<StringContent> encryptedName,
             Box<EncryptionSource> contentEncryption, Box<EncryptionSource>? nameEncryption = null)
         {
-            _root = new DirectoryData(NodeId.NewId(), null, encryptedName, contentEncryption, nameEncryption);
+            _root = new DirectoryData(NodeId.NewId(), NodeId.Invalid, encryptedName, contentEncryption, nameEncryption);
             _nodes.Add(_root.Id, _root);
         }
 
         public void Add(NodeData data)
         {
-            if (data.ParentId == null || !_nodes.ContainsKey(data.ParentId.Value))
+            if (!data.ParentId.IsValid || !_nodes.ContainsKey(data.ParentId))
             {
                 throw new Exception();
             }

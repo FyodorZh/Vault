@@ -25,7 +25,7 @@ namespace Vault.Core
         
         public void WriteTo(TextWriter dst)
         {
-            dst.Write(Value.ToString());
+            dst.Write(Value != null ? Value.ToString() : "null");
         }
     }
 }

@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using Vault.Content;
-using Vault.Encryption;
 using Vault.Storage;
 
 namespace Vault.Repository.V1

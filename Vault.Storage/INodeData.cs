@@ -7,7 +7,7 @@ namespace Vault.Storage
     {
         bool IsValid { get; }
         NodeId Id { get; }
-        NodeId? ParentId { get; }
+        NodeId ParentId { get; }
         Box<StringContent> EncryptedName { get; }
     }
 

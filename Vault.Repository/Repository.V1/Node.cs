@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using Vault.Content;
-using Vault.Encryption;
 using Vault.Storage;
 
 namespace Vault.Repository.V1
@@ -19,7 +16,7 @@ namespace Vault.Repository.V1
         {
             Data = data;
             Repository = repository;
-            if (data.ParentId == null)
+            if (!data.ParentId.IsValid)
             {
                 _name = Data.EncryptedName.Deserialize()?.Content;
                 State &= ~LockState.SelfName;
@@ -50,7 +47,7 @@ namespace Vault.Repository.V1
             {
                 if ((State & LockState.SelfName) == 0)
                 {
-                    if (Data.ParentId != null)
+                    if (Data.ParentId.IsValid)
                     {
                         _name = null;
                         State |= LockState.SelfName;
@@ -63,6 +60,6 @@ namespace Vault.Repository.V1
 
         IDirectoryNode? INode.Parent => Parent;
         public DirectoryNode? Parent =>
-            Data.ParentId != null ? Repository.FindDirectory(Data.ParentId.Value) : null;
+            Data.ParentId.IsValid ? Repository.FindDirectory(Data.ParentId) : null;
     }
 }

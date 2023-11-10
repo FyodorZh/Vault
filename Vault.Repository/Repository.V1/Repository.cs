@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Vault.Content;
 using Vault.Encryption;
 using Vault.Storage;
-using Vault.Storage.InMemory;
 
 namespace Vault.Repository.V1
 {
@@ -19,7 +18,7 @@ namespace Vault.Repository.V1
         IFileNode AddFile(NodeId parentId, Box<StringContent> encryptedName, Box<IContent> encryptedContent);
     }
     
-    public class RepositoryV1 : IRepository, IRepositoryCtl
+    public class RepositoryV1 : IRepositoryCtl
     {
         private readonly IStorage _storage;
 

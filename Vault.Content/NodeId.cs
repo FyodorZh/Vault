@@ -5,10 +5,16 @@ namespace Vault.Content
 {
     public struct NodeId : IEquatable<NodeId>, IVersionedDataStruct
     {
+        private bool _isValid;
         private Guid _guid;
+
+        public bool IsValid => _isValid;
+
+        public static readonly NodeId Invalid = new NodeId();
 
         public NodeId(Guid id)
         {
+            _isValid = true;
             _guid = id;
         }
 
@@ -19,21 +25,37 @@ namespace Vault.Content
 
         public override string ToString()
         {
-            return _guid.ToString();
+            return _isValid ? _guid.ToString() : "invalid";
         }
 
         public void Serialize(IOrderedSerializer serializer)
         {
             if (serializer.IsWriter)
             {
-                var guid = _guid.ToString();
-                serializer.Add(ref guid);
+                serializer.Add(ref _isValid);
+                if (_isValid)
+                {
+                    var guid = _guid.ToString();
+                    serializer.Add(ref guid);
+                }
             }
             else
             {
-                string? guid = null;
-                serializer.Add(ref guid);
-                _guid = Guid.Parse(guid!);
+                _isValid = false;
+                
+                bool isValid = false;
+                serializer.Add(ref isValid);
+                if (isValid)
+                {
+                    string? guid = null;
+                    serializer.Add(ref guid);
+                    _guid = Guid.Parse(guid!);
+                    _isValid = true;
+                }
+                else
+                {
+                    _guid = new Guid();
+                }
             }
         }
 
@@ -41,7 +63,17 @@ namespace Vault.Content
 
         public bool Equals(NodeId other)
         {
-            return _guid.Equals(other._guid);
+            if (_isValid != other._isValid)
+            {
+                return false;
+            }
+
+            if (_isValid)
+            {
+                return _guid.Equals(other._guid);
+            }
+
+            return true;
         }
 
         public override bool Equals(object? obj)
@@ -51,7 +83,7 @@ namespace Vault.Content
 
         public override int GetHashCode()
         {
-            return _guid.GetHashCode();
+            return _isValid ? _guid.GetHashCode() : 0;
         }
 
         public static bool operator ==(NodeId left, NodeId right)

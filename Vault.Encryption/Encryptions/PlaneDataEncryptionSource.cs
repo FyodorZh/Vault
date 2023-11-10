@@ -7,7 +7,7 @@ namespace Vault.Encryption
     [Guid("9D259A66-5F29-4F99-B141-DF71DA50F2BC")]
     public class PlaneDataEncryptionSource : EncryptionSource
     {
-        private IReadOnlyList<byte> Clone(IReadOnlyList<byte> encryptedData)
+        private static IReadOnlyList<byte> Clone(IReadOnlyList<byte> encryptedData)
         {
             byte[] res = new byte[encryptedData.Count];
             for (int i = encryptedData.Count - 1; i >= 0; --i)

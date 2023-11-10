@@ -8,7 +8,7 @@ namespace Vault.Content
         void WriteTo(TextWriter dst);
     }
 
-    public interface IContent<T> : IContent
+    public interface IContent<out T> : IContent
     {
         T Content { get; }
     }
