@@ -8,11 +8,11 @@ namespace Vault.Storage.InMemory
     public class NodeData : INodeData
     {
         public bool IsValid { get; set; }
-        public Guid Id { get; }
-        public Guid? ParentId { get; }
+        public NodeId Id { get; }
+        public NodeId? ParentId { get; }
         public Box<StringContent> EncryptedName { get; set; }
 
-        protected NodeData(Guid id, Guid? parentId, Box<StringContent> encryptedName)
+        protected NodeData(NodeId id, NodeId? parentId, Box<StringContent> encryptedName)
         {
             IsValid = true;
             Id = id;
@@ -27,7 +27,7 @@ namespace Vault.Storage.InMemory
         
         public Box<EncryptionSource>? ChildrenNameEncryption { get; }
         
-        public DirectoryData(Guid id, Guid? parentId, Box<StringContent> encryptedName,
+        public DirectoryData(NodeId id, NodeId? parentId, Box<StringContent> encryptedName,
             Box<EncryptionSource> contentEncryption, Box<EncryptionSource>? childrenNameEncryption = null) 
             : base(id, parentId, encryptedName)
         {
@@ -40,7 +40,7 @@ namespace Vault.Storage.InMemory
     {
         public Box<IContent> EncryptedContent { get; }
         
-        public FileData(Guid id, Guid? parentId, Box<StringContent> encryptedName,
+        public FileData(NodeId id, NodeId? parentId, Box<StringContent> encryptedName,
             Box<IContent> encryptedContent) 
             : base(id, parentId, encryptedName)
         {

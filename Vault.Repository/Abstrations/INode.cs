@@ -1,6 +1,5 @@
 using System;
-using System.Collections.Generic;
-using Vault.Encryption;
+using Vault.Content;
 
 namespace Vault.Repository
 {
@@ -18,7 +17,7 @@ namespace Vault.Repository
     public interface INode
     {
         bool IsValid { get; }
-        Guid Id { get; }
+        NodeId Id { get; }
         
         LockState State { get; }
         void Unlock(LockState stateChange);

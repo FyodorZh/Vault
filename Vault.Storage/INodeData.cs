@@ -1,4 +1,3 @@
-using System;
 using Vault.Content;
 using Vault.Encryption;
 
@@ -7,8 +6,8 @@ namespace Vault.Storage
     public interface INodeData
     {
         bool IsValid { get; }
-        Guid Id { get; }
-        Guid? ParentId { get; }
+        NodeId Id { get; }
+        NodeId? ParentId { get; }
         Box<StringContent> EncryptedName { get; }
     }
 

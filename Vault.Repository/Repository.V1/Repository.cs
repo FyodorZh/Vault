@@ -10,21 +10,21 @@ namespace Vault.Repository.V1
     internal interface IRepositoryCtl : IRepository
     {
         ICredentialsProvider CredentialsProvider { get; }
-        DirectoryNode? FindDirectory(Guid id);
-        FileNode? FindFile(Guid id);
-        IEnumerable<Guid> FindChildren(Guid parentId);
+        DirectoryNode? FindDirectory(NodeId id);
+        FileNode? FindFile(NodeId id);
+        IEnumerable<NodeId> FindChildren(NodeId parentId);
 
-        IDirectoryNode AddDirectory(Guid parentId, Box<StringContent> encryptedName, 
+        IDirectoryNode AddDirectory(NodeId parentId, Box<StringContent> encryptedName, 
             Box<EncryptionSource> encryption, Box<EncryptionSource>? nameEncryption = null);
-        IFileNode AddFile(Guid parentId, Box<StringContent> encryptedName, Box<IContent> encryptedContent);
+        IFileNode AddFile(NodeId parentId, Box<StringContent> encryptedName, Box<IContent> encryptedContent);
     }
     
     public class RepositoryV1 : IRepository, IRepositoryCtl
     {
         private readonly IStorage _storage;
 
-        private readonly Dictionary<Guid, DirectoryNode> _directories = new Dictionary<Guid, DirectoryNode>();
-        private readonly Dictionary<Guid, FileNode> _files = new Dictionary<Guid, FileNode>();
+        private readonly Dictionary<NodeId, DirectoryNode> _directories = new Dictionary<NodeId, DirectoryNode>();
+        private readonly Dictionary<NodeId, FileNode> _files = new Dictionary<NodeId, FileNode>();
 
         public ICredentialsProvider CredentialsProvider { get; }
 
@@ -45,7 +45,7 @@ namespace Vault.Repository.V1
             return res;
         }
 
-        DirectoryNode? IRepositoryCtl.FindDirectory(Guid id)
+        DirectoryNode? IRepositoryCtl.FindDirectory(NodeId id)
         {
             if (_directories.TryGetValue(id, out var dir))
             {
@@ -68,7 +68,7 @@ namespace Vault.Repository.V1
             return dir;
         }
         
-        FileNode? IRepositoryCtl.FindFile(Guid id)
+        FileNode? IRepositoryCtl.FindFile(NodeId id)
         {
             if (_files.TryGetValue(id, out var file))
             {
@@ -91,7 +91,7 @@ namespace Vault.Repository.V1
             return file;
         }
         
-        public IEnumerable<Guid> FindChildren(Guid parentId)
+        public IEnumerable<NodeId> FindChildren(NodeId parentId)
         {
             foreach (var child in _storage.GetChildren(parentId))
             {
@@ -99,7 +99,7 @@ namespace Vault.Repository.V1
             }
         }
 
-        public IDirectoryNode AddDirectory(Guid parentId, Box<StringContent> encryptedName, 
+        public IDirectoryNode AddDirectory(NodeId parentId, Box<StringContent> encryptedName, 
             Box<EncryptionSource> encryption, Box<EncryptionSource>? nameEncryption)
         {
             IDirectoryData? data = _storage.AddDirectory(parentId, encryptedName, encryption, nameEncryption);
@@ -113,7 +113,7 @@ namespace Vault.Repository.V1
             return node;
         }
 
-        public IFileNode AddFile(Guid parentId, Box<StringContent> encryptedName, Box<IContent> encryptedContent)
+        public IFileNode AddFile(NodeId parentId, Box<StringContent> encryptedName, Box<IContent> encryptedContent)
         {
             IFileData? data = _storage.AddFile(parentId, encryptedName, encryptedContent);
             if (data == null)

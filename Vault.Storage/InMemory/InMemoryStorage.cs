@@ -7,13 +7,13 @@ namespace Vault.Storage.InMemory
 {
     public class InMemoryStorage : IStorage
     {
-        private readonly Dictionary<Guid, NodeData> _nodes = new Dictionary<Guid, NodeData>();
+        private readonly Dictionary<NodeId, NodeData> _nodes = new Dictionary<NodeId, NodeData>();
         private readonly DirectoryData _root;
 
         public InMemoryStorage(Box<StringContent> encryptedName,
             Box<EncryptionSource> contentEncryption, Box<EncryptionSource>? nameEncryption = null)
         {
-            _root = new DirectoryData(Guid.NewGuid(), null, encryptedName, contentEncryption, nameEncryption);
+            _root = new DirectoryData(NodeId.NewId(), null, encryptedName, contentEncryption, nameEncryption);
             _nodes.Add(_root.Id, _root);
         }
 
@@ -29,13 +29,13 @@ namespace Vault.Storage.InMemory
 
         INodeData IStorage.Root => _root;
 
-        INodeData? IStorage.GetNode(Guid id)
+        INodeData? IStorage.GetNode(NodeId id)
         {
             _nodes.TryGetValue(id, out var node);
             return node;
         }
 
-        IEnumerable<INodeData> IStorage.GetChildren(Guid id)
+        IEnumerable<INodeData> IStorage.GetChildren(NodeId id)
         {
             foreach (var node in _nodes.Values)
             {
@@ -46,26 +46,26 @@ namespace Vault.Storage.InMemory
             }
         }
         
-        IDirectoryData IStorage.AddDirectory(Guid parentId, Box<StringContent> encryptedName, Box<EncryptionSource> contentEncryption, Box<EncryptionSource>? nameEncryption)
+        IDirectoryData IStorage.AddDirectory(NodeId parentId, Box<StringContent> encryptedName, Box<EncryptionSource> contentEncryption, Box<EncryptionSource>? nameEncryption)
         {
             if (!_nodes.TryGetValue(parentId, out var parent) || !(parent is DirectoryData))
             {
                 throw new InvalidOperationException();
             }
             
-            var node = new DirectoryData(Guid.NewGuid(), parentId, encryptedName, contentEncryption, nameEncryption);
+            var node = new DirectoryData(NodeId.NewId(), parentId, encryptedName, contentEncryption, nameEncryption);
             _nodes.Add(node.Id, node);
             return node;
         }
 
-        IFileData IStorage.AddFile(Guid parentId, Box<StringContent> encryptedName, Box<IContent> encryptedContent)
+        IFileData IStorage.AddFile(NodeId parentId, Box<StringContent> encryptedName, Box<IContent> encryptedContent)
         {
             if (!_nodes.TryGetValue(parentId, out var parent) || !(parent is DirectoryData))
             {
                 throw new InvalidOperationException();
             }
             
-            var node = new FileData(Guid.NewGuid(), parentId, encryptedName, encryptedContent);
+            var node = new FileData(NodeId.NewId(), parentId, encryptedName, encryptedContent);
             _nodes.Add(node.Id, node);
             return node;
         }

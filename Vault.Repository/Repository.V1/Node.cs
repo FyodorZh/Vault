@@ -28,7 +28,7 @@ namespace Vault.Repository.V1
 
         public bool IsValid => Data.IsValid;
 
-        public Guid Id => Data.Id;
+        public NodeId Id => Data.Id;
 
         public LockState State { get; protected set; } = LockState.Closed;
 

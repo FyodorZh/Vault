@@ -9,14 +9,14 @@ namespace Vault.Storage
     {
         INodeData Root { get; }
         
-        INodeData? GetNode(Guid id);
+        INodeData? GetNode(NodeId id);
         
-        IEnumerable<INodeData> GetChildren(Guid parentId);
+        IEnumerable<INodeData> GetChildren(NodeId parentId);
         
-        IDirectoryData AddDirectory(Guid parentId, Box<StringContent> encryptedName, 
+        IDirectoryData AddDirectory(NodeId parentId, Box<StringContent> encryptedName, 
             Box<EncryptionSource> contentEncryption, Box<EncryptionSource>? nameEncryption = null);
         
-        IFileData AddFile(Guid parentId, Box<StringContent> encryptedName, 
+        IFileData AddFile(NodeId parentId, Box<StringContent> encryptedName, 
             Box<IContent> encryptedContent);
     }
 }
