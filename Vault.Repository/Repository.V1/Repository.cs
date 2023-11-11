@@ -14,9 +14,15 @@ namespace Vault.Repository.V1
         FileNode? FindFile(NodeId id);
         IEnumerable<NodeId> FindChildren(NodeId parentId);
 
-        IDirectoryNode AddDirectory(NodeId parentId, Box<StringContent> encryptedName, 
-            Box<EncryptionSource> encryption, Box<EncryptionSource>? nameEncryption = null);
-        IFileNode AddFile(NodeId parentId, Box<StringContent> encryptedName, Box<IContent> encryptedContent);
+        IDirectoryNode AddDirectory(
+            NodeId parentId, 
+            Box<StringContent> encryptedName, 
+            Box<DirectoryContent> encryptedContent);
+        
+        IFileNode AddFile(
+            NodeId parentId, 
+            Box<StringContent> encryptedName, 
+            Box<IContent> encryptedContent);
     }
     
     public class RepositoryV1 : IRepositoryCtl
@@ -101,10 +107,12 @@ namespace Vault.Repository.V1
             }
         }
 
-        public IDirectoryNode AddDirectory(NodeId parentId, Box<StringContent> encryptedName, 
-            Box<EncryptionSource> encryption, Box<EncryptionSource>? nameEncryption)
+        public IDirectoryNode AddDirectory(
+            NodeId parentId, 
+            Box<StringContent> encryptedName, 
+            Box<DirectoryContent> encryptedContent)
         {
-            IDirectoryData? data = _storage.AddDirectory(parentId, encryptedName, encryption, nameEncryption);
+            IDirectoryData? data = _storage.AddDirectory(parentId, encryptedName, encryptedContent);
             if (data == null)
             {
                 throw new InvalidOperationException();

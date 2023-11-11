@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
+using System.Linq;
 using OrderedSerializer;
 using OrderedSerializer.TypeSerializers;
 
@@ -20,7 +20,8 @@ namespace Vault.Serialization
             {
                 _writer = new OrderedSerializer.BinaryBackend.BinaryWriter();
                 _serializer = new HierarchicalSerializer(_writer, new GuidBasedTypeSerializer());
-                _typeDeserializer = new GuidBasedTypeDeserializer(AppDomain.CurrentDomain.GetAssemblies());
+                _typeDeserializer = new GuidBasedTypeDeserializer(
+                    AppDomain.CurrentDomain.GetAssemblies().Where(a => a.FullName!.StartsWith("Vault")));
                 _initialized = true;
             }
         }

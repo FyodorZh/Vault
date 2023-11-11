@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using Vault.Content;
+using Vault.Encryption;
 
 namespace Vault.Repository
 {
@@ -8,9 +10,8 @@ namespace Vault.Repository
     {
         Open = 0,
         SelfName = 1,               // имя ноды
-        ChildrenName = 2,           // имена чилдов ноды (если папка)
         Content = 4,                // для файлов контент, для папки контент всех чилдов
-        Closed = SelfName | ChildrenName | Content, 
+        Closed = SelfName | Content, 
         All = Closed
     }
 
@@ -20,10 +21,18 @@ namespace Vault.Repository
         NodeId Id { get; }
         
         LockState State { get; }
-        void Unlock(LockState stateChange);
-        void Lock(LockState stateChange);
+
+        void LockAll();
         
+        bool UnlockName();
+        void LockName();
+        
+        bool UnlockContent();
+        void LockContent();
+
         string? Name { get; }
+        IContent? Content { get; }
+        
         IDirectoryNode? Parent { get; }
     }
 }

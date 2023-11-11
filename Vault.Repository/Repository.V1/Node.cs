@@ -7,20 +7,18 @@ namespace Vault.Repository.V1
         where TNodeData : class, INodeData
     {
         private string? _name;
+        private IContent? _content;
         
         protected TNodeData Data { get; }
         
         protected IRepositoryCtl Repository { get; }
 
+        protected abstract void OnContentChanged(IContent? newContent);
+
         protected Node(TNodeData data, IRepositoryCtl repository)
         {
             Data = data;
             Repository = repository;
-            if (!data.ParentId.IsValid)
-            {
-                _name = Data.EncryptedName.Deserialize()?.Content;
-                State &= ~LockState.SelfName;
-            }
         }
 
         public bool IsValid => Data.IsValid;
@@ -29,34 +27,88 @@ namespace Vault.Repository.V1
 
         public LockState State { get; protected set; } = LockState.Closed;
 
-        public virtual void Unlock(LockState stateChange)
+        private void SetContent(IContent? content)
         {
-            if ((stateChange & LockState.SelfName) != 0)
+            if (content != _content)
             {
-                if ((State & LockState.SelfName) != 0)
+                _content = content;
+                OnContentChanged(_content);
+            }
+        }
+
+        public virtual void LockAll()
+        {
+            LockContent();
+            LockName();
+        }
+        
+        public bool UnlockName()
+        {
+            if ((State & LockState.SelfName) != 0)
+            {
+                _name = Data.EncryptedName.Deserialize(Parent?.ChildrenNameEncryptionChain)?.Content;
+                if (_name == null)
                 {
-                    _name = Data.EncryptedName.Deserialize(Parent?.ChildrenNameEncryptionChain)?.Content;
-                    State &= ~LockState.SelfName;
+                    return false;
+                }
+                State &= ~LockState.SelfName;
+            }
+            return true;
+        }
+
+        public void LockName()
+        {
+            if ((State & LockState.SelfName) == 0)
+            {
+                if (Data.ParentId.IsValid)
+                {
+                    _name = null;
+                    State |= LockState.SelfName;
                 }
             }
         }
 
-        public virtual void Lock(LockState stateChange)
+        public bool UnlockContent()
         {
-            if ((stateChange & LockState.SelfName) != 0)
+            if ((State & LockState.Content) != 0)
             {
-                if ((State & LockState.SelfName) == 0)
+                SetContent(Data.EncryptedContent.Deserialize(Parent?.EncryptionChain));
+                if (_content == null)
                 {
-                    if (Data.ParentId.IsValid)
-                    {
-                        _name = null;
-                        State |= LockState.SelfName;
-                    }
+                    return false;
                 }
+                State &= ~LockState.Content;
+            }
+
+            return true;
+        }
+
+        public void LockContent()
+        {
+            if ((State & LockState.Content) == 0)
+            {
+                SetContent(null);
+                State |= LockState.Content;
             }
         }
 
-        string? INode.Name => _name;
+        public string? Name
+        {
+            get
+            {
+                UnlockName();
+                return _name;
+            }
+        }
+        
+        public IContent? Content
+        {
+            get
+            {
+                UnlockContent();
+                return _content;
+            }
+        }
 
         IDirectoryNode? INode.Parent => Parent;
         public DirectoryNode? Parent =>

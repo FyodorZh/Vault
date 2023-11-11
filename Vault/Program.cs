@@ -20,22 +20,20 @@ public static class VaultEntryPoint
 
     public static void Main()
     {
-        Box<StringContent> encodedRootName = new Box<StringContent>(new StringContent("root"));
-        Box<EncryptionSource> rootEncryption = new Box<EncryptionSource>(new PlaneDataEncryptionSource());
-        
         InMemoryStorage storage = new InMemoryStorage(
-            new Box<StringContent>(new StringContent("root")));
+            new Box<StringContent>(new StringContent("root")),
+            new Box<DirectoryContent>(new DirectoryContent()));
 
         IRepository repository = new RepositoryV1(storage, new TmpCredentialsProvider());
         var root = repository.GetRoot();
-        root.Unlock(LockState.All);
+        //root.Unlock(LockState.All);
         var a = root.AddChildFile("a", new StringContent("Text for A"));
-        var b = root.AddChildDirectory("b", new XorEncryptionSource());
+        var b = root.AddChildDirectory("b");
         var c = root.AddChildFile("c", new StringContent("Text for C"));
         b.AddChildFile("bb", new StringContent("Text for BBBB"));
 
-        root.Lock(LockState.All);
-        root.Unlock(LockState.ChildrenName);
+        //root.LockAll();
+        //root.Unlock(LockState.ChildrenName);
         
         VaultConsole vaultConsole = new VaultConsole(root); 
         

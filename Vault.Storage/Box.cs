@@ -5,7 +5,13 @@ using Vault.Serialization;
 
 namespace Vault.Storage
 {
-    public class Box<T>
+    public interface IBox<out T>
+        where T : class, IDataStruct
+    {
+        T? Deserialize(IEnumerable<IEncryptionSource>? decryptorsChain = null);
+    }
+    
+    public class Box<T> : IBox<T>
         where T : class, IDataStruct
     {
         public IReadOnlyList<byte> Data { get; }

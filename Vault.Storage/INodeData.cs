@@ -8,17 +8,15 @@ namespace Vault.Storage
         bool IsValid { get; }
         NodeId Id { get; }
         NodeId ParentId { get; }
-        Box<StringContent> EncryptedName { get; }
+        IBox<StringContent> EncryptedName { get; }
+        IBox<IContent> EncryptedContent { get; }
     }
 
     public interface IDirectoryData : INodeData
     {
-        Box<EncryptionSource>? ContentEncryption { get; }
-        Box<EncryptionSource>? ChildrenNameEncryption { get; }
     }
 
     public interface IFileData : INodeData
     {
-        Box<IContent> EncryptedContent { get; }
     }
 }

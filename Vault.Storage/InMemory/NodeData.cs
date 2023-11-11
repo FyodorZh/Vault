@@ -1,5 +1,4 @@
 using Vault.Content;
-using Vault.Encryption;
 
 namespace Vault.Storage.InMemory
 {
@@ -8,40 +7,37 @@ namespace Vault.Storage.InMemory
         public bool IsValid { get; set; }
         public NodeId Id { get; }
         public NodeId ParentId { get; }
-        public Box<StringContent> EncryptedName { get; set; }
+        public IBox<StringContent> EncryptedName { get; set; }
+        public IBox<IContent> EncryptedContent { get; set; }
 
-        protected NodeData(NodeId id, NodeId parentId, Box<StringContent> encryptedName)
+        protected NodeData(NodeId id, NodeId parentId, 
+            IBox<StringContent> encryptedName,
+            IBox<IContent> encryptedContent)
         {
             IsValid = true;
             Id = id;
             ParentId = parentId;
             EncryptedName = encryptedName;
+            EncryptedContent = encryptedContent;
         }
     }
 
     public class DirectoryData : NodeData, IDirectoryData
     {
-        public Box<EncryptionSource>? ContentEncryption { get; set; }
-        
-        public Box<EncryptionSource>? ChildrenNameEncryption { get; set; }
-        
-        public DirectoryData(NodeId id, NodeId parentId, Box<StringContent> encryptedName,
-            Box<EncryptionSource>? contentEncryption = null, 
-            Box<EncryptionSource>? childrenNameEncryption = null) 
-            : base(id, parentId, encryptedName)
+        public DirectoryData(NodeId id, NodeId parentId, 
+            Box<StringContent> encryptedName,
+            IBox<DirectoryContent> encryptedContent) 
+            : base(id, parentId, encryptedName, encryptedContent)
         {
-            ContentEncryption = contentEncryption;
-            ChildrenNameEncryption = childrenNameEncryption;
         }
     }
 
     public class FileData : NodeData, IFileData
     {
-        public Box<IContent> EncryptedContent { get; set; }
-        
-        public FileData(NodeId id, NodeId parentId, Box<StringContent> encryptedName,
-            Box<IContent> encryptedContent) 
-            : base(id, parentId, encryptedName)
+        public FileData(NodeId id, NodeId parentId, 
+            IBox<StringContent> encryptedName,
+            IBox<IContent> encryptedContent) 
+            : base(id, parentId, encryptedName, encryptedContent)
         {
             EncryptedContent = encryptedContent;
         }

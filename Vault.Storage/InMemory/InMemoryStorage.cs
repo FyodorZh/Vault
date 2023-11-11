@@ -11,11 +11,10 @@ namespace Vault.Storage.InMemory
         private readonly DirectoryData _root;
 
         public InMemoryStorage(
-            Box<StringContent> encryptedName,
-            Box<EncryptionSource>? contentEncryption = null,
-            Box<EncryptionSource>? nameEncryption = null)
+            Box<StringContent> encryptedRootName,
+            Box<DirectoryContent> encryptedRootContent)
         {
-            _root = new DirectoryData(NodeId.NewId(), NodeId.Invalid, encryptedName, contentEncryption, nameEncryption);
+            _root = new DirectoryData(NodeId.NewId(), NodeId.Invalid, encryptedRootName, encryptedRootContent);
             _nodes.Add(_root.Id, _root);
         }
 
@@ -48,19 +47,25 @@ namespace Vault.Storage.InMemory
             }
         }
         
-        IDirectoryData IStorage.AddDirectory(NodeId parentId, Box<StringContent> encryptedName, Box<EncryptionSource> contentEncryption, Box<EncryptionSource>? nameEncryption)
+        IDirectoryData IStorage.AddDirectory(
+            NodeId parentId, 
+            Box<StringContent> encryptedName, 
+            Box<DirectoryContent> encryptedContent)
         {
             if (!_nodes.TryGetValue(parentId, out var parent) || !(parent is DirectoryData))
             {
                 throw new InvalidOperationException();
             }
             
-            var node = new DirectoryData(NodeId.NewId(), parentId, encryptedName, contentEncryption, nameEncryption);
+            var node = new DirectoryData(NodeId.NewId(), parentId, encryptedName, encryptedContent);
             _nodes.Add(node.Id, node);
             return node;
         }
 
-        IFileData IStorage.AddFile(NodeId parentId, Box<StringContent> encryptedName, Box<IContent> encryptedContent)
+        IFileData IStorage.AddFile(
+            NodeId parentId, 
+            Box<StringContent> encryptedName, 
+            Box<IContent> encryptedContent)
         {
             if (!_nodes.TryGetValue(parentId, out var parent) || !(parent is DirectoryData))
             {
@@ -83,25 +88,14 @@ namespace Vault.Storage.InMemory
             return true;
         }
 
-        public bool SetDirectoryContentEncryption(NodeId id, Box<EncryptionSource>? contentEncryption = null)
+        public bool SetDirectoryContent(NodeId id, Box<DirectoryContent> encryptedContent)
         {
             if (!_nodes.TryGetValue(id, out var node) || !(node is DirectoryData dir))
             {
                 return false;
             }
 
-            dir.ContentEncryption = contentEncryption;
-            return true;
-        }
-
-        public bool SetDirectoryChildrenNameEncryption(NodeId id, Box<EncryptionSource>? childrenNameEncryption = null)
-        {
-            if (!_nodes.TryGetValue(id, out var node) || !(node is DirectoryData dir))
-            {
-                return false;
-            }
-
-            dir.ChildrenNameEncryption = childrenNameEncryption;
+            dir.EncryptedContent = encryptedContent;
             return true;
         }
         

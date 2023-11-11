@@ -21,24 +21,12 @@ namespace Vault
         private static string FormatName(INode node, bool showDirectory)
         {
             string name = node.Name ?? (node.Id.ToString()+ "*");
-
-            if (node is IDirectoryNode)
+            name += "[";
+            name += ((node.State & LockState.Content) != 0) ? "?" : "c";
+            name += "]";
+            if (node is IDirectoryNode && showDirectory)
             {
-                name += "[";
-                name += ((node.State & LockState.ChildrenName) != 0) ? "?" : "n";
-                name += ",";
-                name += ((node.State & LockState.Content) != 0) ? "?" : "c";
-                name += "]";
-                if (showDirectory)
-                {
-                    name = "<" + name + ">";
-                }
-            }
-            else
-            {
-                name += "[";
-                name += ((node.State & LockState.Content) != 0) ? "?" : "c";
-                name += "]";
+                name = "<" + name + ">";
             }
             
             return name;
@@ -57,45 +45,17 @@ namespace Vault
             Console.Write(prompt + "> ");
         }
 
-
-        private void PrintEncryptionInfo(bool locked, EncryptionDesc encryptionDesc)
+        public void Command_ls()
         {
-            Console.Write($"Method='{encryptionDesc.MethodName}' ");
-            Console.Write($"State='{(locked ? "Locked" : "Unlocked")}' ");
-            if (encryptionDesc.RequireCredentials)
+            Console.WriteLine("Name: " + (CurrentNode.Name ?? "???"));
+            if (CurrentNode.Content != null)
             {
-                Console.Write($"Credentials={(encryptionDesc.HasCredentials ? "PRESENT" : "ABSENT")}");
-            }
-            Console.WriteLine();
-        }
-
-        private void PrintDirInfo(IDirectoryNode dir)
-        {
-            Console.WriteLine("Name: " + (dir.Name ?? "???"));
-            Console.Write("Encryption: ");
-            if (dir.ContentEncryption == null && dir.ChildrenNamesEncryption == null)
-            {
-                Console.WriteLine("NONE");
+                CurrentNode.Content.WriteTo(Console.Out);
             }
             else
             {
-                if (dir.ChildrenNamesEncryption != null)
-                {
-                    Console.Write($"- Children: ");
-                    PrintEncryptionInfo((dir.State & LockState.ChildrenName) != 0, dir.ChildrenNamesEncryption);
-                }
-
-                if (dir.ContentEncryption != null)
-                {
-                    Console.Write($"- Content: ");
-                    PrintEncryptionInfo((dir.State & LockState.Content) != 0, dir.ContentEncryption);
-                }
+                Console.WriteLine("Encryption: ???");
             }
-        }
-
-        public void Command_ls()
-        {
-            PrintDirInfo(CurrentNode);
             
             bool bWritten = false;
             foreach (var elementName in CurrentNode.Children.Select(node => FormatName(node, true)).Order())
@@ -122,8 +82,15 @@ namespace Vault
             {
                 if (child is IFileNode file)
                 {
-                    file.Content.WriteTo(Console.Out);
-                    Console.WriteLine();
+                    if (file.Content != null)
+                    {
+                        file.Content.WriteTo(Console.Out);
+                        Console.WriteLine();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Content is not available!");
+                    }
                 }
                 else
                 {
@@ -184,7 +151,7 @@ namespace Vault
                 return;
             }
             
-            CurrentNode.AddChildDirectory(name, new PlaneDataEncryptionSource());
+            CurrentNode.AddChildDirectory(name);
         }
     }
 }

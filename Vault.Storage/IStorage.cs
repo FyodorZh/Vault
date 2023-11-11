@@ -12,15 +12,17 @@ namespace Vault.Storage
         
         IEnumerable<INodeData> GetChildren(NodeId parentId);
         
-        IDirectoryData AddDirectory(NodeId parentId, Box<StringContent> encryptedName, 
-            Box<EncryptionSource> contentEncryption, Box<EncryptionSource>? nameEncryption = null);
+        IDirectoryData AddDirectory(
+            NodeId parentId, 
+            Box<StringContent> encryptedName, 
+            Box<DirectoryContent> encryptedContent);
         
-        IFileData AddFile(NodeId parentId, Box<StringContent> encryptedName, 
+        IFileData AddFile(NodeId parentId, 
+            Box<StringContent> encryptedName, 
             Box<IContent> encryptedContent);
 
         bool SetNodeName(NodeId id, Box<StringContent> encryptedName);
-        bool SetDirectoryContentEncryption(NodeId id, Box<EncryptionSource>? contentEncryption = null);
-        bool SetDirectoryChildrenNameEncryption(NodeId id, Box<EncryptionSource>? childrenNameEncryption = null);
+        bool SetDirectoryContent(NodeId id, Box<DirectoryContent> encryptedContent);
         bool SetFileContent(NodeId id, Box<IContent> content);
     }
 }
