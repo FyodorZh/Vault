@@ -9,30 +9,27 @@ namespace Vault.Encryption
     {
         private bool _initializedCredentials;
         private byte _xor;
+        
+        public override bool NeedCredentials => !_initializedCredentials;
+
+        public override bool AddCredentials(string credentials)
+        {
+            _xor = 0;
+            foreach (var ch in credentials)
+            {
+                _xor ^= (byte)ch;
+            }
+            _initializedCredentials = true;
+            return true;
+        }
 
         public override EncryptionDesc GetDescription()
         {
             return new EncryptionDesc("Xor", true, _initializedCredentials);
         }
 
-        private void InitCredentials()
-        {
-            if (!_initializedCredentials)
-            {
-                string credentials = CredentialsProvider!.GetCredentials();
-                _xor = 0;
-                foreach (var ch in credentials)
-                {
-                    _xor ^= (byte)ch;
-                }
-                _initializedCredentials = true;
-            }
-        }
-        
         public override IReadOnlyList<byte> Encrypt(IReadOnlyList<byte> plainData)
         {
-            InitCredentials();
-            
             byte[] res = new byte[plainData.Count];
             for (int i = plainData.Count - 1; i >= 0; --i)
             {
@@ -43,8 +40,6 @@ namespace Vault.Encryption
         
         public override IReadOnlyList<byte> Decrypt(IReadOnlyList<byte> plainData)
         {
-            InitCredentials();
-            
             byte[] res = new byte[plainData.Count];
             for (int i = plainData.Count - 1; i >= 0; --i)
             {

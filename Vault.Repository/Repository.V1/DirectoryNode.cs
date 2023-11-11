@@ -18,7 +18,7 @@ namespace Vault.Repository.V1
         {
         }
 
-        protected override void OnContentChanged(IContent? newContent)
+        protected override bool ProcessContent(IContent? newContent)
         {
             if (newContent == null)
             {
@@ -30,31 +30,59 @@ namespace Vault.Repository.V1
                 _encryption = null;
                 _contentEncryptionChain = null;
                 _childNameEncryptionChain = null;
+                return true;
             }
-            else
+            
+            var encryption = newContent as DirectoryContent;
+            if (encryption == null)
             {
-                _encryption = (DirectoryContent)newContent;
-
-                _contentEncryptionChain = new List<IEncryptionSource>();
-                _childNameEncryptionChain = new List<IEncryptionSource>();
-                if (Parent != null)
-                {
-                    _contentEncryptionChain.AddRange(Parent.EncryptionChain);
-                    _childNameEncryptionChain.AddRange(Parent.EncryptionChain);
-                }
-
-                var forContent = _encryption.GetForContent();
-                if (forContent != null)
-                {
-                    _contentEncryptionChain.Add(forContent);
-                }
-                
-                var forNames = _encryption.GetForNames();
-                if (forNames != null)
-                {
-                    _childNameEncryptionChain.Add(forNames);
-                }
+                return false;
             }
+            
+            var contentEncryptionChain = new List<IEncryptionSource>();
+            var childNameEncryptionChain = new List<IEncryptionSource>();
+            if (Parent != null)
+            {
+                contentEncryptionChain.AddRange(Parent.EncryptionChain);
+                childNameEncryptionChain.AddRange(Parent.EncryptionChain);
+            }
+            
+            var contentEncryption = encryption.GetForContent();
+            var namesEncryption = encryption.GetForNames();
+
+            if (contentEncryption != null)
+            {
+                if (contentEncryption.NeedCredentials)
+                {
+                    string? credentials = Repository.CredentialsProvider.GetCredentials(this, contentEncryption.GetDescription());
+                    if (credentials == null)
+                    {
+                        return false;
+                    }
+                    contentEncryption.AddCredentials(credentials);
+                }
+                contentEncryptionChain.Add(contentEncryption);
+            }
+                
+            if (namesEncryption != null)
+            {
+                if (namesEncryption.NeedCredentials)
+                {
+                    string? credentials = Repository.CredentialsProvider.GetCredentials(this, namesEncryption.GetDescription());
+                    if (credentials == null)
+                    {
+                        return false;
+                    }
+                    namesEncryption.AddCredentials(credentials);
+                }
+                childNameEncryptionChain.Add(namesEncryption);
+            }
+
+            _encryption = encryption;
+            _childNameEncryptionChain = childNameEncryptionChain;
+            _contentEncryptionChain = contentEncryptionChain;
+
+            return true;
         }
 
         public IEnumerable<INode> Children

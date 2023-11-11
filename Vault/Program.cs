@@ -11,10 +11,10 @@ public static class VaultEntryPoint
 {
     private class TmpCredentialsProvider : ICredentialsProvider
     {
-        public string GetCredentials()
+        string? ICredentialsProvider.GetCredentials(IDirectoryNode dir, EncryptionDesc encryptionDesc)
         {
             Console.Write("Enter credentials: ");
-            return Console.ReadLine()!;
+            return Console.ReadLine();
         }
     }
 

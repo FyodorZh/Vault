@@ -13,7 +13,7 @@ namespace Vault.Repository.V1
         
         protected IRepositoryCtl Repository { get; }
 
-        protected abstract void OnContentChanged(IContent? newContent);
+        protected abstract bool ProcessContent(IContent? newContent);
 
         protected Node(TNodeData data, IRepositoryCtl repository)
         {
@@ -27,13 +27,20 @@ namespace Vault.Repository.V1
 
         public LockState State { get; protected set; } = LockState.Closed;
 
-        private void SetContent(IContent? content)
+        private bool SetContent(IContent? content)
         {
             if (content != _content)
             {
+                var oldContent = _content;
                 _content = content;
-                OnContentChanged(_content);
+                if (!ProcessContent(_content))
+                {
+                    _content = oldContent;
+                    return false;
+                }
             }
+
+            return true;
         }
 
         public virtual void LockAll()

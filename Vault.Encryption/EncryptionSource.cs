@@ -5,6 +5,9 @@ namespace Vault.Encryption
 {
     public interface IEncryptionSource
     {
+        bool NeedCredentials { get; }
+        bool AddCredentials(string credentials);
+        
         EncryptionDesc GetDescription();
         IReadOnlyList<byte> Encrypt(IReadOnlyList<byte> plainData);
         IReadOnlyList<byte> Decrypt(IReadOnlyList<byte> encryptedData);
@@ -12,15 +15,10 @@ namespace Vault.Encryption
     
     public abstract class EncryptionSource : IEncryptionSource, IVersionedDataStruct
     {
-        protected ICredentialsProvider? CredentialsProvider { get; private set; }
-
-        public abstract EncryptionDesc GetDescription();
-
-        public void SetCredentials(ICredentialsProvider credentialsProvider)
-        {
-            CredentialsProvider = credentialsProvider;
-        }
+        public abstract bool NeedCredentials { get; }
+        public abstract bool AddCredentials(string credentials);
         
+        public abstract EncryptionDesc GetDescription();
         public abstract IReadOnlyList<byte> Encrypt(IReadOnlyList<byte> plainData);
         public abstract IReadOnlyList<byte> Decrypt(IReadOnlyList<byte> encryptedData);
 

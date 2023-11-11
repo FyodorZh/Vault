@@ -10,9 +10,9 @@ namespace Vault.Repository.V1
         {
         }
 
-        protected override void OnContentChanged(IContent? newContent)
+        protected override bool ProcessContent(IContent? newContent)
         {
-            // DO NOTHING
+            return true;
         }
     }
 }
