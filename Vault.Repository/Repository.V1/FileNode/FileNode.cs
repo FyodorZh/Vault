@@ -12,18 +12,5 @@ namespace Vault.Repository.V1
         {
             Content = new FileContentState(this);
         }
-
-        private class FileContentState : ContentState<IContent>
-        {
-            public FileContentState(FileNode node) 
-                : base(node)
-            {
-            }
-
-            protected override bool UnlockContent(IContent content)
-            {
-                return true;
-            }
-        }
     }
 }
