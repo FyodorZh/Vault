@@ -6,83 +6,60 @@ using Vault.Storage;
 
 namespace Vault.Repository.V1
 {
-    internal class DirectoryNode : Node<IDirectoryData>, IDirectoryNode
+    internal class DirectoryNode : Node, IDirectoryNode
     {
-        private DirectoryContent? _encryption;
-
-        private List<IEncryptionSource>? _contentEncryptionChain;
-        private List<IEncryptionSource>? _childNameEncryptionChain;
+        private readonly DirectoryContentState _content;
+        public override ILockedState<IContent> Content => _content;
 
         public DirectoryNode(IDirectoryData data, IRepositoryCtl repository)
             : base(data, repository)
         {
+            _content = new DirectoryContentState(this);
         }
 
-        protected override bool ProcessContent(IContent? newContent)
+        public bool SetEncryption(EncryptionSource? contentEncryption, EncryptionSource? namesEncryption)
         {
-            if (newContent == null)
-            {
-                foreach (var child in Children)
-                {
-                    child.LockAll();
-                }
-
-                _encryption = null;
-                _contentEncryptionChain = null;
-                _childNameEncryptionChain = null;
-                return true;
-            }
-            
-            var encryption = newContent as DirectoryContent;
-            if (encryption == null)
-            {
-                return false;
-            }
-            
-            var contentEncryptionChain = new List<IEncryptionSource>();
-            var childNameEncryptionChain = new List<IEncryptionSource>();
-            if (Parent != null)
-            {
-                contentEncryptionChain.AddRange(Parent.EncryptionChain);
-                childNameEncryptionChain.AddRange(Parent.EncryptionChain);
-            }
-            
-            var contentEncryption = encryption.GetForContent();
-            var namesEncryption = encryption.GetForNames();
-
-            if (contentEncryption != null)
-            {
-                if (contentEncryption.NeedCredentials)
-                {
-                    string? credentials = Repository.CredentialsProvider.GetCredentials(this, contentEncryption.GetDescription());
-                    if (credentials == null)
-                    {
-                        return false;
-                    }
-                    contentEncryption.AddCredentials(credentials);
-                }
-                contentEncryptionChain.Add(contentEncryption);
-            }
-                
-            if (namesEncryption != null)
-            {
-                if (namesEncryption.NeedCredentials)
-                {
-                    string? credentials = Repository.CredentialsProvider.GetCredentials(this, namesEncryption.GetDescription());
-                    if (credentials == null)
-                    {
-                        return false;
-                    }
-                    namesEncryption.AddCredentials(credentials);
-                }
-                childNameEncryptionChain.Add(namesEncryption);
-            }
-
-            _encryption = encryption;
-            _childNameEncryptionChain = childNameEncryptionChain;
-            _contentEncryptionChain = contentEncryptionChain;
-
-            return true;
+            // if (!UnlockContent())
+            // {
+            //     return false;
+            // }
+            //
+            // if (contentEncryption != null && contentEncryption.NeedCredentials)
+            // {
+            //     string? credentials = Repository.CredentialsProvider.GetCredentials(
+            //         this, contentEncryption.GetDescription());
+            //     if (credentials == null || !contentEncryption.AddCredentials(credentials))
+            //     {
+            //         return false;
+            //     }
+            // }
+            //
+            // if (namesEncryption != null && namesEncryption.NeedCredentials)
+            // {
+            //     string? credentials = Repository.CredentialsProvider.GetCredentials(
+            //         this, namesEncryption.GetDescription());
+            //     if (credentials == null || !namesEncryption.AddCredentials(credentials))
+            //     {
+            //         return false;
+            //     }
+            // }
+            //
+            // DirectoryContent content = new DirectoryContent(namesEncryption, contentEncryption);
+            //
+            // if (!SetContent(content))
+            // {
+            //     return false;
+            // }
+            //
+            // if (!Repository.Storage.SetDirectoryContent(Id,
+            //         new Box<DirectoryContent>(content, Parent?.EncryptionChain)))
+            // {
+            //     LockContent();
+            //     return false;
+            // }
+            //
+            // return true;
+            throw new NotImplementedException();
         }
 
         public IEnumerable<INode> Children
@@ -105,12 +82,12 @@ namespace Vault.Repository.V1
                 }
             }
         }
-        
+
         public INode? FindChild(string name)
         {
             foreach (var child in Children)
             {
-                var childName = child.Name;
+                var childName = child.Name.Value;
                 if (childName == null)
                 {
                     throw new InvalidOperationException();
@@ -145,17 +122,102 @@ namespace Vault.Repository.V1
         {
             get
             {
-                UnlockContent();
-                return _contentEncryptionChain ?? throw new Exception();
+                _content.Unlock();
+                return _content.ContentEncryptionChain ?? throw new Exception();
             }
         }
-        
+
         public IEnumerable<IEncryptionSource> ChildrenNameEncryptionChain
         {
             get
             {
-                UnlockContent();
-                return _childNameEncryptionChain ?? throw new Exception();
+                _content.Unlock();
+                return _content.ChildNameEncryptionChain ?? throw new Exception();
+            }
+        }
+
+        private class DirectoryContentState : ContentState<DirectoryContent>
+        {
+            private readonly DirectoryNode _owner;
+
+            private List<IEncryptionSource>? _contentEncryptionChain;
+            private List<IEncryptionSource>? _childNameEncryptionChain;
+
+            public IEnumerable<IEncryptionSource>? ContentEncryptionChain => _contentEncryptionChain;
+            public IEnumerable<IEncryptionSource>? ChildNameEncryptionChain => _childNameEncryptionChain;
+
+            public DirectoryContentState(DirectoryNode node)
+                : base(node)
+            {
+                _owner = node;
+            }
+
+            protected override bool UnlockContent(DirectoryContent encryption)
+            {
+                var contentEncryptionChain = new List<IEncryptionSource>();
+                var childNameEncryptionChain = new List<IEncryptionSource>();
+                if (_owner.Parent != null)
+                {
+                    contentEncryptionChain.AddRange(_owner.Parent.EncryptionChain);
+                    childNameEncryptionChain.AddRange(_owner.Parent.EncryptionChain);
+                }
+
+                var contentEncryption = encryption.GetForContent();
+                var namesEncryption = encryption.GetForNames();
+
+                if (contentEncryption != null)
+                {
+                    // if (contentEncryption.NeedCredentials)
+                    // {
+                    //     string? credentials = Repository.CredentialsProvider.GetCredentials(this, contentEncryption.GetDescription());
+                    //     if (credentials == null)
+                    //     {
+                    //         return false;
+                    //     }
+                    //
+                    //     if (!contentEncryption.AddCredentials(credentials))
+                    //     {
+                    //         return false;
+                    //     }
+                    // }
+
+                    contentEncryptionChain.Add(contentEncryption);
+                }
+
+                if (namesEncryption != null)
+                {
+                    // if (namesEncryption.NeedCredentials)
+                    // {
+                    //     string? credentials = Repository.CredentialsProvider.GetCredentials(this, namesEncryption.GetDescription());
+                    //     if (credentials == null)
+                    //     {
+                    //         return false;
+                    //     }
+                    //
+                    //     if (!namesEncryption.AddCredentials(credentials))
+                    //     {
+                    //         return false;
+                    //     }
+                    // }
+
+                    childNameEncryptionChain.Add(namesEncryption);
+                }
+
+                _childNameEncryptionChain = childNameEncryptionChain;
+                _contentEncryptionChain = contentEncryptionChain;
+
+                return true;
+            }
+            
+            protected override void LockState()
+            {
+                foreach (var child in _owner.Children)
+                {
+                    child.LockAll();
+                }
+
+                _contentEncryptionChain = null;
+                _childNameEncryptionChain = null;
             }
         }
     }

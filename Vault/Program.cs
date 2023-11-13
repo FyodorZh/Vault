@@ -38,11 +38,11 @@ public static class VaultEntryPoint
         VaultConsole vaultConsole = new VaultConsole(root); 
         
         
-        System.Console.Clear();
+        Console.Clear();
         while (true)
         {
             vaultConsole.Prompt();
-            var str = System.Console.ReadLine()?.Trim(' ');
+            var str = Console.ReadLine()?.Trim(' ');
             if (str == null)
             {
                 break;
@@ -106,6 +106,26 @@ public static class VaultEntryPoint
                     else
                     {
                         Console.WriteLine("Error!");
+                    }
+                    break;
+                case "lock":
+                    if (cmd.Length == 1)
+                    {
+                        vaultConsole.Command_lock();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error");
+                    }
+                    break;
+                case "unlock":
+                    if (cmd.Length == 1)
+                    {
+                        vaultConsole.Command_unlock();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error");
                     }
                     break;
                 case "help":

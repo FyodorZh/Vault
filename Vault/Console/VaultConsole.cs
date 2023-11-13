@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Vault.Content;
-using Vault.Encryption;
 using Vault.Repository;
 
 namespace Vault
@@ -20,9 +19,9 @@ namespace Vault
 
         private static string FormatName(INode node, bool showDirectory)
         {
-            string name = node.Name ?? (node.Id.ToString()+ "*");
+            string name = node.Name.Value ?? (node.Id.ToString()+ "*");
             name += "[";
-            name += ((node.State & LockState.Content) != 0) ? "?" : "c";
+            name += node.Content.Unlocked ? "c" : "?";
             name += "]";
             if (node is IDirectoryNode && showDirectory)
             {
@@ -38,7 +37,7 @@ namespace Vault
             INode? c = CurrentNode.Parent;
             while (c != null)
             {
-                prompt = c.Name + "/" + prompt;
+                prompt = (c.Name.Value ?? c.Id.ToString()) + "/" + prompt;
                 c = c.Parent;
             }
 
@@ -47,10 +46,10 @@ namespace Vault
 
         public void Command_ls()
         {
-            Console.WriteLine("Name: " + (CurrentNode.Name ?? "???"));
-            if (CurrentNode.Content != null)
+            Console.WriteLine("Name: " + (CurrentNode.Name.Value ?? "???"));
+            if (CurrentNode.Content.Value != null)
             {
-                CurrentNode.Content.WriteTo(Console.Out);
+                CurrentNode.Content.Value.WriteTo(Console.Out);
             }
             else
             {
@@ -82,9 +81,9 @@ namespace Vault
             {
                 if (child is IFileNode file)
                 {
-                    if (file.Content != null)
+                    if (file.Content.Value != null)
                     {
-                        file.Content.WriteTo(Console.Out);
+                        file.Content.Value.WriteTo(Console.Out);
                         Console.WriteLine();
                     }
                     else
@@ -152,6 +151,16 @@ namespace Vault
             }
             
             CurrentNode.AddChildDirectory(name);
+        }
+
+        public void Command_lock()
+        {
+            CurrentNode.Content.Lock();
+        }
+
+        public void Command_unlock()
+        {
+            CurrentNode.Content.Unlock();
         }
     }
 }
