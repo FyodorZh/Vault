@@ -8,14 +8,23 @@ namespace Vault.Repository.V1
 {
     internal class DirectoryNode : Node, IDirectoryNode
     {
-        private readonly DirectoryEncryptionState _encryption;
-        public override ILockedState<IContent> Content => _encryption;
-        public IDirectoryEncryptionState Encryption => _encryption;
+        private readonly DirectoryEncryptionAspect _encryption;
+        public override ILockableAspect<IContent> Content => _encryption;
+        public IDirectoryEncryptionAspect Encryption => _encryption;
 
+        
+        private readonly DirectoryChildrenNamesAspect _childrenNames;
+        public IDirectoryChildrenNamesAspect ChildrenNames => _childrenNames;
+
+        
+        public IDirectoryChildrenAspect Children2 => throw new NotImplementedException();
+
+        
         public DirectoryNode(IDirectoryData data, IRepositoryCtl repository)
             : base(data, repository)
         {
-            _encryption = new DirectoryEncryptionState(this);
+            _encryption = new DirectoryEncryptionAspect(this);
+            _childrenNames = new DirectoryChildrenNamesAspect(this);
         }
 
         public bool SetEncryption(EncryptionSource? contentEncryption, EncryptionSource? namesEncryption)

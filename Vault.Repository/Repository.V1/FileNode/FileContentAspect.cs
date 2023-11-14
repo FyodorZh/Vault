@@ -2,9 +2,9 @@ using Vault.Content;
 
 namespace Vault.Repository.V1
 {
-    internal class FileContentState : ContentState<IContent>
+    internal class FileContentAspect : ContentAspect<IContent>
     {
-        public FileContentState(FileNode node) 
+        public FileContentAspect(FileNode node) 
             : base(node)
         {
         }

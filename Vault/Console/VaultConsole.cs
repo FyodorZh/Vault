@@ -21,7 +21,7 @@ namespace Vault
         {
             string name = node.Name.Value ?? (node.Id.ToString()+ "*");
             name += "[";
-            name += node.Content.Unlocked ? "c" : "?";
+            name += node.Content.IsLocked ? "?" : "c";
             name += "]";
             if (node is IDirectoryNode && showDirectory)
             {

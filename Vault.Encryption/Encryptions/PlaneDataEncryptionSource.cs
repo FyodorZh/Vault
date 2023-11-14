@@ -14,6 +14,11 @@ namespace Vault.Encryption
             throw new System.InvalidOperationException();
         }
 
+        public override void ClearCredentials()
+        {
+            // DO NOTHING
+        }
+
         public override EncryptionDesc GetDescription()
         {
             return new EncryptionDesc("PlaneData", false, false);

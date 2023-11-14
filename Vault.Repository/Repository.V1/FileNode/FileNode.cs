@@ -5,12 +5,12 @@ namespace Vault.Repository.V1
 {
     internal class FileNode : Node, IFileNode
     {
-        public override ILockedState<IContent> Content { get; }
+        public override ILockableAspect<IContent> Content { get; }
 
         public FileNode(IFileData data, IRepositoryCtl repository) 
             : base(data, repository)
         {
-            Content = new FileContentState(this);
+            Content = new FileContentAspect(this);
         }
     }
 }

@@ -2,14 +2,14 @@ using Vault.Content;
 
 namespace Vault.Repository.V1
 {
-    internal abstract class ContentState<TContent> : LockedState<IContent, TContent>
+    internal abstract class ContentAspect<TContent> : LockableAspect<IContent, TContent>
         where TContent : class, IContent
     {
         private readonly Node _owner;
 
         protected abstract bool UnlockContent(TContent content);
             
-        protected ContentState(Node node) 
+        protected ContentAspect(Node node) 
             : base(true)
         {
             _owner = node;

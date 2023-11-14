@@ -7,6 +7,7 @@ namespace Vault.Encryption
     {
         bool NeedCredentials { get; }
         bool AddCredentials(string credentials);
+        void ClearCredentials();
         
         EncryptionDesc GetDescription();
         IReadOnlyList<byte> Encrypt(IReadOnlyList<byte> plainData);
@@ -17,6 +18,7 @@ namespace Vault.Encryption
     {
         public abstract bool NeedCredentials { get; }
         public abstract bool AddCredentials(string credentials);
+        public abstract void ClearCredentials();
         
         public abstract EncryptionDesc GetDescription();
         public abstract IReadOnlyList<byte> Encrypt(IReadOnlyList<byte> plainData);

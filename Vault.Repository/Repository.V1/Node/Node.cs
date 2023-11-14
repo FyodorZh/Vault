@@ -7,23 +7,23 @@ namespace Vault.Repository.V1
     {
         public INodeData Data { get; }
         
-        protected IRepositoryCtl Repository { get; }
+        public IRepositoryCtl Repository { get; }
 
 
         protected Node(INodeData data, IRepositoryCtl repository)
         {
             Data = data;
             Repository = repository;
-            Name = new NameState(this);
+            Name = new NameAspect(this);
         }
 
         public bool IsValid => Data.IsValid;
 
         public NodeId Id => Data.Id;
 
-        public ILockedState<string> Name { get; }
+        public ILockableAspect<string> Name { get; }
         
-        public abstract ILockedState<IContent> Content { get; }
+        public abstract ILockableAspect<IContent> Content { get; }
 
         public virtual void LockAll()
         {

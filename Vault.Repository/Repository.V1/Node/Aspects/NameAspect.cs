@@ -1,10 +1,10 @@
 namespace Vault.Repository.V1
 {
-    internal class NameState : LockedState<string, string>
+    internal class NameAspect : LockableAspect<string, string>
     {
         private readonly Node _owner;
         
-        internal NameState(Node owner)
+        internal NameAspect(Node owner)
             : base(true)
         {
             _owner = owner;

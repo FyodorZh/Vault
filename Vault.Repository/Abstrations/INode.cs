@@ -7,9 +7,9 @@ namespace Vault.Repository
         bool IsValid { get; }
         NodeId Id { get; }
         
-        ILockedState<string> Name { get; }
+        ILockableAspect<string> Name { get; }
         
-        ILockedState<IContent> Content { get; }
+        ILockableAspect<IContent> Content { get; }
 
         void LockAll();
 

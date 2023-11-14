@@ -23,6 +23,12 @@ namespace Vault.Encryption
             return true;
         }
 
+        public override void ClearCredentials()
+        {
+            _initializedCredentials = false;
+            _xor = 0;
+        }
+
         public override EncryptionDesc GetDescription()
         {
             return new EncryptionDesc("Xor", true, _initializedCredentials);
