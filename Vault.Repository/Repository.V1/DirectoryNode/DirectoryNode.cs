@@ -16,8 +16,9 @@ namespace Vault.Repository.V1
         private readonly DirectoryChildrenNamesAspect _childrenNames;
         public IDirectoryChildrenNamesAspect ChildrenNames => _childrenNames;
 
-        
-        public IDirectoryChildrenAspect Children2 => throw new NotImplementedException();
+
+        private readonly DirectoryChildrenAspect _children;
+        public IDirectoryChildrenAspect Children2 => _children;
 
         
         public DirectoryNode(IDirectoryData data, IRepositoryCtl repository)
@@ -25,6 +26,15 @@ namespace Vault.Repository.V1
         {
             _encryption = new DirectoryEncryptionAspect(this);
             _childrenNames = new DirectoryChildrenNamesAspect(this);
+            _children = new DirectoryChildrenAspect(this);
+        }
+
+        public override void LockAll()
+        {
+            Children2.Lock();
+            ChildrenNames.Lock();
+            Encryption.Lock();
+            base.LockAll();
         }
 
         public bool SetEncryption(EncryptionSource? contentEncryption, EncryptionSource? namesEncryption)
@@ -70,62 +80,6 @@ namespace Vault.Repository.V1
             //
             // return true;
             throw new NotImplementedException();
-        }
-
-        public IEnumerable<INode> Children
-        {
-            get
-            {
-                foreach (var childId in Repository.FindChildren(Data.Id))
-                {
-                    INode? child = Repository.FindDirectory(childId);
-                    if (child == null)
-                    {
-                        child = Repository.FindFile(childId);
-                        if (child == null)
-                        {
-                            throw new Exception();
-                        }
-                    }
-
-                    yield return child;
-                }
-            }
-        }
-
-        public INode? FindChild(string name)
-        {
-            foreach (var child in Children)
-            {
-                var childName = child.Name.Value;
-                if (childName == null)
-                {
-                    throw new InvalidOperationException();
-                }
-
-                if (childName == name)
-                {
-                    return child;
-                }
-            }
-
-            return null;
-        }
-
-        public IFileNode AddChildFile(string name, IContent content)
-        {
-            var fileNode = Repository.AddFile(Id,
-                new Box<StringContent>(new StringContent(name), Encryption.ChildrenNameEncryptionChain),
-                new Box<IContent>(content, Encryption.ContentEncryptionChain));
-            return fileNode;
-        }
-
-        public IDirectoryNode AddChildDirectory(string name)
-        {
-            var nameBox = new Box<StringContent>(new StringContent(name), Encryption.ChildrenNameEncryptionChain);
-            var contentBox = new Box<DirectoryContent>(new DirectoryContent(), Encryption.ContentEncryptionChain);
-            var dirNode = Repository.AddDirectory(Id, nameBox, contentBox);
-            return dirNode;
         }
     }
 }

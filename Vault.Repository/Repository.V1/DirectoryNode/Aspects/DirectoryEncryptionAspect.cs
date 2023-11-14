@@ -76,39 +76,11 @@ namespace Vault.Repository.V1
 
             if (selfChildrenContentEncryption != null)
             {
-                // if (contentEncryption.NeedCredentials)
-                // {
-                //     string? credentials = Repository.CredentialsProvider.GetCredentials(this, contentEncryption.GetDescription());
-                //     if (credentials == null)
-                //     {
-                //         return false;
-                //     }
-                //
-                //     if (!contentEncryption.AddCredentials(credentials))
-                //     {
-                //         return false;
-                //     }
-                // }
-
                 contentEncryptionChain.Add(selfChildrenContentEncryption);
             }
 
             if (selfChildrenNamesEncryption != null)
             {
-                // if (namesEncryption.NeedCredentials)
-                // {
-                //     string? credentials = Repository.CredentialsProvider.GetCredentials(this, namesEncryption.GetDescription());
-                //     if (credentials == null)
-                //     {
-                //         return false;
-                //     }
-                //
-                //     if (!namesEncryption.AddCredentials(credentials))
-                //     {
-                //         return false;
-                //     }
-                // }
-
                 childNameEncryptionChain.Add(selfChildrenNamesEncryption);
             }
 
@@ -123,9 +95,9 @@ namespace Vault.Repository.V1
 
         protected override void LockState()
         {
-            foreach (var child in _owner.Children)
+            foreach (var child in _owner.ChildrenNames.All)
             {
-                child.LockAll();
+                child.Item2.LockAll();
             }
             
             _selfChildrenContentEncryption = null;
@@ -133,6 +105,9 @@ namespace Vault.Repository.V1
 
             _contentEncryptionChain = null;
             _childNameEncryptionChain = null;
+            
+            _owner.Children2.Lock();
+            _owner.ChildrenNames.Lock();
         }
     }
 }

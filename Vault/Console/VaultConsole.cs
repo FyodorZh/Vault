@@ -57,7 +57,7 @@ namespace Vault
             }
             
             bool bWritten = false;
-            foreach (var elementName in CurrentNode.Children.Select(node => FormatName(node, true)).Order())
+            foreach (var elementName in CurrentNode.ChildrenNames.All.Select( pair => FormatName(pair.Item2, true)).Order())
             {
                 Console.Write(elementName);
                 Console.Write(" ");
@@ -72,7 +72,7 @@ namespace Vault
 
         public void Command_cat(string name)
         {
-            var child = CurrentNode.FindChild(name);
+            var child = CurrentNode.ChildrenNames.FindChild(name);
             if (child == null)
             {
                 Console.WriteLine("File " + name + " not found");
@@ -110,7 +110,7 @@ namespace Vault
                 return;
             }
 
-            var child = CurrentNode.FindChild(name);
+            var child = CurrentNode.ChildrenNames.FindChild(name);
             if (child == null)
             {
                 Console.WriteLine("Directory " + name + " not found");
@@ -131,26 +131,26 @@ namespace Vault
 
         public void Command_add(string name, string text)
         {
-            var child = CurrentNode.FindChild(name);
+            var child = CurrentNode.ChildrenNames.FindChild(name);
             if (child != null)
             {
                 Console.WriteLine("File or directory already exists");
                 return;
             }
             
-            CurrentNode.AddChildFile(name, new StringContent(text));
+            CurrentNode.Children2.AddChildFile(name, new StringContent(text));
         }
         
         public void Command_mkdir(string name)
         {
-            var child = CurrentNode.FindChild(name);
+            var child = CurrentNode.ChildrenNames.FindChild(name);
             if (child != null)
             {
                 Console.WriteLine("File or directory already exists");
                 return;
             }
             
-            CurrentNode.AddChildDirectory(name);
+            CurrentNode.Children2.AddChildDirectory(name);
         }
 
         public void Command_lock()

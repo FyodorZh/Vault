@@ -16,11 +16,13 @@ namespace Vault.Repository
     public interface IDirectoryChildrenNamesAspect : ILockableAspect
     {
         IEnumerable<(string, INode)> All { get; }
+        INode? FindChild(string name);
     }
     
     public interface IDirectoryChildrenAspect : ILockableAspect
     {
-        IEnumerable<(string, INode)> All { get; }
+        IFileNode AddChildFile(string name, IContent content);
+        IDirectoryNode AddChildDirectory(string name);
     }
     
     public interface IDirectoryNode : INode
@@ -30,12 +32,5 @@ namespace Vault.Repository
         IDirectoryChildrenNamesAspect ChildrenNames { get; }
         
         IDirectoryChildrenAspect Children2 { get; }
-        
-        
-        IEnumerable<INode> Children { get; }
-        INode? FindChild(string name);
-        
-        IFileNode AddChildFile(string name, IContent content);
-        IDirectoryNode AddChildDirectory(string name);
     }
 }

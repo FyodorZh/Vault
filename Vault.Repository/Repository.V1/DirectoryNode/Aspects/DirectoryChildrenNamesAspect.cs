@@ -12,27 +12,13 @@ namespace Vault.Repository
         {
             _owner = dir;
         }
-
-        public IEnumerable<(string, INode)> All
-        {
-            get
-            {
-                if (!Unlock())
-                {
-                    throw new Exception();
-                }
-                
-                //var chain = _owner.Encryption.ChildrenNameEncryptionChain;
-                
-                foreach (var ch in _owner.Children)
-                {
-                    yield return (ch.Name.Value ?? throw new Exception(), ch);
-                }
-            }
-        }
-
+        
         public override bool Unlock()
         {
+            if (!IsLocked)
+            {
+                return true;
+            }
             if (_owner.Encryption.Unlock())
             {
                 var encryption = _owner.Encryption.SelfChildrenNamesEncryption();
@@ -58,12 +44,47 @@ namespace Vault.Repository
 
         public override void Lock()
         {
+            bool wasLocked = IsLocked;
             if (!_owner.Encryption.IsLocked)
             {
                 var encryption = _owner.Encryption.SelfChildrenNamesEncryption();
                 encryption?.ClearCredentials();
             }
             base.Lock();
+            if (!wasLocked)
+            {
+                _owner.Children2.Lock();
+            }
+        }
+
+        public IEnumerable<(string, INode)> All
+        {
+            get
+            {
+                if (!Unlock())
+                {
+                    throw new Exception();
+                }
+                
+                foreach (var chId in _owner.Repository.FindChildren(_owner.Id))
+                {
+                    INode? node = (INode?)_owner.Repository.FindDirectory(chId) ?? _owner.Repository.FindFile(chId);
+                    yield return (node?.Name.Value ?? throw new Exception(), node);
+                }
+            }
+        }
+
+        public INode? FindChild(string name)
+        {
+            foreach (var pair in All)
+            {
+                if (pair.Item1 == name)
+                {
+                    return pair.Item2;
+                }
+            }
+
+            return null;
         }
     }
 }
