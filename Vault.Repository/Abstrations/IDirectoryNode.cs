@@ -19,7 +19,7 @@ namespace Vault.Repository
         INode? FindChild(string name);
     }
     
-    public interface IDirectoryChildrenAspect : ILockableAspect
+    public interface IDirectoryChildrenContentAspect : ILockableAspect
     {
         IFileNode AddChildFile(string name, IContent content);
         IDirectoryNode AddChildDirectory(string name);
@@ -31,6 +31,6 @@ namespace Vault.Repository
 
         IDirectoryChildrenNamesAspect ChildrenNames { get; }
         
-        IDirectoryChildrenAspect Children2 { get; }
+        IDirectoryChildrenContentAspect ChildrenContent { get; }
     }
 }

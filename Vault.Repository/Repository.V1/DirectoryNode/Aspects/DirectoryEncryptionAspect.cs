@@ -106,7 +106,7 @@ namespace Vault.Repository.V1
             _contentEncryptionChain = null;
             _childNameEncryptionChain = null;
             
-            _owner.Children2.Lock();
+            _owner.ChildrenContent.Lock();
             _owner.ChildrenNames.Lock();
         }
     }

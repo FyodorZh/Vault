@@ -17,8 +17,8 @@ namespace Vault.Repository.V1
         public IDirectoryChildrenNamesAspect ChildrenNames => _childrenNames;
 
 
-        private readonly DirectoryChildrenAspect _children;
-        public IDirectoryChildrenAspect Children2 => _children;
+        private readonly DirectoryChildrenContentAspect _childrenContent;
+        public IDirectoryChildrenContentAspect ChildrenContent => _childrenContent;
 
         
         public DirectoryNode(IDirectoryData data, IRepositoryCtl repository)
@@ -26,12 +26,12 @@ namespace Vault.Repository.V1
         {
             _encryption = new DirectoryEncryptionAspect(this);
             _childrenNames = new DirectoryChildrenNamesAspect(this);
-            _children = new DirectoryChildrenAspect(this);
+            _childrenContent = new DirectoryChildrenContentAspect(this);
         }
 
         public override void LockAll()
         {
-            Children2.Lock();
+            ChildrenContent.Lock();
             ChildrenNames.Lock();
             Encryption.Lock();
             base.LockAll();

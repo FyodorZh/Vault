@@ -6,15 +6,18 @@ namespace Vault.Repository
 
         public bool IsLocked => !_unlocked;
 
-        public virtual bool Unlock()
+        public virtual LockUnlockResult Unlock()
         {
+            var res = _unlocked ? LockUnlockResult.NothingToDo : LockUnlockResult.Success;
             _unlocked = true;
-            return true;
+            return res;
         }
 
-        public virtual void Lock()
+        public virtual LockUnlockResult Lock()
         {
+            var res = _unlocked ? LockUnlockResult.Success : LockUnlockResult.NothingToDo;
             _unlocked = false;
+            return res;
         }
     }
 
@@ -50,23 +53,34 @@ namespace Vault.Repository
         {
         }
 
-        public sealed override bool Unlock()
+        public sealed override LockUnlockResult Unlock()
         {
-            _state ??= UnlockState();
             if (_state != null)
             {
-                return base.Unlock();
+                return LockUnlockResult.NothingToDo;
             }
-
-            base.Lock();
-            return false;
+            
+            _state = UnlockState();
+            if (_state == null)
+            {
+                return LockUnlockResult.Fail;
+            }
+            
+            base.Unlock();
+            return LockUnlockResult.Success;
         }
 
-        public sealed override void Lock()
+        public sealed override LockUnlockResult Lock()
         {
+            if (_state == null)
+            {
+                return LockUnlockResult.NothingToDo;
+            }
+            
             _state = null;
             LockState();
             base.Lock();
+            return LockUnlockResult.Success;
         }
     }
 }

@@ -1,14 +1,15 @@
 using System;
-using System.Collections.Generic;
+using Vault.Content;
 using Vault.Repository.V1;
+using Vault.Storage;
 
 namespace Vault.Repository
 {
-    internal class DirectoryChildrenNamesAspect : LockableAspect, IDirectoryChildrenNamesAspect
+    internal class DirectoryChildrenContentAspect : LockableAspect, IDirectoryChildrenContentAspect
     {
         private readonly DirectoryNode _owner;
         
-        public DirectoryChildrenNamesAspect(DirectoryNode dir)
+        public DirectoryChildrenContentAspect(DirectoryNode dir)
         {
             _owner = dir;
         }
@@ -25,7 +26,7 @@ namespace Vault.Repository
                 return LockUnlockResult.Fail;
             }
             
-            var encryption = _owner.Encryption.SelfChildrenNamesEncryption();
+            var encryption = _owner.Encryption.SelfChildrenContentEncryption();
             if (encryption is { NeedCredentials: true })
             {
                 string? credentials = _owner.Repository.CredentialsProvider.GetCredentials(_owner, encryption.GetDescription());
@@ -55,44 +56,43 @@ namespace Vault.Repository
                 var nameEncryption = _owner.Encryption.SelfChildrenNamesEncryption();
                 var contentEncryption = _owner.Encryption.SelfChildrenContentEncryption();
 
-                if (nameEncryption != null &&
-                    (nameEncryption != contentEncryption || _owner.ChildrenContent.IsLocked))
+                if (contentEncryption != null &&
+                    (nameEncryption != contentEncryption || _owner.ChildrenNames.IsLocked))
                 {
-                    nameEncryption.ClearCredentials();
+                    contentEncryption.ClearCredentials();
                 }
             }
             base.Lock();
             return LockUnlockResult.Success;
         }
 
-        public IEnumerable<(string, INode)> All
+
+        public IFileNode AddChildFile(string name, IContent content)
         {
-            get
+            Unlock();
+            if (IsLocked)
             {
-                if (Unlock() == LockUnlockResult.Fail)
-                {
-                    throw new Exception();
-                }
-                
-                foreach (var chId in _owner.Repository.FindChildren(_owner.Id))
-                {
-                    INode? node = (INode?)_owner.Repository.FindDirectory(chId) ?? _owner.Repository.FindFile(chId);
-                    yield return (node?.Name.Value ?? throw new Exception(), node);
-                }
+                throw new Exception();
             }
+            
+            var fileNode = _owner.Repository.AddFile(_owner.Id,
+                new Box<StringContent>(new StringContent(name), _owner.Encryption.ChildrenNameEncryptionChain),
+                new Box<IContent>(content, _owner.Encryption.ContentEncryptionChain));
+            return fileNode;
         }
 
-        public INode? FindChild(string name)
+        public IDirectoryNode AddChildDirectory(string name)
         {
-            foreach (var pair in All)
+            Unlock();
+            if (IsLocked)
             {
-                if (pair.Item1 == name)
-                {
-                    return pair.Item2;
-                }
+                throw new Exception();
             }
-
-            return null;
+            
+            var nameBox = new Box<StringContent>(new StringContent(name), _owner.Encryption.ChildrenNameEncryptionChain);
+            var contentBox = new Box<DirectoryContent>(new DirectoryContent(), _owner.Encryption.ContentEncryptionChain);
+            var dirNode = _owner.Repository.AddDirectory(_owner.Id, nameBox, contentBox);
+            return dirNode;
         }
     }
 }

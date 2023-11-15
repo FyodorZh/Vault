@@ -138,7 +138,7 @@ namespace Vault
                 return;
             }
             
-            CurrentNode.Children2.AddChildFile(name, new StringContent(text));
+            CurrentNode.ChildrenContent.AddChildFile(name, new StringContent(text));
         }
         
         public void Command_mkdir(string name)
@@ -150,17 +150,66 @@ namespace Vault
                 return;
             }
             
-            CurrentNode.Children2.AddChildDirectory(name);
+            CurrentNode.ChildrenContent.AddChildDirectory(name);
+        }
+        
+        private void LockUnlockReport(LockUnlockResult res, string text)
+        {
+            Console.Write(text + ": ");
+            switch (res)
+            {
+                case LockUnlockResult.NothingToDo:
+                    Console.WriteLine("NothingToDo");
+                    break;
+                case LockUnlockResult.Success:
+                    Console.WriteLine("Success");
+                    break;
+                case LockUnlockResult.Fail:
+                    Console.WriteLine("Fail");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(res), res, null);
+            }
         }
 
-        public void Command_lock()
+        public void Command_lock(string cmd)
         {
-            CurrentNode.Content.Lock();
+            switch (cmd)
+            {
+                case "all":
+                    LockUnlockReport(CurrentNode.ChildrenContent.Lock(), "ChildrenContent");
+                    LockUnlockReport(CurrentNode.ChildrenNames.Lock(), "ChildrenNames");
+                    break;
+                case "content":
+                    LockUnlockReport(CurrentNode.ChildrenContent.Lock(), "ChildrenContent");
+                    break;
+                case "names":
+                    LockUnlockReport(CurrentNode.ChildrenNames.Lock(), "ChildrenNames");
+                    break;
+                default:
+                    Console.WriteLine("Error: Wrong lock command. Allowed: all/names/content");
+                    break;
+            }
         }
 
-        public void Command_unlock()
+        public void Command_unlock(string cmd)
         {
-            CurrentNode.Content.Unlock();
+            switch (cmd)
+            {
+                case "all":
+                    LockUnlockReport(CurrentNode.ChildrenNames.Unlock(), "ChildrenNames");
+                    LockUnlockReport(CurrentNode.ChildrenContent.Unlock(), "ChildrenContent");
+                    break;
+                case "content":
+                    LockUnlockReport(CurrentNode.ChildrenContent.Unlock(), "ChildrenContent");
+                    break;
+                case "names":
+                    LockUnlockReport(CurrentNode.ChildrenNames.Unlock(), "ChildrenNames");
+                    break;
+                default:
+                    Console.WriteLine("Error: Wrong unlock command. Allowed: all/names/content");
+                    break;
+            }
         }
     }
 }
