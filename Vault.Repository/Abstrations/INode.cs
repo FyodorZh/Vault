@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using Vault.Content;
+using Vault.Encryption;
 
 namespace Vault.Repository
 {
@@ -6,8 +8,8 @@ namespace Vault.Repository
     {
         bool IsValid { get; }
         NodeId Id { get; }
-        
-        ILockableAspect<string> Name { get; }
+
+        string Name { get; }
         
         ILockableAspect<IContent> Content { get; }
 

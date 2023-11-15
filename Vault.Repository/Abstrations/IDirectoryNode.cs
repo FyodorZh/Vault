@@ -15,7 +15,7 @@ namespace Vault.Repository
     
     public interface IDirectoryChildrenNamesAspect : ILockableAspect
     {
-        IEnumerable<(string, INode)> All { get; }
+        IEnumerable<INode> All { get; }
         INode? FindChild(string name);
     }
     

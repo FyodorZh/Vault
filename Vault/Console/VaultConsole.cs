@@ -17,27 +17,13 @@ namespace Vault
             _stack.Push(root);
         }
 
-        private static string FormatName(INode node, bool showDirectory)
-        {
-            string name = node.Name.Value ?? (node.Id.ToString()+ "*");
-            name += "[";
-            name += node.Content.IsLocked ? "?" : "c";
-            name += "]";
-            if (node is IDirectoryNode && showDirectory)
-            {
-                name = "<" + name + ">";
-            }
-            
-            return name;
-        }
-
         public void Prompt()
         {
-            string prompt = FormatName(CurrentNode, false);
+            string prompt = CurrentNode.Name;
             INode? c = CurrentNode.Parent;
             while (c != null)
             {
-                prompt = (c.Name.Value ?? c.Id.ToString()) + "/" + prompt;
+                prompt = c.Name + "/" + prompt;
                 c = c.Parent;
             }
 
@@ -46,7 +32,7 @@ namespace Vault
 
         public void Command_ls()
         {
-            Console.WriteLine("Name: " + (CurrentNode.Name.Value ?? "???"));
+            Console.WriteLine("Name: " + CurrentNode.Name);
             if (CurrentNode.Content.Value != null)
             {
                 CurrentNode.Content.Value.WriteTo(Console.Out);
@@ -57,7 +43,15 @@ namespace Vault
             }
             
             bool bWritten = false;
-            foreach (var elementName in CurrentNode.ChildrenNames.All.Select( pair => FormatName(pair.Item2, true)).Order())
+            foreach (var elementName in CurrentNode.ChildrenNames.All.Select(node =>
+                     {
+                         string name = node.Name;
+                         if (node is IDirectoryNode)
+                         {
+                             name = "<" + name + ">";
+                         }
+                         return name;
+                     }).Order())
             {
                 Console.Write(elementName);
                 Console.Write(" ");

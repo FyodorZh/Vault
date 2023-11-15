@@ -97,7 +97,7 @@ namespace Vault.Repository.V1
         {
             foreach (var child in _owner.ChildrenNames.All)
             {
-                child.Item2.LockAll();
+                child.LockAll();
             }
             
             _selfChildrenContentEncryption = null;

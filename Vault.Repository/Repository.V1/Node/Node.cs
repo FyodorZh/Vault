@@ -14,21 +14,27 @@ namespace Vault.Repository.V1
         {
             Data = data;
             Repository = repository;
-            Name = new NameAspect(this);
         }
 
         public bool IsValid => Data.IsValid;
 
         public NodeId Id => Data.Id;
 
-        public ILockableAspect<string> Name { get; }
+        public string Name
+        {
+            get
+            {
+                var chain = Parent?.Encryption.ChildrenNameEncryptionChain;
+                string? name = Data.EncryptedName.Deserialize(chain)?.Content;
+                return name ?? Id.ToString();
+            }
+        }
         
         public abstract ILockableAspect<IContent> Content { get; }
 
         public virtual void LockAll()
         {
             Content.Lock();
-            Name.Lock();
         }
 
         IDirectoryNode? INode.Parent => Parent;

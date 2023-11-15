@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Vault.Encryption;
 using Vault.Repository.V1;
 
 namespace Vault.Repository
@@ -65,7 +67,7 @@ namespace Vault.Repository
             return LockUnlockResult.Success;
         }
 
-        public IEnumerable<(string, INode)> All
+        public IEnumerable<INode> All
         {
             get
             {
@@ -73,22 +75,27 @@ namespace Vault.Repository
                 {
                     throw new Exception();
                 }
-                
+
                 foreach (var chId in _owner.Repository.FindChildren(_owner.Id))
                 {
-                    INode? node = (INode?)_owner.Repository.FindDirectory(chId) ?? _owner.Repository.FindFile(chId);
-                    yield return (node?.Name.Value ?? throw new Exception(), node);
+                    INode? node = _owner.Repository.FindNode(chId);
+                    if (node == null)
+                    {
+                        throw new Exception();
+                    }
+
+                    yield return node;
                 }
             }
         }
-
+        
         public INode? FindChild(string name)
         {
-            foreach (var pair in All)
+            foreach (var node in All)
             {
-                if (pair.Item1 == name)
+                if (node.Name == name)
                 {
-                    return pair.Item2;
+                    return node;
                 }
             }
 

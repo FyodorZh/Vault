@@ -12,6 +12,7 @@ namespace Vault.Repository.V1
         ICredentialsProvider CredentialsProvider { get; }
         DirectoryNode? FindDirectory(NodeId id);
         FileNode? FindFile(NodeId id);
+        Node? FindNode(NodeId id) => (Node?)FindDirectory(id) ?? FindFile(id);
         IEnumerable<NodeId> FindChildren(NodeId parentId);
 
         IDirectoryNode AddDirectory(
