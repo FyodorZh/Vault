@@ -9,6 +9,7 @@ namespace Vault.Encryption
     {
         private bool _initializedCredentials;
         private byte _xor;
+        private string? _dbgCredentials;
         
         public override bool NeedCredentials => !_initializedCredentials;
 
@@ -20,6 +21,7 @@ namespace Vault.Encryption
                 _xor ^= (byte)ch;
             }
             _initializedCredentials = true;
+            _dbgCredentials = credentials;
             return true;
         }
 
@@ -27,6 +29,7 @@ namespace Vault.Encryption
         {
             _initializedCredentials = false;
             _xor = 0;
+            _dbgCredentials = null;
         }
 
         public override EncryptionDesc GetDescription()

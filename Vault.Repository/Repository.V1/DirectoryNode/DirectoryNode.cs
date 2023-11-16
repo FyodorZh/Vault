@@ -40,35 +40,15 @@ namespace Vault.Repository.V1
 
         private static IReadOnlyList<byte> ReEncrypt(
             IReadOnlyList<byte> data, 
-            IReadOnlyList<IEncryptionSource>? parentEncryptionChain,
+            IEncryptionChain? parentEncryptionChain,
             IEncryptionSource? curEncryption,
             IEncryptionSource? newEncryption)
         {
-            if (parentEncryptionChain != null)
-            {
-                foreach (var d in parentEncryptionChain)
-                {
-                    data = d.Decrypt(data);
-                }
-            }
+            data = parentEncryptionChain?.Decrypt(data) ?? data;
+            data = curEncryption?.Decrypt(data) ?? data;
 
-            if (curEncryption != null)
-            {
-                data = curEncryption.Decrypt(data);
-            }
-
-            if (newEncryption != null)
-            {
-                data = newEncryption.Encrypt(data);
-            }
-
-            if (parentEncryptionChain != null)
-            {
-                for (int i = parentEncryptionChain.Count - 1; i >= 0; --i)
-                {
-                    data = parentEncryptionChain[i].Encrypt(data);
-                }
-            }
+            data = newEncryption?.Encrypt(data) ?? data;
+            data = parentEncryptionChain?.Encrypt(data) ?? data;
 
             return data;
         }
@@ -93,10 +73,19 @@ namespace Vault.Repository.V1
             var parentContentEncryptionChain = Parent?.ChildrenContent.ContentEncryptionChain;
             var parentNamesEncryptionChain = Parent?.ChildrenNames.ChildrenNameEncryptionChain;
             
-            foreach (var ch in Repository.Storage.GetChildren(Id))
+            foreach (var ch in Repository.Storage.GetAllSubChildren(Id))
             {
-                var nameData = ReEncrypt(ch.EncryptedName.Data, parentNamesEncryptionChain, curNameEncryption, nameEncryption);
-                var contentData = ReEncrypt(ch.EncryptedContent.Data, parentContentEncryptionChain, curContentEncryption, contentEncryption);
+                IReadOnlyList<byte> nameData = ReEncrypt(
+                    ch.EncryptedName.Data, 
+                    ch.ParentId == Id ? parentNamesEncryptionChain : parentContentEncryptionChain, 
+                    ch.ParentId == Id ? curNameEncryption : curContentEncryption, 
+                    ch.ParentId == Id ? nameEncryption : contentEncryption);
+                
+                IReadOnlyList<byte> contentData = ReEncrypt(
+                    ch.EncryptedContent.Data, 
+                    parentContentEncryptionChain, 
+                    curContentEncryption, 
+                    contentEncryption);
 
                 Repository.Storage.SetNodeName(ch.Id, new Box<StringContent>(nameData));
                 Repository.Storage.SetNodeContent(ch.Id, new Box<IContent>(contentData));

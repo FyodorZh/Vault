@@ -11,9 +11,9 @@ public static class VaultEntryPoint
 {
     private class TmpCredentialsProvider : ICredentialsProvider
     {
-        string? ICredentialsProvider.GetCredentials(IDirectoryNode dir, EncryptionDesc encryptionDesc)
+        string? ICredentialsProvider.GetCredentials(IDirectoryNode dir, EncryptionDesc encryptionDesc, string text)
         {
-            Console.Write("Enter credentials: ");
+            Console.Write("Enter credentials for " + text + ": ");
             return Console.ReadLine();
         }
     }

@@ -29,7 +29,7 @@ namespace Vault.Repository
             var encryption = _owner.Encryption.SelfChildrenNamesEncryption();
             if (encryption is { NeedCredentials: true })
             {
-                string? credentials = _owner.Repository.CredentialsProvider.GetCredentials(_owner, encryption.GetDescription());
+                string? credentials = _owner.Repository.CredentialsProvider.GetCredentials(_owner, encryption.GetDescription(), "name");
                 if (credentials == null)
                 {
                     return LockUnlockResult.Fail;
@@ -72,7 +72,7 @@ namespace Vault.Repository
             return LockUnlockResult.Success;
         }
         
-        public IReadOnlyList<IEncryptionSource> ChildrenNameEncryptionChain
+        public IEncryptionChain ChildrenNameEncryptionChain
         {
             get
             {

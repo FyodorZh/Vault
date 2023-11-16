@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Vault.Content;
 using Vault.Encryption;
 
@@ -20,8 +19,8 @@ namespace Vault.Repository.V1
         private IEncryptionSource? _selfChildrenContentEncryption;
         private IEncryptionSource? _selfChildrenNamesEncryption;
 
-        private List<IEncryptionSource>? _contentEncryptionChain;
-        private List<IEncryptionSource>? _childNameEncryptionChain;
+        private IEncryptionChain? _contentEncryptionChain;
+        private IEncryptionChain? _childNameEncryptionChain;
 
         public IEncryptionSource? SelfChildrenNamesEncryption()
         {
@@ -45,7 +44,7 @@ namespace Vault.Repository.V1
             return _selfChildrenContentEncryption;
         }
 
-        public IReadOnlyList<IEncryptionSource> ContentEncryptionChain
+        public IEncryptionChain ContentEncryptionChain
         {
             get
             {
@@ -54,7 +53,7 @@ namespace Vault.Repository.V1
             }
         }
 
-        public IReadOnlyList<IEncryptionSource> ChildrenNameEncryptionChain
+        public IEncryptionChain ChildrenNameEncryptionChain
         {
             get
             {
@@ -71,32 +70,22 @@ namespace Vault.Repository.V1
 
         protected override bool UnlockContent(DirectoryContent encryption)
         {
-            var contentEncryptionChain = new List<IEncryptionSource>();
-            var childNameEncryptionChain = new List<IEncryptionSource>();
-            if (_owner.Parent != null)
+            _selfChildrenNamesEncryption = encryption.GetForNames();
+            _selfChildrenContentEncryption = encryption.GetForContent();
+
+            _childNameEncryptionChain = _owner.Parent?.ChildrenContent.ContentEncryptionChain ?? VoidEncryptionChain.Instance;
+            _contentEncryptionChain = _owner.Parent?.ChildrenContent.ContentEncryptionChain ?? VoidEncryptionChain.Instance;
+            
+            if (_selfChildrenNamesEncryption != null)
             {
-                contentEncryptionChain.AddRange(_owner.Parent.ChildrenContent.ContentEncryptionChain);
-                childNameEncryptionChain.AddRange(_owner.Parent.ChildrenContent.ContentEncryptionChain);
+                _childNameEncryptionChain = new EncryptionChain(
+                    _childNameEncryptionChain, _selfChildrenNamesEncryption);
             }
-
-            var selfChildrenContentEncryption = encryption.GetForContent();
-            var selfChildrenNamesEncryption = encryption.GetForNames();
-
-            if (selfChildrenContentEncryption != null)
+            if (_selfChildrenContentEncryption != null)
             {
-                contentEncryptionChain.Add(selfChildrenContentEncryption);
+                _contentEncryptionChain = new EncryptionChain(
+                    _contentEncryptionChain, _selfChildrenContentEncryption);
             }
-
-            if (selfChildrenNamesEncryption != null)
-            {
-                childNameEncryptionChain.Add(selfChildrenNamesEncryption);
-            }
-
-            _selfChildrenNamesEncryption = selfChildrenNamesEncryption;
-            _selfChildrenContentEncryption = selfChildrenContentEncryption;
-
-            _childNameEncryptionChain = childNameEncryptionChain;
-            _contentEncryptionChain = contentEncryptionChain;
 
             return true;
         }
@@ -110,6 +99,9 @@ namespace Vault.Repository.V1
             
             _selfChildrenContentEncryption = null;
             _selfChildrenNamesEncryption = null;
+            
+            _contentEncryptionChain?.Destroy();
+            _childNameEncryptionChain?.Destroy();
 
             _contentEncryptionChain = null;
             _childNameEncryptionChain = null;

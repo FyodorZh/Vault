@@ -31,7 +31,7 @@ namespace Vault.Repository
             var encryption = _owner.Encryption.SelfChildrenContentEncryption();
             if (encryption is { NeedCredentials: true })
             {
-                string? credentials = _owner.Repository.CredentialsProvider.GetCredentials(_owner, encryption.GetDescription());
+                string? credentials = _owner.Repository.CredentialsProvider.GetCredentials(_owner, encryption.GetDescription(), "content");
                 if (credentials == null)
                 {
                     return LockUnlockResult.Fail;
@@ -74,7 +74,7 @@ namespace Vault.Repository
             return LockUnlockResult.Success;
         }
 
-        public IReadOnlyList<IEncryptionSource> ContentEncryptionChain
+        public IEncryptionChain ContentEncryptionChain
         {
             get
             {

@@ -12,14 +12,14 @@ namespace Vault.Repository
     
     public interface IDirectoryChildrenNamesAspect : ILockableAspect
     {
-        IReadOnlyList<IEncryptionSource> ChildrenNameEncryptionChain { get; }
+        IEncryptionChain ChildrenNameEncryptionChain { get; }
         IEnumerable<INode> All { get; }
         INode? FindChild(string name);
     }
     
     public interface IDirectoryChildrenContentAspect : ILockableAspect
     {
-        IReadOnlyList<IEncryptionSource> ContentEncryptionChain { get; }
+        IEncryptionChain ContentEncryptionChain { get; }
         IFileNode AddChildFile(string name, IContent content);
         IDirectoryNode AddChildDirectory(string name);
     }

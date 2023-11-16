@@ -9,7 +9,7 @@ namespace Vault.Storage
         where T : class, IDataStruct
     {
         IReadOnlyList<byte> Data { get; }
-        T? Deserialize(IEnumerable<IEncryptionSource>? decryptorsChain = null);
+        T? Deserialize(IEncryptionChain? decryptorsChain = null);
     }
     
     public class Box<T> : IBox<T>
@@ -22,31 +22,15 @@ namespace Vault.Storage
             Data = data;
         }
 
-        public Box(T data, IEnumerable<IEncryptionSource>? encryptorsChain = null)
+        public Box(T data, IEncryptionChain? encryptorsChain = null)
         {
             var bytes = Serializer.Serialize(data);
-            if (encryptorsChain != null)
-            {
-                foreach (var encryptor in encryptorsChain)
-                {
-                    bytes = encryptor.Encrypt(bytes);
-                }
-            }
-
-            Data = bytes;
+            Data = encryptorsChain?.Encrypt(bytes) ?? bytes;
         }
 
-        public T? Deserialize(IEnumerable<IEncryptionSource>? decryptorsChain = null)
+        public T? Deserialize(IEncryptionChain? decryptorsChain = null)
         {
-            var data = Data;
-            if (decryptorsChain != null)
-            {
-                foreach (var decryptor in decryptorsChain)
-                {
-                    data = decryptor.Decrypt(data);
-                }
-            }
-
+            var data = decryptorsChain?.Decrypt(Data) ?? Data;
             IDataStruct? dataStruct = Serializer.Deserialize(data);
             return dataStruct as T;
         }
