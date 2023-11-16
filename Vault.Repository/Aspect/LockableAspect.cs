@@ -1,3 +1,5 @@
+using System;
+
 namespace Vault.Repository
 {
     internal abstract class LockableAspect : ILockableAspect
@@ -29,6 +31,8 @@ namespace Vault.Repository
 
         private InternalT? _state;
 
+        private bool _gateLock;
+
         public T? Value
         {
             get
@@ -55,32 +59,60 @@ namespace Vault.Repository
 
         public sealed override LockUnlockResult Unlock()
         {
-            if (_state != null)
-            {
-                return LockUnlockResult.NothingToDo;
+            try
+            {                
+                if (_state != null)
+                {
+                    return LockUnlockResult.NothingToDo;
+                }
+                
+                if (_gateLock)
+                {
+                    throw new Exception();
+                }
+                _gateLock = true;
+
+                _state = UnlockState();
+                if (_state == null)
+                {
+                    return LockUnlockResult.Fail;
+                }
+
+                base.Unlock();
+                return LockUnlockResult.Success;
             }
-            
-            _state = UnlockState();
-            if (_state == null)
+            finally
             {
-                return LockUnlockResult.Fail;
+                _gateLock = false;
             }
-            
-            base.Unlock();
-            return LockUnlockResult.Success;
         }
 
         public sealed override LockUnlockResult Lock()
         {
-            if (_state == null)
+            try
             {
-                return LockUnlockResult.NothingToDo;
+                if (_state == null)
+                {
+                    return LockUnlockResult.NothingToDo;
+                }
+                _state = null;
+                base.Lock();
+                
+                if (_gateLock)
+                {
+                    throw new Exception();
+                }
+                _gateLock = true;
+                
+
+                LockState();
+                
+                return LockUnlockResult.Success;
             }
-            
-            _state = null;
-            LockState();
-            base.Lock();
-            return LockUnlockResult.Success;
+            finally
+            {
+                _gateLock = false;
+            }
         }
     }
 }

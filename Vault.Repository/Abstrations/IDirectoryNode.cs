@@ -8,19 +8,18 @@ namespace Vault.Repository
     {
         IEncryptionSource? SelfChildrenNamesEncryption();
         IEncryptionSource? SelfChildrenContentEncryption();
-        
-        IEnumerable<IEncryptionSource> ContentEncryptionChain { get; }
-        IEnumerable<IEncryptionSource> ChildrenNameEncryptionChain { get; }
     }
     
     public interface IDirectoryChildrenNamesAspect : ILockableAspect
     {
+        IReadOnlyList<IEncryptionSource> ChildrenNameEncryptionChain { get; }
         IEnumerable<INode> All { get; }
         INode? FindChild(string name);
     }
     
     public interface IDirectoryChildrenContentAspect : ILockableAspect
     {
+        IReadOnlyList<IEncryptionSource> ContentEncryptionChain { get; }
         IFileNode AddChildFile(string name, IContent content);
         IDirectoryNode AddChildDirectory(string name);
     }
@@ -32,5 +31,7 @@ namespace Vault.Repository
         IDirectoryChildrenNamesAspect ChildrenNames { get; }
         
         IDirectoryChildrenContentAspect ChildrenContent { get; }
+
+        bool SetEncryption(EncryptionSource? nameEncryption, EncryptionSource? contentEncryption);
     }
 }

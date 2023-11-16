@@ -8,6 +8,7 @@ namespace Vault.Storage
     public interface IBox<out T>
         where T : class, IDataStruct
     {
+        IReadOnlyList<byte> Data { get; }
         T? Deserialize(IEnumerable<IEncryptionSource>? decryptorsChain = null);
     }
     

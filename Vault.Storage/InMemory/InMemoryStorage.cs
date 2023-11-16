@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Vault.Content;
-using Vault.Encryption;
 
 namespace Vault.Storage.InMemory
 {
@@ -88,25 +87,14 @@ namespace Vault.Storage.InMemory
             return true;
         }
 
-        public bool SetDirectoryContent(NodeId id, Box<DirectoryContent> encryptedContent)
+        public bool SetNodeContent(NodeId id, Box<IContent> encryptedContent)
         {
-            if (!_nodes.TryGetValue(id, out var node) || !(node is DirectoryData dir))
+            if (!_nodes.TryGetValue(id, out var node))
             {
                 return false;
             }
 
-            dir.EncryptedContent = encryptedContent;
-            return true;
-        }
-        
-        public bool SetFileContent(NodeId id, Box<IContent> content)
-        {
-            if (!_nodes.TryGetValue(id, out var node) || !(node is FileData file))
-            {
-                return false;
-            }
-
-            file.EncryptedContent = content;
+            node.EncryptedContent = encryptedContent;
             return true;
         }
     }

@@ -136,6 +136,16 @@ public static class VaultEntryPoint
                         Console.WriteLine("Error");
                     }
                     break;
+                case "encrypt":
+                    if (cmd.Length == 3)
+                    {
+                        vaultConsole.Command_encrypt(cmd[1], cmd[2]);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error");
+                    }
+                    break;
                 case "help":
                     break;
                 default:

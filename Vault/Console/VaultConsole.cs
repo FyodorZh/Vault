@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Vault.Content;
+using Vault.Encryption;
 using Vault.Repository;
 
 namespace Vault
@@ -204,6 +205,41 @@ namespace Vault
                     Console.WriteLine("Error: Wrong unlock command. Allowed: all/names/content");
                     break;
             }
+        }
+
+
+        private static EncryptionSource? EncryptionFactory(string name)
+        {
+            switch (name)
+            {
+                case "null":
+                case "nul":
+                case "none":
+                    return null;
+                case "plain":
+                    return new PlaneDataEncryptionSource();
+                case "xor":
+                    return new XorEncryptionSource();
+                default:
+                    Console.WriteLine("Unknown encryption " + name);
+                    return null;
+            }
+        }
+        public void Command_encrypt(string _nameEncryption, string _contentEncryption)
+        {
+            var nameEncryption = EncryptionFactory(_nameEncryption);
+            var contentEncryption = EncryptionFactory(_contentEncryption);
+
+            if (nameEncryption is { NeedCredentials: true })
+            {
+                nameEncryption.AddCredentials(Console.ReadLine()!);
+            }
+            if (contentEncryption is { NeedCredentials: true })
+            {
+                contentEncryption.AddCredentials(Console.ReadLine()!);
+            }
+
+            CurrentNode.SetEncryption(nameEncryption, contentEncryption);
         }
     }
 }

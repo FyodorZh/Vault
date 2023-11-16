@@ -1,5 +1,4 @@
 using Vault.Content;
-using Vault.Encryption;
 
 namespace Vault.Storage
 {

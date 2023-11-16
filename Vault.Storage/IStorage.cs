@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Vault.Content;
-using Vault.Encryption;
 
 namespace Vault.Storage
 {
@@ -22,7 +21,6 @@ namespace Vault.Storage
             Box<IContent> encryptedContent);
 
         bool SetNodeName(NodeId id, Box<StringContent> encryptedName);
-        bool SetDirectoryContent(NodeId id, Box<DirectoryContent> encryptedContent);
-        bool SetFileContent(NodeId id, Box<IContent> content);
+        bool SetNodeContent(NodeId id, Box<IContent> encryptedContent);
     }
 }

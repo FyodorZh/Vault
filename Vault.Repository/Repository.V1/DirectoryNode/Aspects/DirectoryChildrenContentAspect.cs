@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using Vault.Content;
+using Vault.Encryption;
 using Vault.Repository.V1;
 using Vault.Storage;
 
@@ -62,10 +64,28 @@ namespace Vault.Repository
                     contentEncryption.ClearCredentials();
                 }
             }
+            
+            foreach (var ch in _owner.Repository.Children(_owner.Id))
+            {
+                ch.LockAll();
+            }
+            
             base.Lock();
             return LockUnlockResult.Success;
         }
 
+        public IReadOnlyList<IEncryptionSource> ContentEncryptionChain
+        {
+            get
+            {
+                if (Unlock() == LockUnlockResult.Fail)
+                {
+                    throw new Exception();
+                }
+
+                return _owner.Encryption.ContentEncryptionChain;
+            }
+        }
 
         public IFileNode AddChildFile(string name, IContent content)
         {
@@ -76,8 +96,8 @@ namespace Vault.Repository
             }
             
             var fileNode = _owner.Repository.AddFile(_owner.Id,
-                new Box<StringContent>(new StringContent(name), _owner.Encryption.ChildrenNameEncryptionChain),
-                new Box<IContent>(content, _owner.Encryption.ContentEncryptionChain));
+                new Box<StringContent>(new StringContent(name), _owner.ChildrenNames.ChildrenNameEncryptionChain),
+                new Box<IContent>(content, _owner.ChildrenContent.ContentEncryptionChain));
             return fileNode;
         }
 
@@ -89,8 +109,8 @@ namespace Vault.Repository
                 throw new Exception();
             }
             
-            var nameBox = new Box<StringContent>(new StringContent(name), _owner.Encryption.ChildrenNameEncryptionChain);
-            var contentBox = new Box<DirectoryContent>(new DirectoryContent(), _owner.Encryption.ContentEncryptionChain);
+            var nameBox = new Box<StringContent>(new StringContent(name), _owner.ChildrenNames.ChildrenNameEncryptionChain);
+            var contentBox = new Box<DirectoryContent>(new DirectoryContent(), _owner.ChildrenContent.ContentEncryptionChain);
             var dirNode = _owner.Repository.AddDirectory(_owner.Id, nameBox, contentBox);
             return dirNode;
         }

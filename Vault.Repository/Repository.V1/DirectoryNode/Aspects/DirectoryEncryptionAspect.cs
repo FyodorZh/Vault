@@ -5,6 +5,14 @@ using Vault.Encryption;
 
 namespace Vault.Repository.V1
 {
+    /// <summary>
+    /// Encryption combinations (name, content)
+    /// (null, null) => no encryption
+    /// (null, content) => file names and file content encrypted same way
+    /// (name, null) => only file names are encrypted
+    /// (PLAIN, content) => only content encrypted (PLAIN is plane data encryption)
+    /// </summary>
+    
     internal class DirectoryEncryptionAspect : ContentAspect<DirectoryContent>, IDirectoryEncryptionAspect
     {
         private readonly DirectoryNode _owner;
@@ -37,7 +45,7 @@ namespace Vault.Repository.V1
             return _selfChildrenContentEncryption;
         }
 
-        public IEnumerable<IEncryptionSource> ContentEncryptionChain
+        public IReadOnlyList<IEncryptionSource> ContentEncryptionChain
         {
             get
             {
@@ -46,7 +54,7 @@ namespace Vault.Repository.V1
             }
         }
 
-        public IEnumerable<IEncryptionSource> ChildrenNameEncryptionChain
+        public IReadOnlyList<IEncryptionSource> ChildrenNameEncryptionChain
         {
             get
             {
@@ -67,8 +75,8 @@ namespace Vault.Repository.V1
             var childNameEncryptionChain = new List<IEncryptionSource>();
             if (_owner.Parent != null)
             {
-                contentEncryptionChain.AddRange(_owner.Parent.Encryption.ContentEncryptionChain);
-                childNameEncryptionChain.AddRange(_owner.Parent.Encryption.ContentEncryptionChain);
+                contentEncryptionChain.AddRange(_owner.Parent.ChildrenContent.ContentEncryptionChain);
+                childNameEncryptionChain.AddRange(_owner.Parent.ChildrenContent.ContentEncryptionChain);
             }
 
             var selfChildrenContentEncryption = encryption.GetForContent();
@@ -95,7 +103,7 @@ namespace Vault.Repository.V1
 
         protected override void LockState()
         {
-            foreach (var child in _owner.ChildrenNames.All)
+            foreach (var child in _owner.Repository.Children(_owner.Id))
             {
                 child.LockAll();
             }

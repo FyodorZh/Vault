@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Vault.Encryption;
 using Vault.Repository.V1;
 
@@ -63,8 +62,27 @@ namespace Vault.Repository
                     nameEncryption.ClearCredentials();
                 }
             }
+            
+            foreach (var ch in _owner.Repository.Children(_owner.Id))
+            {
+                ch.LockAll();
+            }
+            
             base.Lock();
             return LockUnlockResult.Success;
+        }
+        
+        public IReadOnlyList<IEncryptionSource> ChildrenNameEncryptionChain
+        {
+            get
+            {
+                if (Unlock() == LockUnlockResult.Fail)
+                {
+                    throw new Exception();
+                }
+
+                return _owner.Encryption.ChildrenNameEncryptionChain;
+            }
         }
 
         public IEnumerable<INode> All
@@ -76,16 +94,7 @@ namespace Vault.Repository
                     throw new Exception();
                 }
 
-                foreach (var chId in _owner.Repository.FindChildren(_owner.Id))
-                {
-                    INode? node = _owner.Repository.FindNode(chId);
-                    if (node == null)
-                    {
-                        throw new Exception();
-                    }
-
-                    yield return node;
-                }
+                return _owner.Repository.Children(_owner.Id);
             }
         }
         

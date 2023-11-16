@@ -10,10 +10,20 @@ namespace Vault.Repository.V1
     {
         IStorage Storage { get; }
         ICredentialsProvider CredentialsProvider { get; }
+        
         DirectoryNode? FindDirectory(NodeId id);
         FileNode? FindFile(NodeId id);
         Node? FindNode(NodeId id) => (Node?)FindDirectory(id) ?? FindFile(id);
+        
         IEnumerable<NodeId> FindChildren(NodeId parentId);
+
+        IEnumerable<INode> Children(NodeId parentId)
+        {
+            foreach (var id in FindChildren(parentId))
+            {
+                yield return FindNode(id) ?? throw new Exception();
+            }
+        }
 
         IDirectoryNode AddDirectory(
             NodeId parentId, 

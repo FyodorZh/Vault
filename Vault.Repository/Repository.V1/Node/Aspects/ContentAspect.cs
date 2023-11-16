@@ -17,7 +17,7 @@ namespace Vault.Repository.V1
 
         protected sealed override TContent? UnlockState()
         {
-            IContent? c = _owner.Data.EncryptedContent.Deserialize(_owner.Parent?.Encryption.ContentEncryptionChain);
+            IContent? c = _owner.Data.EncryptedContent.Deserialize(_owner.Parent?.ChildrenContent.ContentEncryptionChain);
             if (c == null)
             {
                 return null;
