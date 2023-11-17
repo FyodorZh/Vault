@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 
 namespace Vault.Scripting
@@ -12,5 +13,19 @@ namespace Vault.Scripting
         public MkdirCommand(string dirName)
             : base(new CommandOption(dirName))
         {}
+
+        public override void Process(IProcessorContext context)
+        {
+            string dirName = Option.Name;
+            
+            var child = context.Current.ChildrenNames.FindChild(dirName);
+            if (child != null)
+            {
+                context.HumanOutput.WriteLine("File or directory already exists");
+                return;
+            }
+            
+            context.Current.ChildrenContent.AddChildDirectory(dirName);
+        }
     }
 }

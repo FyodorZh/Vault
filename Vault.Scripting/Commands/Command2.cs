@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using OrderedSerializer;
 
 namespace Vault.Scripting

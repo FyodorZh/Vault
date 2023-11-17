@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Vault.Content;
 using Vault.Encryption;
 using Vault.Repository.V1;

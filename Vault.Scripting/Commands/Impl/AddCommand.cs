@@ -1,4 +1,6 @@
+using System;
 using System.Runtime.InteropServices;
+using Vault.Content;
 
 namespace Vault.Scripting
 {
@@ -13,5 +15,20 @@ namespace Vault.Scripting
         public AddCommand(string fileName, string fileContent)
             : base(new CommandOption(fileName), new CommandOption(fileContent))
         {}
+
+        public override void Process(IProcessorContext context)
+        {
+            string name = Options[0].Name;
+            string content = Options[1].Name;
+            
+            var child = context.Current.ChildrenNames.FindChild(name);
+            if (child != null)
+            {
+                context.HumanOutput.WriteLine("File or directory already exists");
+                return;
+            }
+            
+            context.Current.ChildrenContent.AddChildFile(name, new StringContent(content));
+        }
     }
 }

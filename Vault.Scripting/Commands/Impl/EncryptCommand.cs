@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Vault.Encryption;
 
 namespace Vault.Scripting
 {
@@ -15,5 +16,59 @@ namespace Vault.Scripting
             : base(new CommandOption("name", nameEncryptionType), 
                 new CommandOption("content", contentEncryptionType))
         {}
+        
+        private static bool EncryptionFactory(string name, out EncryptionSource? encryptionSource)
+        {
+            switch (name)
+            {
+                case "null":
+                case "nul":
+                case "none":
+                    encryptionSource = null;
+                    return true;
+                case "plain":
+                    encryptionSource = new PlaneDataEncryptionSource();
+                    return true;
+                case "xor":
+                    encryptionSource = new XorEncryptionSource();
+                    return true;
+                default:
+                    encryptionSource = null;
+                    return false;
+            }
+        }
+
+        public override void Process(IProcessorContext context)
+        {
+            if (!EncryptionFactory(Options[0].Parameter!, out var nameEncryption) ||
+                !EncryptionFactory(Options[1].Parameter!, out var contentEncryption))
+            {
+                context.HumanOutput.WriteLine("Error");
+                return;
+            }
+
+            if (nameEncryption is { NeedCredentials: true })
+            {
+                string? credential = context.CredentialsProvider.GetCredentials(context.Current, nameEncryption.GetDescription(), "name");
+                if (credential == null)
+                {
+                    context.HumanOutput.WriteLine("Error");
+                    return;
+                }
+                nameEncryption.AddCredentials(credential);
+            }
+            if (contentEncryption is { NeedCredentials: true })
+            {
+                string? credential = context.CredentialsProvider.GetCredentials(context.Current, contentEncryption.GetDescription(), "content");
+                if (credential == null)
+                {
+                    context.HumanOutput.WriteLine("Error");
+                    return;
+                }
+                contentEncryption.AddCredentials(credential);
+            }
+
+            context.Current.SetEncryption(nameEncryption, contentEncryption);
+        }
     }
 }

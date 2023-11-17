@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using OrderedSerializer;
 
 namespace Vault.Scripting
@@ -7,6 +8,8 @@ namespace Vault.Scripting
         private readonly CommandOption[] _options = new CommandOption[1];
 
         public sealed override IReadOnlyList<CommandOption> Options => _options;
+
+        public CommandOption Option => _options[0];
 
         protected Command1()
         {

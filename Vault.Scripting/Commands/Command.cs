@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using OrderedSerializer;
 
 namespace Vault.Scripting
@@ -13,6 +15,8 @@ namespace Vault.Scripting
         public abstract string Name { get; }
 
         public virtual IReadOnlyList<CommandOption> Options => Array.Empty<CommandOption>();
+
+        public abstract void Process(IProcessorContext context); 
 
         public virtual void Serialize(IOrderedSerializer serializer)
         {
