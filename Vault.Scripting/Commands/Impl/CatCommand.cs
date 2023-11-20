@@ -1,5 +1,5 @@
-using System;
 using System.Runtime.InteropServices;
+using OrderedSerializer;
 using Vault.Repository;
 
 namespace Vault.Scripting
@@ -17,33 +17,48 @@ namespace Vault.Scripting
         {
         }
 
-        public override void Process(IProcessorContext context)
+        public override Result Process(IProcessorContext context)
         {
             string name = Option.Name;
             
             var child = context.Current.ChildrenNames.FindChild(name);
             if (child == null)
             {
-                context.HumanOutput.WriteLine("File " + name + " not found");
+                return Fail("File not found");
             }
-            else
+
+            if (child is not IFileNode file)
             {
-                if (child is IFileNode file)
-                {
-                    if (file.Content.Value != null)
-                    {
-                        file.Content.Value.WriteTo(context.HumanOutput);
-                        context.HumanOutput.WriteLine();
-                    }
-                    else
-                    {
-                        context.HumanOutput.WriteLine("Content is not available!");
-                    }
-                }
-                else
-                {
-                    context.HumanOutput.WriteLine("Not a file!");
-                }
+                return Fail("Not a file");
+            }
+
+            if (file.Content.Value == null)
+            {
+                return Fail("File content is not available");
+            }
+
+            return new CatResult(file.Content.Value.ToString());
+        }
+
+        [Guid("3B0F1BE3-BAC7-4F20-A7D6-3CB537E66564")]
+        public class CatResult : OkResult
+        {
+            private string? _content;
+
+            public string? Content => _content;
+
+            public CatResult()
+            {
+            }
+
+            public CatResult(string? content)
+            {
+                _content = content;
+            }
+
+            public override void Serialize(IOrderedSerializer serializer)
+            {
+                serializer.Add(ref _content);
             }
         }
     }

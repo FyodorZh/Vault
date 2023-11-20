@@ -1,69 +1,86 @@
 using System;
 using System.Runtime.InteropServices;
+using OrderedSerializer;
 using Vault.Repository;
 
 namespace Vault.Scripting
 {
     [Guid("B716E624-B7C9-4345-AB92-E85F825BC1FE")]
-    public class LockCommand : LockUnlockCommand
+    public class LockCommand : Command1
     {
         public override string Name => "lock";
         
         private LockCommand() {}
         
         public LockCommand(string scope)
-            : base(scope)
+            : base(new CommandOption(scope))
         {}
 
-        public override void Process(IProcessorContext context)
+        public override Result Process(IProcessorContext context)
         {
             string scope = Option.Name;
+
+            LockUnlock_Result result = new LockUnlock_Result();
             
             switch (scope)
             {
                 case "all":
-                    LockUnlockReport(context, context.Current.ChildrenContent.Lock(), "ChildrenContent");
-                    LockUnlockReport(context, context.Current.ChildrenNames.Lock(), "ChildrenNames");
+                    result.Content = context.Current.ChildrenContent.Lock();
+                    result.Name = context.Current.ChildrenNames.Lock();
                     break;
                 case "content":
-                    LockUnlockReport(context, context.Current.ChildrenContent.Lock(), "ChildrenContent");
+                    result.Content = context.Current.ChildrenContent.Lock();
                     break;
                 case "names":
-                    LockUnlockReport(context, context.Current.ChildrenNames.Lock(), "ChildrenNames");
+                    result.Name = context.Current.ChildrenNames.Lock();
                     break;
                 default:
-                    context.HumanOutput.WriteLine("Error: Wrong lock command. Allowed: all/names/content");
-                    break;
+                    return Fail("Wrong lock command. Allowed: all/names/content");
             }
+
+            return result;
         }
     }
     
-    public abstract class LockUnlockCommand : Command1
+    [Guid("9440FE81-EEF1-4956-B949-95406E472D87")]
+    public class LockUnlock_Result : OkResult
     {
-        protected LockUnlockCommand()
+        private LockUnlockResult? _name;
+        private LockUnlockResult? _content;
+
+        public LockUnlockResult? Name
         {
+            get => _name;
+            set => _name = value;
+        }
+            
+        public LockUnlockResult? Content
+        {
+            get => _content;
+            set => _content = value;
         }
 
-        protected LockUnlockCommand(string scope)
-            : base(new CommandOption(scope))
+        public LockUnlock_Result()
         {}
-        
-        protected void LockUnlockReport(IProcessorContext context, LockUnlockResult res, string text)
+
+        public override void Serialize(IOrderedSerializer serializer)
         {
-            context.HumanOutput.Write(text + ": ");
-            switch (res)
+            bool isNullName = _name == null;
+            serializer.Add(ref isNullName);
+            if (!isNullName)
             {
-                case LockUnlockResult.NothingToDo:
-                    context.HumanOutput.WriteLine("NothingToDo");
-                    break;
-                case LockUnlockResult.Success:
-                    context.HumanOutput.WriteLine("Success");
-                    break;
-                case LockUnlockResult.Fail:
-                    context.HumanOutput.WriteLine("Fail");
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(res), res, null);
+                byte b = (byte)_name!.Value;
+                serializer.Add(ref b);
+                _name = (LockUnlockResult)b;
+            }
+
+            bool isNullContent = _content == null;
+            serializer.Add(ref isNullContent);
+            if (!isNullContent)
+            {
+                byte b = (byte)_content!.Value;
+                serializer.Add(ref b);
+                _content = (LockUnlockResult)b;
             }
         }
     }

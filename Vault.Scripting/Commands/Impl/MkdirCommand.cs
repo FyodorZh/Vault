@@ -14,18 +14,18 @@ namespace Vault.Scripting
             : base(new CommandOption(dirName))
         {}
 
-        public override void Process(IProcessorContext context)
+        public override Result Process(IProcessorContext context)
         {
             string dirName = Option.Name;
             
             var child = context.Current.ChildrenNames.FindChild(dirName);
             if (child != null)
             {
-                context.HumanOutput.WriteLine("File or directory already exists");
-                return;
+                return Fail("File or directory already exists");
             }
             
             context.Current.ChildrenContent.AddChildDirectory(dirName);
+            return Ok;
         }
     }
 }

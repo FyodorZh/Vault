@@ -34,10 +34,20 @@ namespace Vault.Scripting
             return Console.ReadLine();
         }
 
-        public void Process(Command cmd)
+        public Result Process(Command cmd)
         {
-            cmd.Process(this);
-            Prompt();
+            try
+            {
+                return cmd.Process(this);
+            }
+            catch (Exception ex)
+            {
+                return new ExceptionResult(ex);
+            }
+            finally
+            {
+                Prompt();    
+            }
         }
         
         public void Prompt()

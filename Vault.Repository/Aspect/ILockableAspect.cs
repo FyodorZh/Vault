@@ -1,6 +1,6 @@
 namespace Vault.Repository
 {
-    public enum LockUnlockResult
+    public enum LockUnlockResult : byte
     {
         NothingToDo,
         Success,

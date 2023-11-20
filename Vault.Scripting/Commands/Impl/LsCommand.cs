@@ -1,7 +1,8 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
+using OrderedSerializer;
+using Vault.Content;
+using Vault.Encryption;
 using Vault.Repository;
 
 namespace Vault.Scripting
@@ -11,32 +12,100 @@ namespace Vault.Scripting
     {
         public override string Name => "ls";
 
-        public override void Process(IProcessorContext context)
+        public override Result Process(IProcessorContext context)
         {
-            context.HumanOutput.WriteLine("Name: " + context.Current.Name);
-            if (context.Current.Content.Value != null)
-            {
-                context.Current.Content.Value.WriteTo(context.HumanOutput);
-            }
-            else
-            {
-                context.HumanOutput.WriteLine("Encryption: ???");
-            }
-
-            IEnumerable<string> names = context.Current.ChildrenNames.All.Select(
-                node => node is IDirectoryNode ? "<" + node.Name + ">" : node.Name);
+            LsResult result = new LsResult(context.Current.Name);
             
-            bool bWritten = false;
-            foreach (var elementName in names.Order())
+            if (context.Current.Content.Value is DirectoryContent directoryContent)
             {
-                context.HumanOutput.Write(elementName);
-                context.HumanOutput.Write(" ");
-                bWritten = true;
+                result.NameEncryption = directoryContent.GetForNames()?.GetDescription();
+                result.ContentEncryption = directoryContent.GetForContent()?.GetDescription();
             }
 
-            if (bWritten)
+            foreach (var ch in context.Current.ChildrenNames.All)
             {
-                context.HumanOutput.WriteLine();
+                result.AddChild(ch.Name, ch is IDirectoryNode);
+            }
+            
+            return result;
+        }
+
+        [Guid("2356F5C5-08D9-47EF-8533-8A4AC3E6FBCE")]
+        public class LsResult : OkResult
+        {
+            private string? _dirName;
+            private EncryptionDesc? _nameEncryption;
+            private EncryptionDesc? _contentEncryption;
+            private List<string>? _childrenNames;
+            private List<bool>? _childrenDirFlags; // true => child is directory
+
+            public string Name => _dirName ?? "";
+
+            public EncryptionDesc? NameEncryption
+            {
+                get => _nameEncryption;
+                set => _nameEncryption = value;
+            }
+
+            public EncryptionDesc? ContentEncryption
+            {
+                get => _contentEncryption;
+                set => _contentEncryption = value;
+            }
+
+            public IEnumerable<(string, bool)> Children
+            {
+                get
+                {
+                    if (_childrenNames != null && _childrenDirFlags != null)
+                    {
+                        for (int i = 0; i < _childrenNames.Count; ++i)
+                        {
+                            yield return (_childrenNames[i], _childrenDirFlags[i]);
+                        }
+                    }
+                }
+            }
+
+            public LsResult()
+            {}
+
+            public LsResult(string name)
+            {
+                _dirName = name;
+            }
+
+            public void AddChild(string name, bool isDirectory)
+            {
+                _childrenNames ??= new List<string>();
+                _childrenDirFlags ??= new List<bool>();
+                _childrenNames.Add(name);
+                _childrenDirFlags.Add(isDirectory);
+            }
+
+            public override void Serialize(IOrderedSerializer serializer)
+            {
+                serializer.Add(ref _dirName);
+                SerializeEncryptionDesc(serializer, ref _nameEncryption);
+                SerializeEncryptionDesc(serializer, ref _contentEncryption);
+                serializer.AddCollection<string, List<string>>(ref _childrenNames!);
+                serializer.AddCollection<bool, List<bool>>(ref _childrenDirFlags!);
+            }
+
+            private void SerializeEncryptionDesc(IOrderedSerializer serializer, ref EncryptionDesc? desc)
+            {
+                bool isNull = desc == null;
+                serializer.Add(ref isNull);
+                if (isNull)
+                {
+                    desc = null;
+                }
+                else
+                {
+                    EncryptionDesc tmp = desc ?? new EncryptionDesc();
+                    serializer.AddStruct(ref tmp);
+                    desc = tmp;
+                }
             }
         }
     }

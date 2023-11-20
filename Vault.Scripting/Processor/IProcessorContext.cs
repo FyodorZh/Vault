@@ -1,4 +1,3 @@
-using System.IO;
 using Vault.Repository;
 using Vault.Storage;
 
@@ -11,7 +10,5 @@ namespace Vault.Scripting
         ICredentialsProvider CredentialsProvider { get; }
         
         IDirectoryNode Current { get; set; }
-        
-        TextWriter HumanOutput { get; }
     }
 }

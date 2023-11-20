@@ -19,7 +19,7 @@ namespace Vault.Scripting
         {
         }
 
-        public override void Process(IProcessorContext context)
+        public override Result Process(IProcessorContext context)
         {
             string name = Option.Name;
             
@@ -30,25 +30,22 @@ namespace Vault.Scripting
                     context.Current = context.Current.Parent;
                 }
                 
-                return;
+                return Ok;
             }
 
             var child = context.Current.ChildrenNames.FindChild(name);
             if (child == null)
             {
-                context.HumanOutput.WriteLine("Directory " + name + " not found");
+                return Fail("Directory not found");
             }
-            else
+
+            if (child is not IDirectoryNode dir)
             {
-                if (child is IDirectoryNode dir)
-                {
-                    context.Current = dir;
-                }
-                else
-                {
-                    context.HumanOutput.WriteLine("Not a directory!");
-                }
+                return Fail("Not a directory!");
             }
+
+            context.Current = dir;
+            return Ok;
         }
     }
 }

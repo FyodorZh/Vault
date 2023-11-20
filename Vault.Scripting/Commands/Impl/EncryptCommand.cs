@@ -38,13 +38,12 @@ namespace Vault.Scripting
             }
         }
 
-        public override void Process(IProcessorContext context)
+        public override Result Process(IProcessorContext context)
         {
             if (!EncryptionFactory(Options[0].Parameter!, out var nameEncryption) ||
                 !EncryptionFactory(Options[1].Parameter!, out var contentEncryption))
             {
-                context.HumanOutput.WriteLine("Error");
-                return;
+                return Fail();
             }
 
             if (nameEncryption is { NeedCredentials: true })
@@ -52,8 +51,7 @@ namespace Vault.Scripting
                 string? credential = context.CredentialsProvider.GetCredentials(context.Current, nameEncryption.GetDescription(), "name");
                 if (credential == null)
                 {
-                    context.HumanOutput.WriteLine("Error");
-                    return;
+                    return Fail();
                 }
                 nameEncryption.AddCredentials(credential);
             }
@@ -62,13 +60,14 @@ namespace Vault.Scripting
                 string? credential = context.CredentialsProvider.GetCredentials(context.Current, contentEncryption.GetDescription(), "content");
                 if (credential == null)
                 {
-                    context.HumanOutput.WriteLine("Error");
-                    return;
+                    return Fail();
                 }
                 contentEncryption.AddCredentials(credential);
             }
 
             context.Current.SetEncryption(nameEncryption, contentEncryption);
+
+            return Ok;
         }
     }
 }

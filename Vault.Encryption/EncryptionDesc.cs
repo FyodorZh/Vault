@@ -1,16 +1,33 @@
+using System.Runtime.InteropServices;
+using OrderedSerializer;
+
 namespace Vault.Encryption
 {
-    public record EncryptionDesc
+    [Guid("2B5E26BE-249C-4274-B612-070C4AFC9A0B")]
+    public struct EncryptionDesc : IVersionedDataStruct
     {
-        public string MethodName;
-        public bool RequireCredentials;
-        public bool HasCredentials;
+        private string? _methodName;
+        private bool _requireCredentials;
+        private bool _hasCredentials;
         
+        public string MethodName => _methodName ?? "";
+        public bool RequireCredentials => _requireCredentials;
+        public bool HasCredentials => _hasCredentials;
+
         public EncryptionDesc(string methodName, bool requireCredentials, bool hasCredentials)
         {
-            MethodName = methodName;
-            RequireCredentials = requireCredentials;
-            HasCredentials = hasCredentials;
+            _methodName = methodName;
+            _requireCredentials = requireCredentials;
+            _hasCredentials = hasCredentials;
         }
+
+        public void Serialize(IOrderedSerializer serializer)
+        {
+            serializer.Add(ref _methodName);
+            serializer.Add(ref _requireCredentials);
+            serializer.Add(ref _hasCredentials);
+        }
+
+        public byte Version => 0;
     }
 }

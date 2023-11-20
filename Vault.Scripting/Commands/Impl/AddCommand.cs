@@ -16,7 +16,7 @@ namespace Vault.Scripting
             : base(new CommandOption(fileName), new CommandOption(fileContent))
         {}
 
-        public override void Process(IProcessorContext context)
+        public override Result Process(IProcessorContext context)
         {
             string name = Options[0].Name;
             string content = Options[1].Name;
@@ -24,11 +24,12 @@ namespace Vault.Scripting
             var child = context.Current.ChildrenNames.FindChild(name);
             if (child != null)
             {
-                context.HumanOutput.WriteLine("File or directory already exists");
-                return;
+                return Fail("File or directory already exists");
             }
             
             context.Current.ChildrenContent.AddChildFile(name, new StringContent(content));
+
+            return Ok;
         }
     }
 }

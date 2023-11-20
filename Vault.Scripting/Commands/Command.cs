@@ -16,7 +16,10 @@ namespace Vault.Scripting
 
         public virtual IReadOnlyList<CommandOption> Options => Array.Empty<CommandOption>();
 
-        public abstract void Process(IProcessorContext context); 
+        protected static Result Ok => new OkResult();
+        protected static Result Fail(string? text = null) => new FailResult(text);
+        
+        public abstract Result Process(IProcessorContext context); 
 
         public virtual void Serialize(IOrderedSerializer serializer)
         {
