@@ -16,7 +16,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vault.Serialization", "Vaul
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vault.Repository", "Vault.Repository\Vault.Repository.csproj", "{C1C4B448-7CDC-449F-AABF-1EB6D9747470}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vault.Scripting", "Vault.Scripting\Vault.Scripting.csproj", "{A9C90172-B196-4BC8-896E-11B717F5CE29}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vault.Commands", "Vault.Commands\Vault.Commands.csproj", "{A9C90172-B196-4BC8-896E-11B717F5CE29}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

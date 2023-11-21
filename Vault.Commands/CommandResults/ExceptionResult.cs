@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using OrderedSerializer;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     [Guid("FD0FCF27-D349-4025-B4ED-FF20D03553DC")]
     public class ExceptionResult : Result

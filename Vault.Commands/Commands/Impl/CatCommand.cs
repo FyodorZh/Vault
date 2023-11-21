@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using OrderedSerializer;
 using Vault.Repository;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     [Guid("87DE0D2B-E23A-4DFC-A551-1AF643D02D45")]
     public class CatCommand : Command1

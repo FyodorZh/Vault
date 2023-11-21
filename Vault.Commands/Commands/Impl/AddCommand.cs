@@ -2,7 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using Vault.Content;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     [Guid("C0BF4DFF-2764-4DF7-81E1-1585E469863D")]
     public class AddCommand : Command2

@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using OrderedSerializer;
 using Vault.Repository;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     [Guid("95FBC04D-66E7-4924-BDFC-7FF27F899F32")]
     public class CdCommand : Command1

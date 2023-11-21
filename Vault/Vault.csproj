@@ -17,7 +17,7 @@
       <ProjectReference Include="..\Vault.Core\Vault.Core.csproj" />
       <ProjectReference Include="..\Vault.Encryption\Vault.Encryption.csproj" />
       <ProjectReference Include="..\Vault.Repository\Vault.Repository.csproj" />
-      <ProjectReference Include="..\Vault.Scripting\Vault.Scripting.csproj" />
+      <ProjectReference Include="..\Vault.Commands\Vault.Commands.csproj" />
       <ProjectReference Include="..\Vault.Serialization\Vault.Serialization.csproj" />
       <ProjectReference Include="..\Vault.Storage\Vault.Storage.csproj" />
     </ItemGroup>

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using OrderedSerializer;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     public interface ICommand
     {

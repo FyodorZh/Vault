@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     [Guid("E36473AC-8AA7-41E1-A0F9-EC7D28D0CEC7")]
     public class MkdirCommand : Command1

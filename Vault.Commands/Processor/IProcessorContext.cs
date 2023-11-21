@@ -1,7 +1,7 @@
 using Vault.Repository;
 using Vault.Storage;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     public interface IProcessorContext
     {

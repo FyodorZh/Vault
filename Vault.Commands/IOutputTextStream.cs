@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     public interface IOutputTextStream
     {

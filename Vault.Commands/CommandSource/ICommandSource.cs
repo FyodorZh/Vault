@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     public interface ICommandSource
     {

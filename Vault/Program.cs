@@ -4,7 +4,7 @@ using Vault.Content;
 using Vault.Encryption;
 using Vault.Repository;
 using Vault.Repository.V1;
-using Vault.Scripting;
+using Vault.Commands;
 using Vault.Storage;
 using Vault.Storage.InMemory;
 

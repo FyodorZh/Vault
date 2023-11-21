@@ -1,7 +1,7 @@
 using System.IO;
 using OrderedSerializer;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     public interface IResult : IDataStruct
     {

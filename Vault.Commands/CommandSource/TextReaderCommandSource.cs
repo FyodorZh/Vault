@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     public class TextReaderCommandSource : ICommandSource
     {

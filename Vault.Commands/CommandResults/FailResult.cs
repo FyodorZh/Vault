@@ -2,7 +2,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using OrderedSerializer;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     [Guid("32313464-8606-4ADA-BE93-B92D9E32C349")]
     public class FailResult : Result

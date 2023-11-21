@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using OrderedSerializer;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     [Guid("09E21DCD-51BD-4DEB-98A7-28FF6236A617")]
     public struct CommandOption : IVersionedDataStruct

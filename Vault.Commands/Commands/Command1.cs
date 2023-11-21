@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using OrderedSerializer;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     public abstract class Command1 : Command
     {

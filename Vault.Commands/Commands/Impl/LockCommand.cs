@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using OrderedSerializer;
 using Vault.Repository;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     [Guid("B716E624-B7C9-4345-AB92-E85F825BC1FE")]
     public class LockCommand : Command1

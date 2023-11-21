@@ -5,7 +5,7 @@ using Vault.Repository;
 using Vault.Repository.V1;
 using Vault.Storage;
 
-namespace Vault.Scripting
+namespace Vault.Commands
 {
     public class CommandsProcessor : IProcessorContext, ICredentialsProvider
     {
