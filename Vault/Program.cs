@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using OrderedSerializer.JsonBackend;
 using Vault;
 using Vault.Content;
 using Vault.Encryption;
@@ -173,6 +174,24 @@ public static class VaultEntryPoint
 
     private static void RunAll()
     {
+        OrderedSerializer.JsonBackend.JsonWriter jsonWriter = new JsonWriter();
+
+        jsonWriter.WriteBool(true);
+        jsonWriter.WriteByte(1);
+        jsonWriter.WriteChar('a');
+        jsonWriter.WriteShort(-1);
+        jsonWriter.WriteInt(100000);
+        jsonWriter.WriteFloat(0.5f);
+        jsonWriter.WriteString(null);
+        jsonWriter.WriteString("hel\\lo\n\"");
+        jsonWriter.WriteLong(1L << 60);
+        jsonWriter.BeginSection();
+        jsonWriter.WriteString("Section");
+        jsonWriter.WriteDouble(0.3);
+        jsonWriter.EndSection();
+        string str = jsonWriter.ToString();
+
+
         InMemoryStorage storage = new InMemoryStorage(
             new Box<StringContent>(new StringContent("root")),
             new Box<DirectoryContent>(new DirectoryContent()));

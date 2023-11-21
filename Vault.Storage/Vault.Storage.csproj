@@ -18,4 +18,8 @@
       <ProjectReference Include="..\Vault.Serialization\Vault.Serialization.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="NETStandard.Library" Version="2.0.3" />
+    </ItemGroup>
+
 </Project>
