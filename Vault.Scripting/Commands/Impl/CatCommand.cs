@@ -56,6 +56,11 @@ namespace Vault.Scripting
                 _content = content;
             }
 
+            public override void WriteTo(IOutputTextStream dst)
+            {
+                dst.WriteLine(_content ?? "");
+            }
+
             public override void Serialize(IOrderedSerializer serializer)
             {
                 serializer.Add(ref _content);

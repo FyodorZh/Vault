@@ -4,6 +4,7 @@ using Vault.Content;
 using Vault.Encryption;
 using Vault.Repository;
 using Vault.Repository.V1;
+using Vault.Scripting;
 using Vault.Storage;
 using Vault.Storage.InMemory;
 
@@ -20,6 +21,8 @@ public static class VaultEntryPoint
 
     public static void Main()
     {
+        RunAll();
+        
         InMemoryStorage storage = new InMemoryStorage(
             new Box<StringContent>(new StringContent("root")),
             new Box<DirectoryContent>(new DirectoryContent()));
@@ -154,5 +157,39 @@ public static class VaultEntryPoint
             }
         }
         Console.WriteLine("Exited.");
+    }
+
+    private static void RunAll()
+    {
+        InMemoryStorage storage = new InMemoryStorage(
+            new Box<StringContent>(new StringContent("root")),
+            new Box<DirectoryContent>(new DirectoryContent()));
+
+        var commandsFactory = CommandsFactory.ConstructFullFactory();
+
+        var commandsProcessor = new CommandsProcessor(storage);
+
+        var commandSource = new TextReaderCommandSource(Console.In, commandsFactory);
+        commandSource.OnError += ex => Console.WriteLine(ex);
+
+        var consoleOutput = new OutputTextStream(Console.Out, () => ".", () =>
+        {
+            string prompt = commandsProcessor.Current.Name;
+            INode? c = commandsProcessor.Current.Parent;
+            while (c != null)
+            {
+                prompt = c.Name + "/" + prompt;
+                c = c.Parent;
+            }
+
+            return prompt + "> ";
+        });
+        
+        foreach (var cmd in commandSource.GetAll())
+        {
+            var result = commandsProcessor.Process(cmd);
+            result.WriteTo(consoleOutput);
+            consoleOutput.FinishBlock();
+        }
     }
 }

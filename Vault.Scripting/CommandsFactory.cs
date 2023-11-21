@@ -4,7 +4,12 @@ using System.Text;
 
 namespace Vault.Scripting
 {
-    public class CommandsFactory
+    public interface ICommandsFactory
+    {
+        Command? Construct(string cmd);
+    }
+    
+    public class CommandsFactory : ICommandsFactory
     {
         private readonly Dictionary<string, Func<IReadOnlyList<string>, Command?>> _ctors = 
             new Dictionary<string, Func<IReadOnlyList<string>, Command?>>();

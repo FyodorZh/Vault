@@ -8,6 +8,7 @@ namespace Vault.Scripting
     {
         string Name { get; }
         IReadOnlyList<CommandOption> Options { get; }
+        Result Process(IProcessorContext context);
     }
 
     public abstract class Command : ICommand, IVersionedDataStruct
@@ -19,7 +20,7 @@ namespace Vault.Scripting
         protected static Result Ok => new OkResult();
         protected static Result Fail(string? text = null) => new FailResult(text);
         
-        public abstract Result Process(IProcessorContext context); 
+        public abstract Result Process(IProcessorContext context);
 
         public virtual void Serialize(IOrderedSerializer serializer)
         {

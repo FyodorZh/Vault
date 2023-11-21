@@ -1,3 +1,4 @@
+using System.IO;
 using System.Runtime.InteropServices;
 using OrderedSerializer;
 
@@ -16,6 +17,12 @@ namespace Vault.Scripting
         public FailResult(string? message)
         {
             _message = message;
+        }
+
+        public override void WriteTo(IOutputTextStream dst)
+        {
+            dst.Write("Error: ");
+            dst.WriteLine(_message ?? "???");
         }
 
         public override void Serialize(IOrderedSerializer serializer)

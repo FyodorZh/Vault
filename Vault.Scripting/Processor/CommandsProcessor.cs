@@ -7,7 +7,7 @@ using Vault.Storage;
 
 namespace Vault.Scripting
 {
-    public class RepositoryProcessor : IProcessorContext, ICredentialsProvider
+    public class CommandsProcessor : IProcessorContext, ICredentialsProvider
     {
         public IStorage Storage { get; }
         
@@ -19,13 +19,12 @@ namespace Vault.Scripting
 
         public TextWriter HumanOutput { get; private set; }
 
-        public RepositoryProcessor(IStorage storage)
+        public CommandsProcessor(IStorage storage)
         {
             Storage = storage;
             Repository = new RepositoryV1(storage, this);
             Current = Repository.GetRoot();
             HumanOutput = Console.Out;
-            Prompt();
         }
 
         string? ICredentialsProvider.GetCredentials(IDirectoryNode dir, EncryptionDesc encryptionDesc, string text)
@@ -34,7 +33,7 @@ namespace Vault.Scripting
             return Console.ReadLine();
         }
 
-        public Result Process(Command cmd)
+        public Result Process(ICommand cmd)
         {
             try
             {
@@ -44,23 +43,6 @@ namespace Vault.Scripting
             {
                 return new ExceptionResult(ex);
             }
-            finally
-            {
-                Prompt();    
-            }
-        }
-        
-        public void Prompt()
-        {
-            string prompt = Current.Name;
-            INode? c = Current.Parent;
-            while (c != null)
-            {
-                prompt = c.Name + "/" + prompt;
-                c = c.Parent;
-            }
-
-            HumanOutput.Write(prompt + "> ");
         }
     }
 }

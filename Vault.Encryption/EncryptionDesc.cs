@@ -21,6 +21,11 @@ namespace Vault.Encryption
             _hasCredentials = hasCredentials;
         }
 
+        public override string ToString()
+        {
+            return $"Method={_methodName ?? "???"} RequireCredentials={_requireCredentials} HasCredentials={_hasCredentials}";
+        }
+
         public void Serialize(IOrderedSerializer serializer)
         {
             serializer.Add(ref _methodName);

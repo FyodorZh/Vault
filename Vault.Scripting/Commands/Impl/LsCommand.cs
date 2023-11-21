@@ -82,6 +82,25 @@ namespace Vault.Scripting
                 _childrenNames.Add(name);
                 _childrenDirFlags.Add(isDirectory);
             }
+            
+            
+            public override void WriteTo(IOutputTextStream dst)
+            {
+                dst.WriteLine("Name: " + _dirName);
+                dst.WriteLine("Encryption.Name:    " + (_nameEncryption.HasValue ? _nameEncryption.ToString() : "???"));
+                dst.WriteLine("Encryption.Content: " + (_contentEncryption.HasValue ? _contentEncryption.ToString() : "???"));
+
+                List<string> names = new List<string>();
+                for (int i = 0; i < (_childrenNames?.Count ?? 0); ++i)
+                {
+                    names.Add(_childrenDirFlags![i] ? ("<" + _childrenNames![i] + ">") : _childrenNames![i]);
+                }
+                names.Sort();
+                foreach (var name in names)
+                {
+                    dst.WriteLine(name);
+                }
+            }
 
             public override void Serialize(IOrderedSerializer serializer)
             {

@@ -41,14 +41,30 @@ namespace Vault.Scripting
                 _data = new List<KeyValuePair<string?, string?>>();
                 foreach (DictionaryEntry kv in ex.Data)
                 {
-                    _data.Add(new KeyValuePair<string?, string?>(kv.Key?.ToString(), kv.Value?.ToString()));
+                    _data.Add(new KeyValuePair<string?, string?>(kv.Key.ToString(), kv.Value?.ToString()));
                 }
             }
 
             _innerException =
                 ex.InnerException != null ? new ExceptionResult(ex.InnerException) : null;
         }
-        
+
+        public override void WriteTo(IOutputTextStream dst)
+        {
+            dst.WriteLine("Exception: " + Message);
+            if (_innerException != null)
+            {
+                dst.WriteLine("Inner:");
+                var offsetDst = new OutputTextOffset(dst, () => "    ", true);
+                _innerException.WriteTo(offsetDst);
+                offsetDst.FinishBlock();
+            }
+            if (_stackTrace != null)
+            {
+                dst.WriteLine(_stackTrace);
+            }
+        }
+
         public override void Serialize(IOrderedSerializer serializer)
         {
             serializer.Add(ref _message);

@@ -21,6 +21,11 @@ namespace Vault.Content
             _content = content;
         }
 
+        public override string ToString()
+        {
+            return Content;
+        }
+
         public override void WriteTo(TextWriter dst)
         {
             dst.Write(_content);

@@ -63,6 +63,12 @@ namespace Vault.Scripting
         public LockUnlock_Result()
         {}
 
+        public override void WriteTo(IOutputTextStream dst)
+        {
+            dst.WriteLine("Name: " + _name?.ToString() ?? "???");
+            dst.WriteLine("Content: " + _content?.ToString() ?? "???");
+        }
+
         public override void Serialize(IOrderedSerializer serializer)
         {
             bool isNullName = _name == null;

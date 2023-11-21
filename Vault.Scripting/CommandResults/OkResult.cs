@@ -1,3 +1,4 @@
+using System.IO;
 using System.Runtime.InteropServices;
 using OrderedSerializer;
 
@@ -9,7 +10,12 @@ namespace Vault.Scripting
         public OkResult()
         {
         }
-        
+
+        public override void WriteTo(IOutputTextStream dst)
+        {
+            // DO NOTHING
+        }
+
         public override void Serialize(IOrderedSerializer serializer)
         {
         }
