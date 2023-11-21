@@ -7,28 +7,23 @@ using OrderedSerializer;
 
 namespace Vault.UT
 {
-    public class Serialization
+    public class Check_IDataStructs
     {
-        [SetUp]
-        public void Setup()
-        {
-        }
-
-        [Test(Description = "Check All IDataStructs for GUIDs and default constructors")]
-        public void Check_IDataStructs()
+        [Test]
+        public void Guid_And_Ctor()
         {
             Dictionary<Guid, Type> guids = new Dictionary<Guid, Type>();
 
             var dataStruct = typeof(IDataStruct);
             
-            var allAssemblies = new Assembly[]
+            var allAssemblies = new []
             {
-                typeof(Vault.Commands.EntryPoint).Assembly,
-                typeof(Vault.Content.EntryPoint).Assembly,
-                typeof(Vault.Encryption.EntryPoint).Assembly,
-                typeof(Vault.Repository.EntryPoint).Assembly,
-                typeof(Vault.Serialization.EntryPoint).Assembly,
-                typeof(Vault.Storage.EntryPoint).Assembly
+                typeof(Commands.EntryPoint).Assembly,
+                typeof(Content.EntryPoint).Assembly,
+                typeof(Encryption.EntryPoint).Assembly,
+                typeof(Repository.EntryPoint).Assembly,
+                typeof(Serialization.EntryPoint).Assembly,
+                typeof(Storage.EntryPoint).Assembly
             };
             
             foreach (var assembly in allAssemblies)

@@ -12,6 +12,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\OrderedSerializer\OrderedSerializer.Json\OrderedSerializer.Json.csproj" />
       <ProjectReference Include="..\OrderedSerializer\Package\Runtime\OrderedSerializer\OrderedSerializer.csproj" />
       <ProjectReference Include="..\Vault.Content\Vault.Content.csproj" />
       <ProjectReference Include="..\Vault.Encryption\Vault.Encryption.csproj" />
