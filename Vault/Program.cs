@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Vault;
 using Vault.Content;
 using Vault.Encryption;
@@ -159,6 +161,16 @@ public static class VaultEntryPoint
         Console.WriteLine("Exited.");
     }
 
+    private static readonly List<ICommand> _initCommands = new List<ICommand>()
+    {
+        new AddCommand("a", "text for a"),
+        new AddCommand("b", "text for b"),
+        new MkdirCommand("d"),
+        new CdCommand("d"),
+        new AddCommand("file", "1234"),
+        new CdCommand("..")
+    };
+
     private static void RunAll()
     {
         InMemoryStorage storage = new InMemoryStorage(
@@ -185,7 +197,7 @@ public static class VaultEntryPoint
             return prompt + "> ";
         });
         
-        foreach (var cmd in commandSource.GetAll())
+        foreach (var cmd in _initCommands.Concat(commandSource.GetAll()))
         {
             var result = commandsProcessor.Process(cmd);
             result.WriteTo(consoleOutput);
