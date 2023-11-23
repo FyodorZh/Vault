@@ -7,15 +7,16 @@ namespace Vault.Storage
         bool IsValid { get; }
         NodeId Id { get; }
         NodeId ParentId { get; }
-        IBox<StringContent> EncryptedName { get; }
-        IBox<IContent> EncryptedContent { get; }
+        IBox<StringContent> Name { get; }
     }
 
     public interface IDirectoryData : INodeData
     {
+        IBox<IDirectoryContent> DirContent { get; }
     }
 
     public interface IFileData : INodeData
     {
+        IBox<IFileContent> FileContent { get; }
     }
 }

@@ -12,7 +12,7 @@ namespace Vault.Repository.V1
     /// (PLAIN, content) => only content encrypted (PLAIN is plane data encryption)
     /// </summary>
     
-    internal class DirectoryEncryptionAspect : ContentAspect<DirectoryContent>, IDirectoryEncryptionAspect
+    internal class DirectoryEncryptionAspect : LockableAspect<IDirectoryContent, IDirectoryContent>, IDirectoryEncryptionAspect
     {
         private readonly DirectoryNode _owner;
 
@@ -63,15 +63,21 @@ namespace Vault.Repository.V1
         }
 
         public DirectoryEncryptionAspect(DirectoryNode node)
-            : base(node)
+            : base(true)
         {
             _owner = node;
         }
 
-        protected override bool UnlockContent(DirectoryContent encryption)
+        protected override IDirectoryContent? UnlockState()
         {
-            _selfChildrenNamesEncryption = encryption.GetForNames();
-            _selfChildrenContentEncryption = encryption.GetForContent();
+            var dirData = _owner.Data.DirContent.Deserialize(_owner.Parent?.ChildrenContent.ContentEncryptionChain);
+            if (dirData == null)
+            {
+                return null;
+            }
+
+            _selfChildrenNamesEncryption = dirData.GetForNames();
+            _selfChildrenContentEncryption = dirData.GetForContent();
 
             _childNameEncryptionChain = _owner.Parent?.ChildrenContent.ContentEncryptionChain ?? VoidEncryptionChain.Instance;
             _contentEncryptionChain = _owner.Parent?.ChildrenContent.ContentEncryptionChain ?? VoidEncryptionChain.Instance;
@@ -86,8 +92,8 @@ namespace Vault.Repository.V1
                 _contentEncryptionChain = new EncryptionChain(
                     _contentEncryptionChain, _selfChildrenContentEncryption);
             }
-
-            return true;
+            
+            return dirData;
         }
 
         protected override void LockState()

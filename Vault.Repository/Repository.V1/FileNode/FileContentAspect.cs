@@ -2,16 +2,23 @@ using Vault.Content;
 
 namespace Vault.Repository.V1
 {
-    internal class FileContentAspect : ContentAspect<IContent>
+    public interface IFileContentAspect : ILockableAspect<IFileContent>
     {
+    }
+    
+    internal class FileContentAspect : LockableAspect<IFileContent, IFileContent>, IFileContentAspect
+    {
+        private readonly FileNode _owner;
+        
         public FileContentAspect(FileNode node) 
-            : base(node)
+            : base(true)
         {
+            _owner = node;
         }
-
-        protected override bool UnlockContent(IContent content)
+        
+        protected sealed override IFileContent? UnlockState()
         {
-            return true;
+            return _owner.Data.FileContent.Deserialize(_owner.Parent?.ChildrenContent.ContentEncryptionChain);
         }
     }
 }

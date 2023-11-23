@@ -1,11 +1,10 @@
-using System.IO;
 using System.Runtime.InteropServices;
 using OrderedSerializer;
 
 namespace Vault.Content
 {
     [Guid("42EBBA80-9719-46B1-B833-68FF1972D9CE")]
-    public class StringContent : Content, IContent<string>
+    public class StringContent : Content
     {
         private string? _content;
         
@@ -24,11 +23,6 @@ namespace Vault.Content
         public override string ToString()
         {
             return Content;
-        }
-
-        public override void WriteTo(TextWriter dst)
-        {
-            dst.Write(_content);
         }
 
         public override void Serialize(IOrderedSerializer serializer)

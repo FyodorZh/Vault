@@ -27,7 +27,7 @@ namespace Vault.Commands
                 return Fail("File or directory already exists");
             }
             
-            context.Current.ChildrenContent.AddChildFile(name, new StringContent(content));
+            context.Current.ChildrenContent.AddChildFile(name, content);
 
             return Ok;
         }

@@ -36,7 +36,7 @@ namespace Vault
             Console.WriteLine("Name: " + CurrentNode.Name);
             if (CurrentNode.Content.Value != null)
             {
-                CurrentNode.Content.Value.WriteTo(Console.Out);
+                Console.Out.Write(CurrentNode.Content.Value.ToString());
             }
             else
             {
@@ -78,7 +78,7 @@ namespace Vault
                 {
                     if (file.Content.Value != null)
                     {
-                        file.Content.Value.WriteTo(Console.Out);
+                        Console.Out.Write(file.Content.Value.ToString());
                         Console.WriteLine();
                     }
                     else
@@ -133,7 +133,7 @@ namespace Vault
                 return;
             }
             
-            CurrentNode.ChildrenContent.AddChildFile(name, new StringContent(text));
+            CurrentNode.ChildrenContent.AddChildFile(name, text);
         }
         
         public void Command_mkdir(string name)

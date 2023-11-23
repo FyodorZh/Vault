@@ -33,10 +33,10 @@ public static class VaultEntryPoint
         IRepository repository = new RepositoryV1(storage, new TmpCredentialsProvider());
         var root = repository.GetRoot();
         //root.Unlock(LockState.All);
-        var a = root.ChildrenContent.AddChildFile("a", new StringContent("Text for A"));
+        var a = root.ChildrenContent.AddChildFile("a", "Text for A");
         var b = root.ChildrenContent.AddChildDirectory("b");
-        var c = root.ChildrenContent.AddChildFile("c", new StringContent("Text for C"));
-        b.ChildrenContent.AddChildFile("bb", new StringContent("Text for BBBB"));
+        var c = root.ChildrenContent.AddChildFile("c", "Text for C");
+        b.ChildrenContent.AddChildFile("bb", "Text for BBBB");
 
         //root.LockAll();
         //root.Unlock(LockState.ChildrenName);

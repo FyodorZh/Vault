@@ -7,39 +7,17 @@ namespace Vault.Storage.InMemory
         public bool IsValid { get; set; }
         public NodeId Id { get; }
         public NodeId ParentId { get; }
-        public IBox<StringContent> EncryptedName { get; set; }
-        public IBox<IContent> EncryptedContent { get; set; }
+        public IBox<StringContent> Name { get; set; }
 
         protected NodeData(NodeId id, NodeId parentId, 
-            IBox<StringContent> encryptedName,
-            IBox<IContent> encryptedContent)
+            IBox<StringContent> encryptedName)
         {
             IsValid = true;
             Id = id;
             ParentId = parentId;
-            EncryptedName = encryptedName;
-            EncryptedContent = encryptedContent;
+            Name = encryptedName;
         }
     }
 
-    public class DirectoryData : NodeData, IDirectoryData
-    {
-        public DirectoryData(NodeId id, NodeId parentId, 
-            Box<StringContent> encryptedName,
-            IBox<DirectoryContent> encryptedContent) 
-            : base(id, parentId, encryptedName, encryptedContent)
-        {
-        }
-    }
 
-    public class FileData : NodeData, IFileData
-    {
-        public FileData(NodeId id, NodeId parentId, 
-            IBox<StringContent> encryptedName,
-            IBox<IContent> encryptedContent) 
-            : base(id, parentId, encryptedName, encryptedContent)
-        {
-            EncryptedContent = encryptedContent;
-        }
-    }
 }

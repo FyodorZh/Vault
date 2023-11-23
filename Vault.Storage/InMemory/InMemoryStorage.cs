@@ -64,7 +64,7 @@ namespace Vault.Storage.InMemory
         IFileData IStorage.AddFile(
             NodeId parentId, 
             Box<StringContent> encryptedName, 
-            Box<IContent> encryptedContent)
+            Box<FileContent> encryptedContent)
         {
             if (!_nodes.TryGetValue(parentId, out var parent) || !(parent is DirectoryData))
             {
@@ -83,18 +83,29 @@ namespace Vault.Storage.InMemory
                 return false;
             }
 
-            node.EncryptedName = encryptedName;
+            node.Name = encryptedName;
             return true;
         }
 
-        public bool SetNodeContent(NodeId id, Box<IContent> encryptedContent)
+        bool IStorage.SetDirectoryContent(NodeId id, Box<IDirectoryContent> encryptedContent)
         {
-            if (!_nodes.TryGetValue(id, out var node))
+            if (!_nodes.TryGetValue(id, out var node) || node is not DirectoryData dirData)
             {
                 return false;
             }
 
-            node.EncryptedContent = encryptedContent;
+            dirData.DirContent = encryptedContent;
+            return true;
+        }
+
+        bool IStorage.SetFileContent(NodeId id, Box<IFileContent> encryptedContent)
+        {
+            if (!_nodes.TryGetValue(id, out var node) || node is not FileData fileData)
+            {
+                return false;
+            }
+
+            fileData.FileContent = encryptedContent;
             return true;
         }
     }

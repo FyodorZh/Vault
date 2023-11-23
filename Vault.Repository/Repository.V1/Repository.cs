@@ -33,7 +33,7 @@ namespace Vault.Repository.V1
         IFileNode AddFile(
             NodeId parentId, 
             Box<StringContent> encryptedName, 
-            Box<IContent> encryptedContent);
+            Box<FileContent> encryptedContent);
     }
     
     public class RepositoryV1 : IRepositoryCtl
@@ -134,7 +134,7 @@ namespace Vault.Repository.V1
             return node;
         }
 
-        public IFileNode AddFile(NodeId parentId, Box<StringContent> encryptedName, Box<IContent> encryptedContent)
+        public IFileNode AddFile(NodeId parentId, Box<StringContent> encryptedName, Box<FileContent> encryptedContent)
         {
             IFileData? data = _storage.AddFile(parentId, encryptedName, encryptedContent);
             if (data == null)

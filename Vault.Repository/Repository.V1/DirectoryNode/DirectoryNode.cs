@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Vault.Content;
 using Vault.Encryption;
@@ -7,6 +8,8 @@ namespace Vault.Repository.V1
 {
     internal class DirectoryNode : Node, IDirectoryNode
     {
+        public new IDirectoryData Data { get; }
+        
         private readonly DirectoryEncryptionAspect _encryption;
         public override ILockableAspect<IContent> Content => _encryption;
         IDirectoryEncryptionAspect IDirectoryNode.Encryption => _encryption;
@@ -25,6 +28,7 @@ namespace Vault.Repository.V1
         public DirectoryNode(IDirectoryData data, IRepositoryCtl repository)
             : base(data, repository)
         {
+            Data = data;
             _encryption = new DirectoryEncryptionAspect(this);
             _childrenNames = new DirectoryChildrenNamesAspect(this);
             _childrenContent = new DirectoryChildrenContentAspect(this);
@@ -76,24 +80,39 @@ namespace Vault.Repository.V1
             foreach (var ch in Repository.Storage.GetAllSubChildren(Id))
             {
                 IReadOnlyList<byte> nameData = ReEncrypt(
-                    ch.EncryptedName.Data, 
+                    ch.Name.Data, 
                     ch.ParentId == Id ? parentNamesEncryptionChain : parentContentEncryptionChain, 
                     ch.ParentId == Id ? curNameEncryption : curContentEncryption, 
                     ch.ParentId == Id ? nameEncryption : contentEncryption);
-                
-                IReadOnlyList<byte> contentData = ReEncrypt(
-                    ch.EncryptedContent.Data, 
-                    parentContentEncryptionChain, 
-                    curContentEncryption, 
-                    contentEncryption);
-
                 Repository.Storage.SetNodeName(ch.Id, new Box<StringContent>(nameData));
-                Repository.Storage.SetNodeContent(ch.Id, new Box<IContent>(contentData));
+
+                if (ch is IDirectoryData dir)
+                {
+                    IReadOnlyList<byte> contentData = ReEncrypt(
+                        dir.DirContent.Data, 
+                        parentContentEncryptionChain, 
+                        curContentEncryption, 
+                        contentEncryption);
+                    Repository.Storage.SetDirectoryContent(ch.Id, new Box<IDirectoryContent>(contentData));
+                }
+                else if (ch is IFileData file)
+                {
+                    IReadOnlyList<byte> contentData = ReEncrypt(
+                        file.FileContent.Data, 
+                        parentContentEncryptionChain, 
+                        curContentEncryption, 
+                        contentEncryption);
+                    Repository.Storage.SetFileContent(ch.Id, new Box<IFileContent>(contentData));
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
             }
 
             var newDirContent = new DirectoryContent(nameEncryption, contentEncryption);
-            var contentBox = new Box<IContent>(newDirContent, Parent?.ChildrenContent.ContentEncryptionChain);
-            Repository.Storage.SetNodeContent(Id, contentBox);
+            var contentBox = new Box<IDirectoryContent>(newDirContent, Parent?.ChildrenContent.ContentEncryptionChain);
+            Repository.Storage.SetDirectoryContent(Id, contentBox);
             Content.Lock();
 
             return true;

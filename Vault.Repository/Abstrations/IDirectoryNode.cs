@@ -4,7 +4,7 @@ using Vault.Encryption;
 
 namespace Vault.Repository
 {
-    public interface IDirectoryEncryptionAspect : ILockableAspect<IContent>
+    public interface IDirectoryEncryptionAspect : ILockableAspect<IDirectoryContent>
     {
         IEncryptionSource? SelfChildrenNamesEncryption();
         IEncryptionSource? SelfChildrenContentEncryption();
@@ -20,7 +20,7 @@ namespace Vault.Repository
     public interface IDirectoryChildrenContentAspect : ILockableAspect
     {
         IEncryptionChain ContentEncryptionChain { get; }
-        IFileNode AddChildFile(string name, IContent content);
+        IFileNode AddChildFile(string name, string content);
         IDirectoryNode AddChildDirectory(string name);
     }
     

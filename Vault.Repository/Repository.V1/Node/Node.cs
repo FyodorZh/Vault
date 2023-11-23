@@ -25,7 +25,7 @@ namespace Vault.Repository.V1
             get
             {
                 var chain = Parent?.ChildrenNames.ChildrenNameEncryptionChain;
-                string? name = Data.EncryptedName.Deserialize(chain)?.Content;
+                string? name = Data.Name.Deserialize(chain)?.Content;
                 return name ?? Id.ToString();
             }
         }

@@ -86,7 +86,7 @@ namespace Vault.Repository
             }
         }
 
-        public IFileNode AddChildFile(string name, IContent content)
+        public IFileNode AddChildFile(string name, string content)
         {
             Unlock();
             if (IsLocked)
@@ -96,7 +96,7 @@ namespace Vault.Repository
             
             var fileNode = _owner.Repository.AddFile(_owner.Id,
                 new Box<StringContent>(new StringContent(name), _owner.ChildrenNames.ChildrenNameEncryptionChain),
-                new Box<IContent>(content, _owner.ChildrenContent.ContentEncryptionChain));
+                new Box<FileContent>(new FileContent(content), _owner.ChildrenContent.ContentEncryptionChain));
             return fileNode;
         }
 
