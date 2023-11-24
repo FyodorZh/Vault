@@ -28,7 +28,7 @@ public static class VaultEntryPoint
         
         InMemoryStorage storage = new InMemoryStorage(
             new Box<StringContent>(new StringContent("root")),
-            new Box<DirectoryContent>(new DirectoryContent()));
+            new Box<DirectoryContent>(new DirectoryContent(new PlaneDataEncryptionSource())));
 
         IRepository repository = new RepositoryV1(storage, new TmpCredentialsProvider());
         var root = repository.GetRoot();
@@ -194,7 +194,7 @@ public static class VaultEntryPoint
 
         InMemoryStorage storage = new InMemoryStorage(
             new Box<StringContent>(new StringContent("root")),
-            new Box<DirectoryContent>(new DirectoryContent()));
+            new Box<DirectoryContent>(new DirectoryContent(new PlaneDataEncryptionSource())));
 
         var commandsFactory = CommandsFactory.ConstructFullFactory();
 

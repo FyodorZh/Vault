@@ -109,7 +109,7 @@ namespace Vault.Repository
             }
             
             var nameBox = new Box<StringContent>(new StringContent(name), _owner.ChildrenNames.ChildrenNameEncryptionChain);
-            var contentBox = new Box<DirectoryContent>(new DirectoryContent(), _owner.ChildrenContent.ContentEncryptionChain);
+            var contentBox = new Box<DirectoryContent>(new DirectoryContent(new PlaneDataEncryptionSource()), _owner.ChildrenContent.ContentEncryptionChain);
             var dirNode = _owner.Repository.AddDirectory(_owner.Id, nameBox, contentBox);
             return dirNode;
         }

@@ -6,8 +6,8 @@ namespace Vault.Repository
 {
     public interface IDirectoryEncryptionAspect : ILockableAspect<IDirectoryContent>
     {
-        IEncryptionSource? SelfChildrenNamesEncryption();
-        IEncryptionSource? SelfChildrenContentEncryption();
+        IEncryptionSource SelfChildrenNamesEncryption();
+        IEncryptionSource SelfChildrenContentEncryption();
     }
     
     public interface IDirectoryChildrenNamesAspect : ILockableAspect
@@ -32,6 +32,6 @@ namespace Vault.Repository
         
         IDirectoryChildrenContentAspect ChildrenContent { get; }
 
-        bool SetEncryption(EncryptionSource? nameEncryption, EncryptionSource? contentEncryption);
+        bool SetEncryption(EncryptionSource nameEncryption, EncryptionSource contentEncryption);
     }
 }

@@ -137,11 +137,15 @@ namespace Vault.Commands
             });
             factory.Add("encrypt", list =>
             {
-                if (list.Count != 3)
+                switch (list.Count)
                 {
-                    return null;
+                    case 2:
+                        return new EncryptCommand(list[1]);
+                    case 3:
+                        return new EncryptCommand(list[1], list[2]);
+                    default:
+                        return null;
                 }
-                return new EncryptCommand(list[1], list[2]);
             });
             factory.Add("lock", list =>
             {

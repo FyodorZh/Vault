@@ -18,8 +18,17 @@ namespace Vault.Commands
             
             if (context.Current.Content.Value is DirectoryContent directoryContent)
             {
-                result.NameEncryption = directoryContent.GetForNames()?.GetDescription();
-                result.ContentEncryption = directoryContent.GetForContent()?.GetDescription();
+                var nameEncryption = directoryContent.GetForNames();
+                var contentEncryption = directoryContent.GetForContent();
+
+                if (nameEncryption == contentEncryption)
+                {
+                    result.SetEncryption(nameEncryption.GetDescription());
+                }
+                else
+                {
+                    result.SetEncryption(nameEncryption.GetDescription(), contentEncryption.GetDescription());
+                }
             }
 
             foreach (var ch in context.Current.ChildrenNames.All)
@@ -36,21 +45,30 @@ namespace Vault.Commands
             private string? _dirName;
             private EncryptionDesc? _nameEncryption;
             private EncryptionDesc? _contentEncryption;
+            private EncryptionDesc? _globalEncryption;
             private List<string>? _childrenNames;
             private List<bool>? _childrenDirFlags; // true => child is directory
 
             public string Name => _dirName ?? "";
 
-            public EncryptionDesc? NameEncryption
+            public EncryptionDesc? GlobalEncryption => _globalEncryption;
+            
+            public EncryptionDesc? NameEncryption => _nameEncryption;
+
+            public EncryptionDesc? ContentEncryption => _contentEncryption;
+
+            public void SetEncryption(EncryptionDesc nameAndContentEncryption)
             {
-                get => _nameEncryption;
-                set => _nameEncryption = value;
+                _globalEncryption = nameAndContentEncryption;
+                _nameEncryption = null;
+                _contentEncryption = null;
             }
 
-            public EncryptionDesc? ContentEncryption
+            public void SetEncryption(EncryptionDesc nameEncryption, EncryptionDesc contentEncryption)
             {
-                get => _contentEncryption;
-                set => _contentEncryption = value;
+                _globalEncryption = null;
+                _nameEncryption = nameEncryption;
+                _contentEncryption = contentEncryption;
             }
 
             public IEnumerable<(string, bool)> Children
@@ -87,8 +105,19 @@ namespace Vault.Commands
             public override void WriteTo(IOutputTextStream dst)
             {
                 dst.WriteLine("Name: " + _dirName);
-                dst.WriteLine("Encryption.Name:    " + (_nameEncryption.HasValue ? _nameEncryption.ToString() : "???"));
-                dst.WriteLine("Encryption.Content: " + (_contentEncryption.HasValue ? _contentEncryption.ToString() : "???"));
+                if (_nameEncryption != null && _contentEncryption != null)
+                {
+                    dst.WriteLine("Encryption.Name:    " + _nameEncryption);
+                    dst.WriteLine("Encryption.Content: " + _contentEncryption);
+                }
+                else if (_globalEncryption != null)
+                {
+                    dst.WriteLine("Encryption:    " + _globalEncryption);
+                }
+                else
+                {
+                    dst.WriteLine("Encryption: INVALID STATE");
+                }
 
                 List<string> names = new List<string>();
                 for (int i = 0; i < (_childrenNames?.Count ?? 0); ++i)
@@ -105,6 +134,7 @@ namespace Vault.Commands
             public override void Serialize(IOrderedSerializer serializer)
             {
                 serializer.Add(ref _dirName);
+                SerializeEncryptionDesc(serializer, ref _globalEncryption);
                 SerializeEncryptionDesc(serializer, ref _nameEncryption);
                 SerializeEncryptionDesc(serializer, ref _contentEncryption);
                 serializer.AddCollection<string, List<string>>(ref _childrenNames!);

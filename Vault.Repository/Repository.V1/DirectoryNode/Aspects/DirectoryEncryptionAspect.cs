@@ -22,7 +22,7 @@ namespace Vault.Repository.V1
         private IEncryptionChain? _contentEncryptionChain;
         private IEncryptionChain? _childNameEncryptionChain;
 
-        public IEncryptionSource? SelfChildrenNamesEncryption()
+        public IEncryptionSource SelfChildrenNamesEncryption()
         {
             Unlock();
             if (IsLocked)
@@ -30,10 +30,10 @@ namespace Vault.Repository.V1
                 throw new Exception();
             }
 
-            return _selfChildrenNamesEncryption;
+            return _selfChildrenNamesEncryption ?? throw new Exception("Impossible");
         }
 
-        public IEncryptionSource? SelfChildrenContentEncryption()
+        public IEncryptionSource SelfChildrenContentEncryption()
         {
             Unlock();
             if (IsLocked)
@@ -41,7 +41,7 @@ namespace Vault.Repository.V1
                 throw new Exception();
             }
 
-            return _selfChildrenContentEncryption;
+            return _selfChildrenContentEncryption ?? throw new Exception("Impossible");
         }
 
         public IEncryptionChain ContentEncryptionChain
@@ -70,30 +70,22 @@ namespace Vault.Repository.V1
 
         protected override IDirectoryContent? UnlockState()
         {
-            var dirData = _owner.Data.DirContent.Deserialize(_owner.Parent?.ChildrenContent.ContentEncryptionChain);
-            if (dirData == null)
+            IDirectoryContent? dirContent = _owner.Data.DirContent.Deserialize(_owner.Parent?.ChildrenContent.ContentEncryptionChain);
+            if (dirContent == null)
             {
                 return null;
             }
 
-            _selfChildrenNamesEncryption = dirData.GetForNames();
-            _selfChildrenContentEncryption = dirData.GetForContent();
+            _selfChildrenNamesEncryption = dirContent.GetForNames();
+            _selfChildrenContentEncryption = dirContent.GetForContent();
 
             _childNameEncryptionChain = _owner.Parent?.ChildrenContent.ContentEncryptionChain ?? VoidEncryptionChain.Instance;
             _contentEncryptionChain = _owner.Parent?.ChildrenContent.ContentEncryptionChain ?? VoidEncryptionChain.Instance;
             
-            if (_selfChildrenNamesEncryption != null)
-            {
-                _childNameEncryptionChain = new EncryptionChain(
-                    _childNameEncryptionChain, _selfChildrenNamesEncryption);
-            }
-            if (_selfChildrenContentEncryption != null)
-            {
-                _contentEncryptionChain = new EncryptionChain(
-                    _contentEncryptionChain, _selfChildrenContentEncryption);
-            }
+            _childNameEncryptionChain = new EncryptionChain(_childNameEncryptionChain, _selfChildrenNamesEncryption);
+            _contentEncryptionChain = new EncryptionChain(_contentEncryptionChain, _selfChildrenContentEncryption);
             
-            return dirData;
+            return dirContent;
         }
 
         protected override void LockState()

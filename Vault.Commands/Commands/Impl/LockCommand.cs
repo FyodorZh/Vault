@@ -65,8 +65,8 @@ namespace Vault.Commands
 
         public override void WriteTo(IOutputTextStream dst)
         {
-            dst.WriteLine("Name: " + _name?.ToString() ?? "???");
-            dst.WriteLine("Content: " + _content?.ToString() ?? "???");
+            dst.WriteLine("Name: " + (_name?.ToString() ?? "???"));
+            dst.WriteLine("Content: " + (_content?.ToString() ?? "???"));
         }
 
         public override void Serialize(IOrderedSerializer serializer)

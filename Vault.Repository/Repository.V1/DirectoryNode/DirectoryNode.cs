@@ -57,26 +57,32 @@ namespace Vault.Repository.V1
             return data;
         }
 
-        public bool SetEncryption(EncryptionSource? nameEncryption, EncryptionSource? contentEncryption)
+        public bool SetEncryption(EncryptionSource nameEncryption, EncryptionSource contentEncryption)
         {
+            EncryptionSource? nameAndContentEncryption = null;
+            if (nameEncryption == contentEncryption)
+            {
+                nameAndContentEncryption = nameEncryption;
+            }
+
             if (contentEncryption is { NeedCredentials: true } ||
                 nameEncryption is { NeedCredentials: true })
             {
                 return false;
             }
             
+            // TODO: не должно быть необходимо декодировать всё в любом случае
             if (ChildrenNames.Unlock() == LockUnlockResult.Fail ||
                 ChildrenContent.Unlock() == LockUnlockResult.Fail)
             {
                 return false;
             }
 
-            IEncryptionSource? curNameEncryption = Encryption.SelfChildrenNamesEncryption();
-            IEncryptionSource? curContentEncryption = Encryption.SelfChildrenContentEncryption();
+            IEncryptionSource curNameEncryption = Encryption.SelfChildrenNamesEncryption();
+            IEncryptionSource curContentEncryption = Encryption.SelfChildrenContentEncryption();
 
             var parentContentEncryptionChain = Parent?.ChildrenContent.ContentEncryptionChain;
             var parentNamesEncryptionChain = Parent?.ChildrenNames.ChildrenNameEncryptionChain;
-            
             foreach (var ch in Repository.Storage.GetAllSubChildren(Id))
             {
                 IReadOnlyList<byte> nameData = ReEncrypt(
@@ -110,7 +116,10 @@ namespace Vault.Repository.V1
                 }
             }
 
-            var newDirContent = new DirectoryContent(nameEncryption, contentEncryption);
+            var newDirContent = nameAndContentEncryption != null ?
+                new DirectoryContent(nameAndContentEncryption) : 
+                new DirectoryContent(nameEncryption, contentEncryption);
+            
             var contentBox = new Box<IDirectoryContent>(newDirContent, Parent?.ChildrenContent.ContentEncryptionChain);
             Repository.Storage.SetDirectoryContent(Id, contentBox);
             Content.Lock();

@@ -227,19 +227,19 @@ namespace Vault
         }
         public void Command_encrypt(string _nameEncryption, string _contentEncryption)
         {
-            var nameEncryption = EncryptionFactory(_nameEncryption);
-            var contentEncryption = EncryptionFactory(_contentEncryption);
-
-            if (nameEncryption is { NeedCredentials: true })
-            {
-                nameEncryption.AddCredentials(Console.ReadLine()!);
-            }
-            if (contentEncryption is { NeedCredentials: true })
-            {
-                contentEncryption.AddCredentials(Console.ReadLine()!);
-            }
-
-            CurrentNode.SetEncryption(nameEncryption, contentEncryption);
+            // var nameEncryption = EncryptionFactory(_nameEncryption);
+            // var contentEncryption = EncryptionFactory(_contentEncryption);
+            //
+            // if (nameEncryption is { NeedCredentials: true })
+            // {
+            //     nameEncryption.AddCredentials(Console.ReadLine()!);
+            // }
+            // if (contentEncryption is { NeedCredentials: true })
+            // {
+            //     contentEncryption.AddCredentials(Console.ReadLine()!);
+            // }
+            //
+            // CurrentNode.SetEncryption(nameEncryption, contentEncryption);
         }
     }
 }
