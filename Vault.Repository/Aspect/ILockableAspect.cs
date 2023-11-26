@@ -2,6 +2,7 @@ namespace Vault.Repository
 {
     public enum LockUnlockResult : byte
     {
+        Unknown,
         NothingToDo,
         Success,
         Fail

@@ -134,27 +134,11 @@ namespace Vault.Commands
             public override void Serialize(IOrderedSerializer serializer)
             {
                 serializer.Add(ref _dirName);
-                SerializeEncryptionDesc(serializer, ref _globalEncryption);
-                SerializeEncryptionDesc(serializer, ref _nameEncryption);
-                SerializeEncryptionDesc(serializer, ref _contentEncryption);
-                serializer.AddCollection<string, List<string>>(ref _childrenNames!);
-                serializer.AddCollection<bool, List<bool>>(ref _childrenDirFlags!);
-            }
-
-            private void SerializeEncryptionDesc(IOrderedSerializer serializer, ref EncryptionDesc? desc)
-            {
-                bool isNull = desc == null;
-                serializer.Add(ref isNull);
-                if (isNull)
-                {
-                    desc = null;
-                }
-                else
-                {
-                    EncryptionDesc tmp = desc ?? new EncryptionDesc();
-                    serializer.AddStruct(ref tmp);
-                    desc = tmp;
-                }
+                serializer.Add(ref _globalEncryption);
+                serializer.Add(ref _nameEncryption);
+                serializer.Add(ref _contentEncryption);
+                serializer.Add(ref _childrenNames!);
+                serializer.Add(ref _childrenDirFlags!);
             }
         }
     }

@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.InteropServices;
 using OrderedSerializer;
 using Vault.Repository;
@@ -45,49 +44,31 @@ namespace Vault.Commands
     [Guid("9440FE81-EEF1-4956-B949-95406E472D87")]
     public class LockUnlock_Result : OkResult
     {
-        private LockUnlockResult? _name;
-        private LockUnlockResult? _content;
+        private LockUnlockResult _name;
+        private LockUnlockResult _content;
 
-        public LockUnlockResult? Name
+        public LockUnlockResult Name
         {
             get => _name;
             set => _name = value;
         }
             
-        public LockUnlockResult? Content
+        public LockUnlockResult Content
         {
             get => _content;
             set => _content = value;
         }
-
-        public LockUnlock_Result()
-        {}
-
+        
         public override void WriteTo(IOutputTextStream dst)
         {
-            dst.WriteLine("Name: " + (_name?.ToString() ?? "???"));
-            dst.WriteLine("Content: " + (_content?.ToString() ?? "???"));
+            dst.WriteLine("Name: " + _name);
+            dst.WriteLine("Content: " + _content);
         }
 
         public override void Serialize(IOrderedSerializer serializer)
         {
-            bool isNullName = _name == null;
-            serializer.Add(ref isNullName);
-            if (!isNullName)
-            {
-                byte b = (byte)_name!.Value;
-                serializer.Add(ref b);
-                _name = (LockUnlockResult)b;
-            }
-
-            bool isNullContent = _content == null;
-            serializer.Add(ref isNullContent);
-            if (!isNullContent)
-            {
-                byte b = (byte)_content!.Value;
-                serializer.Add(ref b);
-                _content = (LockUnlockResult)b;
-            }
+            serializer.Add(ref _name);
+            serializer.Add(ref _content);
         }
     }
 }
