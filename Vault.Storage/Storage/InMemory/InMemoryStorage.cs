@@ -1,13 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using OrderedSerializer;
 using Vault.Content;
 
 namespace Vault.Storage.InMemory
 {
-    public class InMemoryStorage : IStorage
+    [Guid("341B9F6F-B76B-4D75-8991-FBF7BCADEDA5")]
+    public class InMemoryStorage : IStorage, IVersionedDataStruct
     {
         private readonly Dictionary<NodeId, NodeData> _nodes = new Dictionary<NodeId, NodeData>();
         private readonly DirectoryData _root;
+
+        private InMemoryStorage()
+        {
+            _root = null!;
+        }
 
         public InMemoryStorage(
             Box<StringContent> encryptedRootName,
@@ -108,5 +116,36 @@ namespace Vault.Storage.InMemory
             fileData.FileContent = encryptedContent;
             return true;
         }
+
+        public void Serialize(IOrderedSerializer serializer)
+        {
+            if (serializer.IsWriter)
+            {
+                serializer.Writer.WriteInt(_nodes.Count);
+                foreach (var kv in _nodes)
+                {
+                    var key = kv.Key;
+                    var value = kv.Value;
+                    serializer.AddVersionedStruct(ref key);
+                    serializer.AddClass(ref value);
+                }
+            }
+            else
+            {
+                int count = 0;
+                serializer.Add(ref count);
+                _nodes.Clear();
+                for (int i = 0; i < count; ++i)
+                {
+                    NodeId key = new NodeId();
+                    NodeData value = null!;
+                    serializer.AddVersionedStruct(ref key);
+                    serializer.AddClass(ref value, () => throw new Exception());
+                    _nodes.Add(key, value);
+                }
+            }
+        }
+
+        public byte Version => 0;
     }
 }
