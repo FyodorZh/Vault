@@ -55,7 +55,7 @@ namespace Vault.Commands
             if (_innerException != null)
             {
                 dst.WriteLine("Inner:");
-                var offsetDst = new OutputTextOffset(dst, () => "    ", true);
+                var offsetDst = new OutputTextStreamWithOffset(dst, () => "    ", true);
                 _innerException.WriteTo(offsetDst);
                 offsetDst.FinishBlock();
             }

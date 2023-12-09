@@ -10,7 +10,7 @@ namespace Vault.Storage.InMemory
     public class InMemoryStorage : IStorage, IVersionedDataStruct
     {
         private readonly Dictionary<NodeId, NodeData> _nodes = new Dictionary<NodeId, NodeData>();
-        private readonly DirectoryData _root;
+        private DirectoryData _root;
 
         private InMemoryStorage()
         {
@@ -129,6 +129,9 @@ namespace Vault.Storage.InMemory
                     serializer.AddVersionedStruct(ref key);
                     serializer.AddClass(ref value);
                 }
+
+                var rootId = _root.Id;
+                serializer.AddVersionedStruct(ref rootId);
             }
             else
             {
@@ -143,6 +146,10 @@ namespace Vault.Storage.InMemory
                     serializer.AddClass(ref value, () => throw new Exception());
                     _nodes.Add(key, value);
                 }
+
+                NodeId rootId = default;
+                serializer.AddVersionedStruct(ref rootId);
+                _root = (DirectoryData)_nodes[rootId];
             }
         }
 
