@@ -8,6 +8,7 @@ using Vault.Encryption;
 using Vault.Repository;
 using Vault.Repository.V1;
 using Vault.Commands;
+using Vault.Serialization;
 using Vault.Storage;
 using Vault.Storage.InMemory;
 
@@ -37,10 +38,7 @@ public static class VaultEntryPoint
         var commandsFactory = CommandsFactory.ConstructFullFactory();
 
         var commandsProcessor = new CommandsProcessor(storage);
-
-        var commandSource = new TextReaderCommandSource(Console.In, commandsFactory);
-        commandSource.OnError += ex => Console.WriteLine(ex);
-
+        
         var consoleOutput = new OutputTextStream(Console.Out, () => ".", () =>
         {
             string prompt = commandsProcessor.Current.Name;
@@ -53,8 +51,23 @@ public static class VaultEntryPoint
 
             return prompt + "> ";
         });
+
+        foreach (var cmd in _initCommands)
+        {
+            var result = commandsProcessor.Process(cmd);
+            if (result is FailResult fail)
+            {
+                fail.WriteTo(consoleOutput);
+            }
+        }
         
-        foreach (var cmd in _initCommands.Concat(commandSource.GetAll()))
+        Console.WriteLine(SerializerJson.Serialize(storage));
+
+        var commandSource = new TextReaderCommandSource(Console.In, commandsFactory);
+        commandSource.OnError += ex => Console.WriteLine(ex);
+        
+        
+        foreach (var cmd in commandSource.GetAll())
         {
             var result = commandsProcessor.Process(cmd);
             result.WriteTo(consoleOutput);
