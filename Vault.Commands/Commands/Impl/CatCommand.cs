@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 using OrderedSerializer;
 using Vault.Repository;
@@ -5,23 +6,25 @@ using Vault.Repository;
 namespace Vault.Commands
 {
     [Guid("87DE0D2B-E23A-4DFC-A551-1AF643D02D45")]
-    public class CatCommand : Command1
+    public class CatCommand : Command
     {
-        public override string Name => "cat";
+        private string _fileName;
         
+        public override string Name => "cat";
+
         private CatCommand()
-        {}
+        {
+            _fileName = "";
+        }
 
         public CatCommand(string fileName)
-            : base(new CommandOption(fileName))
         {
+            _fileName = fileName;
         }
 
         public override Result Process(IProcessorContext context)
         {
-            string name = Option.Name;
-            
-            var child = context.Current.ChildrenNames.FindChild(name);
+            var child = context.Current.ChildrenNames.FindChild(_fileName);
             if (child == null)
             {
                 return Fail("File not found");
@@ -38,6 +41,11 @@ namespace Vault.Commands
             }
 
             return new CatResult(file.Content.Value.ToString());
+        }
+
+        public override void Serialize(IOrderedSerializer serializer)
+        {
+            serializer.Add(ref _fileName, () => throw new Exception());
         }
 
         [Guid("3B0F1BE3-BAC7-4F20-A7D6-3CB537E66564")]

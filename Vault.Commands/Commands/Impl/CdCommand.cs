@@ -6,24 +6,25 @@ using Vault.Repository;
 namespace Vault.Commands
 {
     [Guid("95FBC04D-66E7-4924-BDFC-7FF27F899F32")]
-    public class CdCommand : Command1
+    public class CdCommand : Command
     {
+        private string _cdParam;
+        
         public override string Name => "cd";
 
         private CdCommand()
         {
+            _cdParam = "";
         }
 
         public CdCommand(string param)
-            : base(new CommandOption(param))
         {
+            _cdParam = param;
         }
 
         public override Result Process(IProcessorContext context)
         {
-            string name = Option.Name;
-            
-            if (name == "..")
+            if (_cdParam == "..")
             {
                 if (context.Current.Parent != null)
                 {
@@ -33,7 +34,7 @@ namespace Vault.Commands
                 return Ok;
             }
 
-            var child = context.Current.ChildrenNames.FindChild(name);
+            var child = context.Current.ChildrenNames.FindChild(_cdParam);
             if (child == null)
             {
                 return Fail("Directory not found");
@@ -46,6 +47,11 @@ namespace Vault.Commands
 
             context.Current = dir;
             return Ok;
+        }
+
+        public override void Serialize(IOrderedSerializer serializer)
+        {
+            serializer.Add(ref _cdParam, () => throw new Exception());
         }
     }
 }

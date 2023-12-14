@@ -39,6 +39,11 @@ namespace Vault.Commands
             return result;
         }
 
+        public override void Serialize(IOrderedSerializer serializer)
+        {
+            // DO NOTHING
+        }
+
         [Guid("2356F5C5-08D9-47EF-8533-8A4AC3E6FBCE")]
         public class LsResult : OkResult
         {

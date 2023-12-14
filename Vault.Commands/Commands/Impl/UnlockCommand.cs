@@ -1,26 +1,31 @@
 using System;
 using System.Runtime.InteropServices;
+using OrderedSerializer;
 
 namespace Vault.Commands
 {
     [Guid("E81B3238-8B90-4B25-BC6E-2517C5AD7DC9")]
-    public class UnlockCommand : Command1
+    public class UnlockCommand : Command
     {
+        private string _scope;
+        
         public override string Name => "unlock";
-        
-        private UnlockCommand() {}
-        
+
+        private UnlockCommand()
+        {
+            _scope = "";
+        }
+
         public UnlockCommand(string scope)
-            : base(new CommandOption(scope))
-        {}
+        {
+            _scope = scope;
+        }
 
         public override Result Process(IProcessorContext context)
         {
-            string scope = Option.Name;
-
             var res = new LockUnlock_Result();
             
-            switch (scope)
+            switch (_scope)
             {
                 case "all":
                     res.Name = context.Current.ChildrenNames.Unlock();
@@ -37,6 +42,11 @@ namespace Vault.Commands
             }
 
             return res;
+        }
+
+        public override void Serialize(IOrderedSerializer serializer)
+        {
+            serializer.Add(ref _scope, () => throw new Exception());
         }
     }
 }
