@@ -151,11 +151,11 @@ namespace Vault.Commands
             {
                 if (list.Count == 1)
                 {
-                    return new LockCommand("all");
+                    return new LockUnlockCommand(LockUnlockCommand.LockUnlockMode.Lock, "all");
                 }
                 if (list.Count == 2)
                 {
-                    return new LockCommand(list[1]);
+                    return new LockUnlockCommand(LockUnlockCommand.LockUnlockMode.Lock, list[1]);
                 }
                 return null;
             });
@@ -163,11 +163,11 @@ namespace Vault.Commands
             {
                 if (list.Count == 1)
                 {
-                    return new UnlockCommand("all");
+                    return new LockUnlockCommand(LockUnlockCommand.LockUnlockMode.Unlock, "all");
                 }
                 if (list.Count == 2)
                 {
-                    return new UnlockCommand(list[1]);
+                    return new LockUnlockCommand(LockUnlockCommand.LockUnlockMode.Unlock, list[1]);
                 }
                 return null;
             });
