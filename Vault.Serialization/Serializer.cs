@@ -19,9 +19,17 @@ namespace Vault.Serialization
             if (!_initialized)
             {
                 _writer = new OrderedSerializer.BinaryBackend.BinaryWriter();
-                _serializer = new HierarchicalSerializer(_writer, new GuidBasedTypeSerializer());
+                
+                _serializer = new HierarchicalSerializer(
+                    _writer, 
+                    new GuidBasedTypeSerializer(), 
+                    null,
+                    DefaultTypeSet.Version,
+                    DefaultTypeSet.DefaultTypes);
+                
                 _typeDeserializer = new GuidBasedTypeDeserializer(
                     AppDomain.CurrentDomain.GetAssemblies().Where(a => a.FullName!.StartsWith("Vault")));
+                
                 _initialized = true;
             }
         }
@@ -42,7 +50,7 @@ namespace Vault.Serialization
             finally
             {
                 _writer.Clear();
-                _serializer.Prepare();
+                _serializer.Prepare(DefaultTypeSet.Version, DefaultTypeSet.DefaultTypes);
             }
         }
         
@@ -58,7 +66,10 @@ namespace Vault.Serialization
                 }
 
                 var reader = new OrderedSerializer.BinaryBackend.BinaryReader(bytes);
-                var deserializer = new HierarchicalDeserializer(reader, _typeDeserializer);
+                
+                var deserializer = new HierarchicalDeserializer(
+                    reader, _typeDeserializer, null, DefaultTypeSet.Provider);
+                
                 IDataStruct? dataStruct = null;
                 deserializer.AddClass(ref dataStruct);
                 return dataStruct;
