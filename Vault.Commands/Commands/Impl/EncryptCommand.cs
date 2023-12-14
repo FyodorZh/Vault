@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using OrderedSerializer;
 using Vault.Encryption;
+using Vault.Repository;
 
 namespace Vault.Commands
 {
@@ -32,11 +33,6 @@ namespace Vault.Commands
         {
             switch (name)
             {
-                case "null":
-                case "nul":
-                case "none":
-                    encryptionSource = null;
-                    return true;
                 case "plain":
                     encryptionSource = new PlaneDataEncryptionSource();
                     return true;
@@ -70,7 +66,7 @@ namespace Vault.Commands
             
             if (nameAndContentEncryption is { NeedCredentials: true })
             {
-                string? credential = context.CredentialsProvider.GetCredentials(context.Current, nameAndContentEncryption.GetDescription(), "name+content");
+                string? credential = context.CredentialsProvider.GetCredentials(context.Current, CredentialsType.NamesAndContent, nameAndContentEncryption.GetDescription());
                 if (credential == null)
                 {
                     return Fail();
@@ -79,7 +75,7 @@ namespace Vault.Commands
             }
             if (nameEncryption is { NeedCredentials: true })
             {
-                string? credential = context.CredentialsProvider.GetCredentials(context.Current, nameEncryption.GetDescription(), "name");
+                string? credential = context.CredentialsProvider.GetCredentials(context.Current, CredentialsType.Names, nameEncryption.GetDescription());
                 if (credential == null)
                 {
                     return Fail();
@@ -88,7 +84,7 @@ namespace Vault.Commands
             }
             if (contentEncryption is { NeedCredentials: true })
             {
-                string? credential = context.CredentialsProvider.GetCredentials(context.Current, contentEncryption.GetDescription(), "content");
+                string? credential = context.CredentialsProvider.GetCredentials(context.Current, CredentialsType.Content, contentEncryption.GetDescription());
                 if (credential == null)
                 {
                     return Fail();

@@ -7,7 +7,9 @@ namespace Vault.Commands
     {
         IRepository Repository { get; }
         IStorage Storage { get; }
+        
         ICredentialsProvider CredentialsProvider { get; }
+        void SetCredentialsInAdvance(CredentialsType type, string credentials);
         
         IDirectoryNode Current { get; set; }
     }

@@ -37,7 +37,7 @@ public static class VaultEntryPoint
 
         var commandsFactory = CommandsFactory.ConstructFullFactory();
 
-        var commandsProcessor = new CommandsProcessor(storage);
+        var commandsProcessor = new CommandsProcessor(storage, Console.ReadLine, Console.Out);
         
         var consoleOutput = new OutputTextStream(Console.Out, () => ".", () =>
         {

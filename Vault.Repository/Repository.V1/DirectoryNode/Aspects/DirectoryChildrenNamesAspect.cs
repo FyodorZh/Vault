@@ -29,7 +29,7 @@ namespace Vault.Repository
             var encryption = _owner.Encryption.SelfChildrenNamesEncryption();
             if (encryption is { NeedCredentials: true })
             {
-                string? credentials = _owner.Repository.CredentialsProvider.GetCredentials(_owner, encryption.GetDescription(), "name");
+                string? credentials = _owner.Repository.CredentialsProvider.GetCredentials(_owner, CredentialsType.Names, encryption.GetDescription());
                 if (credentials == null)
                 {
                     return LockUnlockResult.Fail;

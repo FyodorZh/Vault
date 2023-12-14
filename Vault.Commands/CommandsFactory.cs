@@ -171,6 +171,20 @@ namespace Vault.Commands
                 }
                 return null;
             });
+            factory.Add("credentials", list =>
+            {
+                if (list.Count == 2)
+                {
+                    return new SetCredentialsCommand(list[1]);
+                }
+
+                if (list.Count == 3)
+                {
+                    return new SetCredentialsCommand(list[1], list[2]);
+                }
+
+                return null;
+            });
 
             return factory;
         }
