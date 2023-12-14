@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using OrderedSerializer;
 using Vault.Encryption;
@@ -44,11 +45,28 @@ namespace Vault.Storage
             return dataStruct as T;
         }
 
-        public void Serialize(IOrderedSerializer serializer)
+        void IDataStruct.Serialize(IOrderedSerializer serializer)
         {
-            IReadOnlyList<byte>? data = _data; 
-            serializer.Add(ref data);
-            _data = data ?? Array.Empty<byte>();
+            if (serializer.IsWriter)
+            {
+                byte[]? bytes = null;
+                if (_data is byte[] typedData)
+                {
+                    bytes = typedData;
+                }
+                else
+                {
+                    bytes = _data.ToArray();
+                }
+
+                serializer.Add(ref bytes);
+            }
+            else
+            {
+                byte[] bytes = null!;
+                serializer.Add(ref bytes, Array.Empty<byte>);
+                _data = bytes;
+            }
         }
 
         public byte Version => 0;
