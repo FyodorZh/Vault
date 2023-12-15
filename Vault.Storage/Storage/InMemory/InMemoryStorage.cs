@@ -9,19 +9,24 @@ namespace Vault.Storage.InMemory
     [Guid("341B9F6F-B76B-4D75-8991-FBF7BCADEDA5")]
     public class InMemoryStorage : IStorage, IVersionedDataStruct
     {
+        private INodeIdSource _nodeIdSource;
+        
         private readonly Dictionary<NodeId, NodeData> _nodes = new Dictionary<NodeId, NodeData>();
         private DirectoryData _root;
 
         private InMemoryStorage()
         {
+            _nodeIdSource = null!;
             _root = null!;
         }
 
         public InMemoryStorage(
+            INodeIdSource nodeIdSource,
             Box<StringContent> encryptedRootName,
             Box<DirectoryContent> encryptedRootContent)
         {
-            _root = new DirectoryData(NodeId.NewId(), NodeId.Invalid, encryptedRootName, encryptedRootContent);
+            _nodeIdSource = nodeIdSource;
+            _root = new DirectoryData(_nodeIdSource.GenNew(), NodeId.Invalid, encryptedRootName, encryptedRootContent);
             _nodes.Add(_root.Id, _root);
         }
 
@@ -64,7 +69,7 @@ namespace Vault.Storage.InMemory
                 throw new InvalidOperationException();
             }
             
-            var node = new DirectoryData(NodeId.NewId(), parentId, encryptedName, encryptedContent);
+            var node = new DirectoryData(_nodeIdSource.GenNew(), parentId, encryptedName, encryptedContent);
             _nodes.Add(node.Id, node);
             return node;
         }
@@ -79,7 +84,7 @@ namespace Vault.Storage.InMemory
                 throw new InvalidOperationException();
             }
             
-            var node = new FileData(NodeId.NewId(), parentId, encryptedName, encryptedContent);
+            var node = new FileData(_nodeIdSource.GenNew(), parentId, encryptedName, encryptedContent);
             _nodes.Add(node.Id, node);
             return node;
         }
@@ -119,6 +124,7 @@ namespace Vault.Storage.InMemory
 
         public void Serialize(IOrderedSerializer serializer)
         {
+            serializer.AddClass(ref _nodeIdSource, () => throw new Exception());
             if (serializer.IsWriter)
             {
                 serializer.Writer.WriteInt(_nodes.Count);
@@ -126,12 +132,12 @@ namespace Vault.Storage.InMemory
                 {
                     var key = kv.Key;
                     var value = kv.Value;
-                    serializer.AddVersionedStruct(ref key);
+                    serializer.AddStruct(ref key);
                     serializer.AddClass(ref value);
                 }
 
                 var rootId = _root.Id;
-                serializer.AddVersionedStruct(ref rootId);
+                serializer.AddStruct(ref rootId);
             }
             else
             {
@@ -142,13 +148,13 @@ namespace Vault.Storage.InMemory
                 {
                     NodeId key = new NodeId();
                     NodeData value = null!;
-                    serializer.AddVersionedStruct(ref key);
+                    serializer.AddStruct(ref key);
                     serializer.AddClass(ref value, () => throw new Exception());
                     _nodes.Add(key, value);
                 }
 
                 NodeId rootId = default;
-                serializer.AddVersionedStruct(ref rootId);
+                serializer.AddStruct(ref rootId);
                 _root = (DirectoryData)_nodes[rootId];
             }
         }

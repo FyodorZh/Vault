@@ -47,6 +47,7 @@ public static class VaultEntryPoint
         });
         
         InMemoryStorage storage = new InMemoryStorage(
+            new IncrementalNodeIdSource(),
             new Box<StringContent>(new StringContent("root")),
             new Box<DirectoryContent>(new DirectoryContent(new PlaneDataEncryptionSource())));
 
