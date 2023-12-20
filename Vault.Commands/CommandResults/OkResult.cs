@@ -1,6 +1,6 @@
 using System.IO;
 using System.Runtime.InteropServices;
-using OrderedSerializer;
+using Archivarius;
 
 namespace Vault.Commands
 {

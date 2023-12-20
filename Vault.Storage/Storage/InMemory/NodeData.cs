@@ -1,5 +1,5 @@
 using System;
-using OrderedSerializer;
+using Archivarius;
 using Vault.Content;
 
 namespace Vault.Storage.InMemory

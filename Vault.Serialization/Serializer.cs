@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using OrderedSerializer;
-using OrderedSerializer.TypeSerializers;
+using Archivarius;
+using Archivarius.BinaryBackend;
+using Archivarius.TypeSerializers;
 
 namespace Vault.Serialization
 {
@@ -10,7 +11,7 @@ namespace Vault.Serialization
     {
         private static bool _initialized;
         
-        private static OrderedSerializer.BinaryBackend.BinaryWriter _writer = null!;
+        private static BinaryWriter _writer = null!;
         private static HierarchicalSerializer _serializer = null!;
         private static GuidBasedTypeDeserializer _typeDeserializer = null!;
 
@@ -18,7 +19,7 @@ namespace Vault.Serialization
         {
             if (!_initialized)
             {
-                _writer = new OrderedSerializer.BinaryBackend.BinaryWriter();
+                _writer = new BinaryWriter();
                 
                 _serializer = new HierarchicalSerializer(
                     _writer, 
@@ -65,7 +66,7 @@ namespace Vault.Serialization
                     bytes[i] = data[i];
                 }
 
-                var reader = new OrderedSerializer.BinaryBackend.BinaryReader(bytes);
+                var reader = new BinaryReader(bytes);
                 
                 var deserializer = new HierarchicalDeserializer(
                     reader, _typeDeserializer, null, DefaultTypeSet.Provider);

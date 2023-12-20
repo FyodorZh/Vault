@@ -13,7 +13,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\OrderedSerializer\Package\Runtime\OrderedSerializer\OrderedSerializer.csproj" />
       <ProjectReference Include="..\Vault.Repository\Vault.Repository.csproj" />
     </ItemGroup>
 

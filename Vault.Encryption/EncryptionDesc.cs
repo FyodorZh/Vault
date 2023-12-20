@@ -1,5 +1,5 @@
 using System.Runtime.InteropServices;
-using OrderedSerializer;
+using Archivarius;
 
 namespace Vault.Encryption
 {

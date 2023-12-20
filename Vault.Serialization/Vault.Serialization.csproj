@@ -12,11 +12,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\OrderedSerializer\OrderedSerializer.Json\OrderedSerializer.Json.csproj" />
-      <ProjectReference Include="..\OrderedSerializer\Package\Runtime\OrderedSerializer\OrderedSerializer.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
+      <PackageReference Include="Archivarius" Version="0.1.0-dev.2" />
+      <PackageReference Include="Archivarius.Json" Version="0.1.0-dev.0" />
       <PackageReference Include="NETStandard.Library" Version="2.0.3" />
     </ItemGroup>
 

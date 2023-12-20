@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using NUnit.Framework;
-using OrderedSerializer;
+using Archivarius;
 
 namespace Vault.UT
 {

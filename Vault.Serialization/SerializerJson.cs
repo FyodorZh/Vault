@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using OrderedSerializer;
-using OrderedSerializer.JsonBackend;
-using OrderedSerializer.TypeSerializers;
+using Archivarius;
+using Archivarius.JsonBackend;
+using Archivarius.TypeSerializers;
 
 namespace Vault.Serialization
 {

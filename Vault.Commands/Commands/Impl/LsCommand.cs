@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using OrderedSerializer;
+using Archivarius;
 using Vault.Content;
 using Vault.Encryption;
 using Vault.Repository;

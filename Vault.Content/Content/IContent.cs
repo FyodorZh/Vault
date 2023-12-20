@@ -1,5 +1,5 @@
 using System.IO;
-using OrderedSerializer;
+using Archivarius;
 
 namespace Vault.Content
 {

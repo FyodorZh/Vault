@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using OrderedSerializer;
+using Archivarius;
 using Vault.Content;
 
 namespace Vault.Storage.InMemory

@@ -1,5 +1,5 @@
 using System.Runtime.InteropServices;
-using OrderedSerializer;
+using Archivarius;
 using Vault.Repository;
 
 namespace Vault.Commands
