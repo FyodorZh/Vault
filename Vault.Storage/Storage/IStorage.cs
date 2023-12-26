@@ -5,7 +5,7 @@ namespace Vault.Storage
 {
     public interface IStorage
     {
-        INodeData Root { get; }
+        IDirectoryData Root { get; }
         
         INodeData? GetNode(NodeId id);
         

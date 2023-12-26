@@ -40,7 +40,7 @@ namespace Vault.Storage.InMemory
             _nodes.Add(data.Id, data);
         }
 
-        INodeData IStorage.Root => _root;
+        IDirectoryData IStorage.Root => _root;
 
         INodeData? IStorage.GetNode(NodeId id)
         {
