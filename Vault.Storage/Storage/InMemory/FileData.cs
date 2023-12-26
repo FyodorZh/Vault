@@ -29,7 +29,7 @@ namespace Vault.Storage.InMemory
             _fileContent = fileContent;
         }
 
-        public override void Serialize(IOrderedSerializer serializer)
+        public override void Serialize(ISerializer serializer)
         {
             base.Serialize(serializer);
             serializer.AddClass(ref _fileContent, () => throw new Exception());

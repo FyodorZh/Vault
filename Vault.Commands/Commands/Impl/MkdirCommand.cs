@@ -33,7 +33,7 @@ namespace Vault.Commands
             return Ok;
         }
 
-        public override void Serialize(IOrderedSerializer serializer)
+        public override void Serialize(ISerializer serializer)
         {
             serializer.Add(ref _dirName, () => throw new Exception());
         }

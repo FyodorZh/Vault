@@ -25,7 +25,7 @@ namespace Vault.Content
             return Content;
         }
 
-        public override void Serialize(IOrderedSerializer serializer)
+        public override void Serialize(ISerializer serializer)
         {
             serializer.Add(ref _content);
         }

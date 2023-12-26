@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Archivarius;
@@ -39,7 +40,7 @@ namespace Vault.Commands
             return result;
         }
 
-        public override void Serialize(IOrderedSerializer serializer)
+        public override void Serialize(ISerializer serializer)
         {
             // DO NOTHING
         }
@@ -136,14 +137,14 @@ namespace Vault.Commands
                 }
             }
 
-            public override void Serialize(IOrderedSerializer serializer)
+            public override void Serialize(ISerializer serializer)
             {
                 serializer.Add(ref _dirName);
                 serializer.Add(ref _globalEncryption);
                 serializer.Add(ref _nameEncryption);
                 serializer.Add(ref _contentEncryption);
-                serializer.Add(ref _childrenNames!);
-                serializer.Add(ref _childrenDirFlags!);
+                serializer.AddList(ref _childrenNames, () => throw new Exception());
+                serializer.AddList(ref _childrenDirFlags);
             }
         }
     }

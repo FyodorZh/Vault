@@ -24,7 +24,7 @@ namespace Vault.Encryption
         public abstract IReadOnlyList<byte> Encrypt(IReadOnlyList<byte> plainData);
         public abstract IReadOnlyList<byte> Decrypt(IReadOnlyList<byte> encryptedData);
 
-        public abstract void Serialize(IOrderedSerializer serializer);
+        public abstract void Serialize(ISerializer serializer);
         public virtual byte Version => 0;
     }
 }

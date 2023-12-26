@@ -41,7 +41,7 @@ namespace Vault.Content
 
         public IEncryptionSource GetForContent() => _namesAndContent ?? _content ?? throw new InvalidOperationException();
 
-        public void Serialize(IOrderedSerializer serializer)
+        public void Serialize(ISerializer serializer)
         {
             serializer.AddClass(ref _namesAndContent);
             serializer.AddClass(ref _names);

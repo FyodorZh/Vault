@@ -34,7 +34,7 @@ namespace Vault.Storage.InMemory
             _name = encryptedName;
         }
 
-        public virtual void Serialize(IOrderedSerializer serializer)
+        public virtual void Serialize(ISerializer serializer)
         {
             if (serializer.IsWriter && !IsValid)
             {

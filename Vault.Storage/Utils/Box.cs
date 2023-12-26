@@ -45,7 +45,7 @@ namespace Vault.Storage
             return dataStruct as T;
         }
 
-        void IDataStruct.Serialize(IOrderedSerializer serializer)
+        void IDataStruct.Serialize(ISerializer serializer)
         {
             if (serializer.IsWriter)
             {

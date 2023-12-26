@@ -16,7 +16,7 @@ namespace Vault.Storage
             _id = id;
         }
 
-        public void Serialize(IOrderedSerializer serializer)
+        public void Serialize(ISerializer serializer)
         {
             serializer.Add(ref _id);
         }

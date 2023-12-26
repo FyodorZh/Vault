@@ -57,7 +57,7 @@ namespace Vault.Encryption
             return res;
         }
 
-        public override void Serialize(IOrderedSerializer serializer)
+        public override void Serialize(ISerializer serializer)
         {
             // DO NOTHING
         }

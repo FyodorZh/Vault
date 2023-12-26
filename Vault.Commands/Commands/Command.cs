@@ -17,7 +17,7 @@ namespace Vault.Commands
         
         public abstract Result Process(IProcessorContext context);
 
-        public abstract void Serialize(IOrderedSerializer serializer);
+        public abstract void Serialize(ISerializer serializer);
 
         public virtual byte Version => 0;
     }

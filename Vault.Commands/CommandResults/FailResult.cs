@@ -25,7 +25,7 @@ namespace Vault.Commands
             dst.WriteLine(_message ?? "???");
         }
 
-        public override void Serialize(IOrderedSerializer serializer)
+        public override void Serialize(ISerializer serializer)
         {
             serializer.Add(ref _message);
         }

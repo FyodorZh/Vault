@@ -26,7 +26,7 @@ namespace Vault.Encryption
             return $"Method={_methodName ?? "???"} RequireCredentials={_requireCredentials} HasCredentials={_hasCredentials}";
         }
 
-        public void Serialize(IOrderedSerializer serializer)
+        public void Serialize(ISerializer serializer)
         {
             serializer.Add(ref _methodName);
             serializer.Add(ref _requireCredentials);

@@ -43,7 +43,7 @@ namespace Vault.Commands
             return new CatResult(file.Content.Value.ToString());
         }
 
-        public override void Serialize(IOrderedSerializer serializer)
+        public override void Serialize(ISerializer serializer)
         {
             serializer.Add(ref _fileName, () => throw new Exception());
         }
@@ -69,7 +69,7 @@ namespace Vault.Commands
                 dst.WriteLine(_content ?? "");
             }
 
-            public override void Serialize(IOrderedSerializer serializer)
+            public override void Serialize(ISerializer serializer)
             {
                 serializer.Add(ref _content);
             }

@@ -124,7 +124,7 @@ namespace Vault.Commands
             }
         }
 
-        public override void Serialize(IOrderedSerializer serializer)
+        public override void Serialize(ISerializer serializer)
         {
             serializer.Add(ref _mode);
             serializer.Add(ref _scope);
@@ -154,7 +154,7 @@ namespace Vault.Commands
                 dst.WriteLine("Content: " + _content);
             }
 
-            public override void Serialize(IOrderedSerializer serializer)
+            public override void Serialize(ISerializer serializer)
             {
                 serializer.Add(ref _name);
                 serializer.Add(ref _content);

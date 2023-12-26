@@ -16,7 +16,7 @@ namespace Vault.Commands
             // DO NOTHING
         }
 
-        public override void Serialize(IOrderedSerializer serializer)
+        public override void Serialize(ISerializer serializer)
         {
         }
     }

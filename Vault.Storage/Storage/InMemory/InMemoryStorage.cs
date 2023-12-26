@@ -122,7 +122,7 @@ namespace Vault.Storage.InMemory
             return true;
         }
 
-        public void Serialize(IOrderedSerializer serializer)
+        public void Serialize(ISerializer serializer)
         {
             serializer.AddClass(ref _nodeIdSource, () => throw new Exception());
             if (serializer.IsWriter)

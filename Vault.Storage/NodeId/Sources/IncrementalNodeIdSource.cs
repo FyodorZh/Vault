@@ -9,7 +9,7 @@ namespace Vault.Storage
     {
         private long _nextId = 1;
         
-        public void Serialize(IOrderedSerializer serializer)
+        public void Serialize(ISerializer serializer)
         {
             serializer.Add(ref _nextId);
         }

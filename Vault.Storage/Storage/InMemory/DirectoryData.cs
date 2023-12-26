@@ -29,7 +29,7 @@ namespace Vault.Storage.InMemory
             _dirContent = dirContent;
         }
 
-        public override void Serialize(IOrderedSerializer serializer)
+        public override void Serialize(ISerializer serializer)
         {
             base.Serialize(serializer);
             serializer.AddClass(ref _dirContent, () => throw new Exception());

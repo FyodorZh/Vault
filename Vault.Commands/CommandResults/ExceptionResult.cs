@@ -65,7 +65,7 @@ namespace Vault.Commands
             }
         }
 
-        public override void Serialize(IOrderedSerializer serializer)
+        public override void Serialize(ISerializer serializer)
         {
             serializer.Add(ref _message);
             serializer.Add(ref _source);
@@ -73,7 +73,24 @@ namespace Vault.Commands
             serializer.Add(ref _hResult);
             serializer.Add(ref _stackTrace);
             serializer.AddClass(ref _innerException);
-            serializer.AddAny(ref _data); // is it ok?
+            serializer.AddList(ref _data, (ISerializer s, ref KeyValuePair<string?, string?> kv) =>
+            {
+                if (s.IsWriter)
+                {
+                    var k = kv.Key;
+                    var v = kv.Value;
+                    serializer.Add(ref k);
+                    serializer.Add(ref v);
+                }
+                else
+                {
+                    string? k = null;
+                    string? v = null;
+                    serializer.Add(ref k);
+                    serializer.Add(ref v);
+                    kv = new KeyValuePair<string?, string?>(k, v);
+                }
+            });
         }
     }
 }

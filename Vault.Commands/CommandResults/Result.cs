@@ -12,7 +12,7 @@ namespace Vault.Commands
     {
         public abstract void WriteTo(IOutputTextStream dst);
         
-        public abstract void Serialize(IOrderedSerializer serializer);
+        public abstract void Serialize(ISerializer serializer);
 
         public byte Version => 0;
     }
