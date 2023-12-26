@@ -41,7 +41,7 @@ namespace Vault.Storage
         public T? Deserialize(IEncryptionChain? decryptorsChain = null)
         {
             var data = decryptorsChain?.Decrypt(Data) ?? Data;
-            IDataStruct? dataStruct = Serializer.Deserialize(data);
+            IDataStruct? dataStruct = Serializer.Deserialize(data.ToArray());
             return dataStruct as T;
         }
 
@@ -49,7 +49,7 @@ namespace Vault.Storage
         {
             if (serializer.IsWriter)
             {
-                byte[]? bytes = null;
+                byte[]? bytes;
                 if (_data is byte[] typedData)
                 {
                     bytes = typedData;

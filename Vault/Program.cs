@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Vault;
 using Vault.Content;
 using Vault.Encryption;
 using Vault.Repository;
-using Vault.Repository.V1;
 using Vault.Commands;
 using Vault.Serialization;
 using Vault.Storage;
