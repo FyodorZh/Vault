@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Archivarius;
 using Archivarius.BinaryBackend;
@@ -35,7 +34,7 @@ namespace Vault.Serialization
             }
         }
             
-        public static IReadOnlyList<byte> Serialize(IDataStruct dataStruct)
+        public static byte[] Serialize(IDataStruct dataStruct)
         {
             try
             {
@@ -55,18 +54,13 @@ namespace Vault.Serialization
             }
         }
         
-        public static IDataStruct? Deserialize(IReadOnlyList<byte> data)
+        public static IDataStruct? Deserialize(byte[] data)
         {
             try
             {
                 Init();
-                var bytes = new byte[data.Count];
-                for (int i = data.Count - 1; i >= 0; --i)
-                {
-                    bytes[i] = data[i];
-                }
-
-                var reader = new BinaryReader(bytes);
+                
+                var reader = new BinaryReader(data);
                 
                 var deserializer = new HierarchicalDeserializer(
                     reader, _typeDeserializer, null, DefaultTypeSet.Provider);
