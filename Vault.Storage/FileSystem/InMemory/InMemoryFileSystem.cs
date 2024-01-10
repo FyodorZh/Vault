@@ -1,31 +1,29 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Archivarius;
 
 namespace Vault.FileSystem
 {
-    public abstract class InMemoryFileSystem<TData, TEntity, ITEntity> : IGenericFileSystem<TData, ITEntity>, IVersionedDataStruct
+    public abstract class InMemoryFileSystem<TData, TEntity> : IFileSystem<TData>, IVersionedDataStruct
         where TData : class
-        where TEntity : class, ITEntity, IGenericEntity<TData>, IDataStruct, new()
-        where ITEntity : class, IGenericEntity<TData>
+        where TEntity : class, IEntity<TData>, IDataStruct, new()
     {
         private Dictionary<EntityName, TEntity> _entities = new Dictionary<EntityName, TEntity>();
         
-        public Task<ITEntity?> GetEntity(EntityName name)
+        public Task<IEntity<TData>?> GetEntity(EntityName name)
         {
             if (_entities.TryGetValue(name, out var entity))
             {
-                return Task.FromResult<ITEntity?>(entity);
+                return Task.FromResult<IEntity<TData>?>(entity);
             }
 
-            return Task.FromResult<ITEntity?>(null);
+            return Task.FromResult<IEntity<TData>?>(null);
         }
 
-        public Task<IEnumerable<ITEntity>> GetChildren(EntityName name)
+        public Task<IEnumerable<IEntity<TData>>> GetChildren(EntityName name)
         {
-            List<ITEntity> list = new List<ITEntity>();
+            List<IEntity<TData>> list = new List<IEntity<TData>>();
 
             foreach (var kv in _entities)
             {
@@ -35,21 +33,21 @@ namespace Vault.FileSystem
                 }
             }
 
-            return Task.FromResult((IEnumerable<ITEntity>)list);
+            return Task.FromResult((IEnumerable<IEntity<TData>>)list);
         }
 
-        public Task<ITEntity?> Add(EntityName name, TData data)
+        public Task<IEntity<TData>?> Add(EntityName name, TData data)
         {
             if (_entities.ContainsKey(name))
             {
-                return Task.FromResult<ITEntity?>(null);
+                return Task.FromResult<IEntity<TData>?>(null);
             }
 
             TEntity entity = new TEntity();
             entity.Setup(name, data);
             _entities.Add(name, entity);
             
-            return Task.FromResult<ITEntity?>(entity);
+            return Task.FromResult<IEntity<TData>?>(entity);
         }
 
         public Task<bool> Delete(EntityName name)

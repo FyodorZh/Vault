@@ -4,14 +4,6 @@ using Archivarius;
 
 namespace Vault.FileSystem
 {
-    public interface IEntityName
-    {
-        bool IsRoot { get; }
-        IEntityName? Parent { get; }
-        string Name { get; }
-        string FullName { get; }
-    }
-    
     [Guid("DB8D4134-3A0E-4B15-9673-B99FD5E8E4E1")]
     public sealed class EntityName : IEquatable<EntityName>, IVersionedDataStruct
     {
@@ -24,6 +16,8 @@ namespace Vault.FileSystem
         private string? _fullName;
         
         public bool IsRoot => _parent == null;
+
+        public EntityName? Parent => _parent;
 
         public string Name => _name;
 
@@ -58,9 +52,18 @@ namespace Vault.FileSystem
 
         public EntityName(EntityName parent, string name)
         {
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentException(nameof(name));
+            }
             _parent = parent;
             _name = name;
             _depth = parent.Depth + 1;
+        }
+
+        public EntityName Sub(string subName)
+        {
+            return new EntityName(this, subName);
         }
 
         public bool IsSubEntity(EntityName subEntityName, bool directChild = true)
@@ -103,12 +106,22 @@ namespace Vault.FileSystem
 
         public static bool operator ==(EntityName? left, EntityName? right)
         {
-            return Equals(left, right);
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (ReferenceEquals(left, null))
+            {
+                return false;
+            }
+
+            return left.Equals(right);
         }
 
         public static bool operator !=(EntityName? left, EntityName? right)
         {
-            return !Equals(left, right);
+            return !(left == right);
         }
 
         public void Serialize(ISerializer serializer)

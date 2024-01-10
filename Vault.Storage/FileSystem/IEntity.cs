@@ -4,7 +4,7 @@ using Vault.Serialization;
 
 namespace Vault.FileSystem
 {
-    public interface IGenericEntity<T>
+    public interface IEntity<T>
         where T: class
     {
         internal void Setup(EntityName name, T data);
@@ -14,44 +14,38 @@ namespace Vault.FileSystem
         EntityName Name { get; }
         Task<T> Read();
         Task Write(T data);
-    }
-    
-    public interface IBinaryEntity : IGenericEntity<byte[]>
-    {
-    }
-    
-    public interface ITextEntity : IGenericEntity<string>
-    {
-    }
 
-    public static class IGenericEntity_Ext
+        Task<TModel?> ReadModel<TModel>() where TModel : class, IDataStruct;
+        Task WriteModel<TModel>(TModel model) where TModel : class, IDataStruct;
+    }
+    
+    public interface IBinaryEntity : IEntity<byte[]>
     {
-        public static async Task<TModel?> ReadModel<TModel>(this IGenericEntity<byte[]> entity)
-            where TModel : class, IDataStruct
+        async Task<TModel?> IEntity<byte[]>.ReadModel<TModel>() where TModel : class
         {
-            var bytes = await entity.Read();
+            var bytes = await Read();
             return Serializer.Deserialize(bytes) as TModel;
         }
-        
-        public static async Task<TModel?> ReadModel<TModel>(this IGenericEntity<string> entity)
-            where TModel : class, IDataStruct
-        {
-            var json = await entity.Read();
-            return SerializerJson.Deserialize(json) as TModel;
-        }
-        
-        public static async Task WriteModel<TModel>(this IGenericEntity<byte[]> entity, TModel model)
-            where TModel : class, IDataStruct
+
+        Task IEntity<byte[]>.WriteModel<TModel>(TModel model)
         {
             var bytes = Serializer.Serialize(model);
-            await entity.Write(bytes);
+            return Write(bytes);
         }
-        
-        public static async Task WriteModel<TModel>(this IGenericEntity<string> entity, TModel model)
-            where TModel : class, IDataStruct
+    }
+    
+    public interface ITextEntity : IEntity<string>
+    {
+        async Task<TModel?> IEntity<string>.ReadModel<TModel>() where TModel : class
+        {
+            var json = await Read();
+            return SerializerJson.Deserialize(json) as TModel;
+        }
+
+        Task IEntity<string>.WriteModel<TModel>(TModel model)
         {
             var json = SerializerJson.Serialize(model);
-            await entity.Write(json);
+            return Write(json);
         }
     }
 }

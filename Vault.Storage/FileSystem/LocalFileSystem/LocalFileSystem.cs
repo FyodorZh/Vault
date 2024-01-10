@@ -13,28 +13,28 @@ namespace Vault.FileSystem
             _root = root;
         }
 
-        public Task<IBinaryEntity?> GetEntity(EntityName name)
+        public Task<IEntity<byte[]>?> GetEntity(EntityName name)
         {
             var fi = new FileInfo(_root.FullName + "/" + name.FullName);
             if (fi.Exists)
             {
-                return Task.FromResult<IBinaryEntity?>(new Entity(name, fi));
+                return Task.FromResult<IEntity<byte[]>?>(new Entity(name, fi));
             }
 
-            return Task.FromResult<IBinaryEntity?>(null);
+            return Task.FromResult<IEntity<byte[]>?>(null);
         }
 
-        public Task<IEnumerable<IBinaryEntity>> GetChildren(EntityName name)
+        public Task<IEnumerable<IEntity<byte[]>>> GetChildren(EntityName name)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<IBinaryEntity?> Add(EntityName name, byte[] data)
+        public Task<IEntity<byte[]>?> Add(EntityName name, byte[] data)
         {
             throw new System.NotImplementedException();
         }
 
-        public  Task<bool> Delete(EntityName name)
+        public Task<bool> Delete(EntityName name)
         {
             throw new System.NotImplementedException();
         }
