@@ -6,11 +6,11 @@ namespace Vault.Storage.FileSystem
 {
     public class FileSystemStorage : IStorage
     {
-        private readonly IBinaryFileSystem _fs;
+        private readonly IFileSystem<byte[]> _fs;
         
         private IDirectoryData _root = null!;
 
-        public FileSystemStorage(IBinaryFileSystem fileSystem)
+        public FileSystemStorage(IFileSystem<byte[]> fileSystem)
         {
             _fs = fileSystem;
         }

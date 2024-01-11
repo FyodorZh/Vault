@@ -1,26 +1,25 @@
 using System;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Archivarius;
 
 namespace Vault.FileSystem
 {
-    [Guid("23388A65-377D-456E-A2C6-F865B6E0815B")]
-    public class InMemoryTextFileSystemEntity : ITextEntity, IDataStruct
+    public abstract class InMemoryFileSystemEntity<TData> : IEntity<TData>, IDataStruct
+        where TData : class
     {
         private EntityName _name;
-        private string? _data;
+        private TData? _data;
 
         public bool IsValid => _data != null;
 
         public EntityName Name => _name;
 
-        public InMemoryTextFileSystemEntity()
+        protected InMemoryFileSystemEntity()
         {
             _name = null!;
         }
 
-        public void Setup(EntityName name, string data)
+        public void Setup(EntityName name, TData data)
         {
             _name = name;
             _data = data;
@@ -31,25 +30,25 @@ namespace Vault.FileSystem
             _data = null;
         }
 
-        public Task<string> Read()
+        public Task<TData> Read()
         {
             if (_data == null)
             {
                 throw new InvalidOperationException("Entity is not valid");
             }
-            return Task.FromResult(_data);
+            return Task.FromResult(SafeCopy(_data));
         }
 
-        public Task Write(string data)
+        public Task Write(TData data)
         {
             if (_data == null)
             {
                 throw new InvalidOperationException("Entity is not valid");
             }
-            _data = data;
+            _data = SafeCopy(data);
             return Task.CompletedTask;
         }
-
+        
         public void Serialize(ISerializer serializer)
         {
             if (serializer.IsWriter && _data == null)
@@ -57,7 +56,15 @@ namespace Vault.FileSystem
                 throw new InvalidOperationException("Entity is not valid");
             }
             serializer.AddClass(ref _name, () => throw new Exception());
-            serializer.Add(ref _data);
+            Serialize(serializer, ref _data);
         }
+        
+        public abstract Task<TModel?> ReadModel<TModel>() where TModel : class, IDataStruct;
+        
+        public abstract Task WriteModel<TModel>(TModel model) where TModel : class, IDataStruct;
+
+        protected abstract TData SafeCopy(TData src);
+
+        protected abstract void Serialize(ISerializer serializer, ref TData? data);
     }
 }

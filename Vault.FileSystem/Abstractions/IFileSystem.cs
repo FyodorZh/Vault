@@ -12,12 +12,4 @@ namespace Vault.FileSystem
         Task<IEntity<TData>?> Add(EntityName name, TData data);
         Task<bool> Delete(EntityName name);
     }
-    
-    public interface IBinaryFileSystem : IFileSystem<byte[]>
-    {
-    }
-    
-    public interface ITextFileSystem : IFileSystem<string>
-    {
-    }
 }
