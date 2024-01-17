@@ -19,10 +19,10 @@ namespace Vault.FileSystem
             _name = null!;
         }
 
-        void IEntityCtl<TData>.Setup(EntityName name, TData data)
+        void IEntityCtl<TData>.Setup(EntityName name, TData? data)
         {
             _name = name;
-            _data = data;
+            _data = data ?? Empty;
         }
 
         void IEntityCtl<TData>.Invalidate()
@@ -63,6 +63,8 @@ namespace Vault.FileSystem
         
         public abstract Task WriteModel<TModel>(TModel model) where TModel : class, IDataStruct;
 
+        protected abstract TData Empty { get; }
+        
         protected abstract TData SafeCopy(TData src);
 
         protected abstract void Serialize(ISerializer serializer, ref TData? data);

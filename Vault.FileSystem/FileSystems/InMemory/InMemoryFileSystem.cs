@@ -5,13 +5,19 @@ using Archivarius;
 
 namespace Vault.FileSystem
 {
-    public abstract class InMemoryFileSystem<TData, TEntity> : IFileSystem<TData>, IVersionedDataStruct
+    public abstract class InMemoryFileSystem<TData, TEntity> : 
+        IFileSystem, IFileSystem<TData>, IVersionedDataStruct
         where TData : class
         where TEntity : class, IEntityCtl<TData>, IDataStruct, new()
     {
         private Dictionary<EntityName, TEntity> _entities = new Dictionary<EntityName, TEntity>();
         
-        public Task<IEntity<TData>?> GetEntity(EntityName name)
+        async Task<IEntity?> IFileSystem.GetEntity(EntityName name)
+        {
+            return await ((IFileSystem<TData>)this).GetEntity(name);
+        }
+        
+        Task<IEntity<TData>?> IFileSystem<TData>.GetEntity(EntityName name)
         {
             if (_entities.TryGetValue(name, out var entity))
             {
@@ -21,7 +27,12 @@ namespace Vault.FileSystem
             return Task.FromResult<IEntity<TData>?>(null);
         }
 
-        public Task<IEnumerable<IEntity<TData>>> GetChildren(EntityName name)
+        async Task<IEnumerable<IEntity>> IFileSystem.GetChildren(EntityName name)
+        {
+            return await ((IFileSystem<TData>)this).GetChildren(name);
+        }
+
+        Task<IEnumerable<IEntity<TData>>> IFileSystem<TData>.GetChildren(EntityName name)
         {
             List<IEntity<TData>> list = new List<IEntity<TData>>();
 
@@ -35,8 +46,13 @@ namespace Vault.FileSystem
 
             return Task.FromResult((IEnumerable<IEntity<TData>>)list);
         }
+        
+        async Task<IEntity?> IFileSystem.Add(EntityName name)
+        {
+            return await ((IFileSystem<TData>)this).Add(name, null);
+        }
 
-        public Task<IEntity<TData>?> Add(EntityName name, TData data)
+        Task<IEntity<TData>?> IFileSystem<TData>.Add(EntityName name, TData? data)
         {
             if (_entities.ContainsKey(name))
             {
@@ -49,8 +65,13 @@ namespace Vault.FileSystem
             
             return Task.FromResult<IEntity<TData>?>(entity);
         }
+        
+        Task<bool> IFileSystem.Delete(EntityName name)
+        {
+            return ((IFileSystem<TData>)this).Delete(name);
+        }
 
-        public Task<bool> Delete(EntityName name)
+        Task<bool> IFileSystem<TData>.Delete(EntityName name)
         {
             if (_entities.TryGetValue(name, out var entity))
             {

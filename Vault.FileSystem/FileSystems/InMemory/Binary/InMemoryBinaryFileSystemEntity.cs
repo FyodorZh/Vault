@@ -9,6 +9,8 @@ namespace Vault.FileSystem
     [Guid("910991F8-60D3-414A-8852-E7C0AE2E10A7")]
     public class InMemoryBinaryFileSystemEntity : InMemoryFileSystemEntity<byte[]>
     {
+        protected override byte[] Empty => Array.Empty<byte>();
+        
         protected override byte[] SafeCopy(byte[] src)
         {
             byte[] res = new byte[src.Length];

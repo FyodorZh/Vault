@@ -8,6 +8,8 @@ namespace Vault.FileSystem
     [Guid("23388A65-377D-456E-A2C6-F865B6E0815B")]
     public class InMemoryTextFileSystemEntity : InMemoryFileSystemEntity<string>
     {
+        protected override string Empty => "";
+
         protected override string SafeCopy(string src)
         {
             return src;

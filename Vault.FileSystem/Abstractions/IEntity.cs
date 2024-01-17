@@ -22,7 +22,7 @@ namespace Vault.FileSystem
     public interface IEntityCtl<T> : IEntity<T>
         where T: class
     {
-        void Setup(EntityName name, T data);
+        void Setup(EntityName name, T? data);
         void Invalidate();
     }
 }
