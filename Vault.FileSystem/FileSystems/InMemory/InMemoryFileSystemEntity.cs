@@ -4,7 +4,7 @@ using Archivarius;
 
 namespace Vault.FileSystem
 {
-    public abstract class InMemoryFileSystemEntity<TData> : IEntity<TData>, IDataStruct
+    public abstract class InMemoryFileSystemEntity<TData> : IEntityCtl<TData>, IDataStruct
         where TData : class
     {
         private EntityName _name;
@@ -19,13 +19,13 @@ namespace Vault.FileSystem
             _name = null!;
         }
 
-        public void Setup(EntityName name, TData data)
+        void IEntityCtl<TData>.Setup(EntityName name, TData data)
         {
             _name = name;
             _data = data;
         }
 
-        public void Invalidate()
+        void IEntityCtl<TData>.Invalidate()
         {
             _data = null;
         }

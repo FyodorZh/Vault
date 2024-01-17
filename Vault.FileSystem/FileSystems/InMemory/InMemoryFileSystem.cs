@@ -7,7 +7,7 @@ namespace Vault.FileSystem
 {
     public abstract class InMemoryFileSystem<TData, TEntity> : IFileSystem<TData>, IVersionedDataStruct
         where TData : class
-        where TEntity : class, IEntity<TData>, IDataStruct, new()
+        where TEntity : class, IEntityCtl<TData>, IDataStruct, new()
     {
         private Dictionary<EntityName, TEntity> _entities = new Dictionary<EntityName, TEntity>();
         
