@@ -68,11 +68,6 @@ namespace Vault.FileSystem
         
         Task<bool> IFileSystem.Delete(EntityName name)
         {
-            return ((IFileSystem<TData>)this).Delete(name);
-        }
-
-        Task<bool> IFileSystem<TData>.Delete(EntityName name)
-        {
             if (_entities.TryGetValue(name, out var entity))
             {
                 entity.Invalidate();

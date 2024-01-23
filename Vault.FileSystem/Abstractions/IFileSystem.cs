@@ -10,15 +10,24 @@ namespace Vault.FileSystem
         
         Task<IEntity?> Add(EntityName name);
         Task<bool> Delete(EntityName name);
+
+        async Task CollectAllChildrenOf(EntityName parent, List<EntityName> collector)
+        {
+            var children = await GetChildren(parent);
+            foreach (var child in children)
+            {
+                collector.Add(child.Name);
+                await CollectAllChildrenOf(child.Name, collector);
+            }
+        }
     }
     
-    public interface IFileSystem<TData>
+    public interface IFileSystem<TData> : IFileSystem
         where TData : class
     {
-        Task<IEntity<TData>?> GetEntity(EntityName name);
-        Task<IEnumerable<IEntity<TData>>> GetChildren(EntityName name);
+        new Task<IEntity<TData>?> GetEntity(EntityName name);
+        new Task<IEnumerable<IEntity<TData>>> GetChildren(EntityName name);
         
         Task<IEntity<TData>?> Add(EntityName name, TData? data);
-        Task<bool> Delete(EntityName name);
     }
 }

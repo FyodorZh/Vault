@@ -22,6 +22,7 @@ namespace Vault.UT
         private async Task GenericCheck<T>(IFileSystem<T> fs, Func<byte, T> encode) where T : class
         {
             Assert.That(await fs.GetChildren(EntityName.Root), Is.Empty);
+            Assert.That(await fs.Delete(EntityName.Root), Is.False);
 
             {
                 Assert.That(await fs.GetEntity(EntityName.Root.Sub("a")), Is.Null);
