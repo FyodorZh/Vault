@@ -20,9 +20,9 @@ namespace Vault.FileSystem
             serializer.Add(ref data);
         }
 
-        public override async Task<TModel?> ReadModel<TModel>() where TModel : class
+        protected override TModel? GetModel<TModel>() where TModel : class
         {
-            var json = await Read();
+            var json = ((IEntityData<string>)this).GetData();
             return SerializerJson.Deserialize(json) as TModel;
         }
 

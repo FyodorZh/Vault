@@ -23,9 +23,9 @@ namespace Vault.FileSystem
             serializer.Add(ref data);
         }
         
-        public override async Task<TModel?> ReadModel<TModel>() where TModel : class
+        protected override TModel? GetModel<TModel>() where TModel : class
         {
-            var bytes = await Read();
+            var bytes = ((IEntityData<byte[]>)this).GetData();
             return Serializer.Deserialize(bytes) as TModel;
         }
 

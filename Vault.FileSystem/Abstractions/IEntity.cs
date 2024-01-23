@@ -8,13 +8,17 @@ namespace Vault.FileSystem
         Validity IsValid { get; }
         EntityName Name { get; }
 
+        Task<IEntityData> ReadAllData();
+
         Task<TModel?> ReadModel<TModel>() where TModel : class, IDataStruct;
         Task WriteModel<TModel>(TModel model) where TModel : class, IDataStruct;
     }
     
     public interface IEntity<T> : IEntity
-        where T: class
+        where T: notnull
     {
+        new Task<IEntityData<T>> ReadAllData();
+        
         Task<T> Read();
         Task Write(T data);
     }
