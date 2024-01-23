@@ -10,7 +10,8 @@ namespace Vault.FileSystem
         private EntityName _name;
         private TData? _data;
 
-        public bool IsValid => _data != null;
+        private readonly ValidityImpl _isValid = new ValidityImpl();
+        public Validity IsValid => _isValid;
 
         public EntityName Name => _name;
 
@@ -28,6 +29,7 @@ namespace Vault.FileSystem
         void IEntityCtl<TData>.Invalidate()
         {
             _data = null;
+            _isValid.Invalidate();
         }
 
         public Task<TData> Read()

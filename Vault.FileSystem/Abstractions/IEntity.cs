@@ -4,8 +4,8 @@ using Archivarius;
 namespace Vault.FileSystem
 {
     public interface IEntity
-    {
-        bool IsValid { get; }
+    { 
+        Validity IsValid { get; }
         EntityName Name { get; }
 
         Task<TModel?> ReadModel<TModel>() where TModel : class, IDataStruct;
