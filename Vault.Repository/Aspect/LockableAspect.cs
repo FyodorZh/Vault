@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace Vault.Repository
 {
@@ -15,11 +16,11 @@ namespace Vault.Repository
             return res;
         }
 
-        public virtual LockUnlockResult Lock()
+        public virtual Task<LockUnlockResult> Lock()
         {
             var res = _unlocked ? LockUnlockResult.Success : LockUnlockResult.NothingToDo;
             _unlocked = false;
-            return res;
+            return Task.FromResult(res);
         }
     }
 
@@ -53,8 +54,9 @@ namespace Vault.Repository
 
         protected abstract InternalT? UnlockState();
 
-        protected virtual void LockState()
+        protected virtual Task LockState()
         {
+            return Task.CompletedTask;
         }
 
         public sealed override LockUnlockResult Unlock()
@@ -87,13 +89,13 @@ namespace Vault.Repository
             }
         }
 
-        public sealed override LockUnlockResult Lock()
+        public sealed override Task<LockUnlockResult> Lock()
         {
             try
             {
                 if (_state == null)
                 {
-                    return LockUnlockResult.NothingToDo;
+                    return Task.FromResult(LockUnlockResult.NothingToDo);
                 }
                 _state = null;
                 base.Lock();
@@ -107,7 +109,7 @@ namespace Vault.Repository
 
                 LockState();
                 
-                return LockUnlockResult.Success;
+                return Task.FromResult(LockUnlockResult.Success);
             }
             finally
             {

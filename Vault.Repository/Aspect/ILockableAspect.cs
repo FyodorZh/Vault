@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace Vault.Repository
 {
     public enum LockUnlockResult : byte
@@ -12,7 +14,7 @@ namespace Vault.Repository
     {
         bool IsLocked { get; }
         LockUnlockResult Unlock();
-        LockUnlockResult Lock();
+        Task<LockUnlockResult> Lock();
     }
     
     public interface ILockableAspect<out T> : ILockableAspect

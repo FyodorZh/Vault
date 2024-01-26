@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Archivarius;
 using Vault.Content;
 using Vault.Encryption;
@@ -13,7 +14,7 @@ namespace Vault.Commands
     {
         public override string Name => "ls";
 
-        public override Result Process(IProcessorContext context)
+        public override async Task<Result> Process(IProcessorContext context)
         {
             LsResult result = new LsResult(context.Current.Name);
             
@@ -32,7 +33,7 @@ namespace Vault.Commands
                 }
             }
 
-            foreach (var ch in context.Current.ChildrenNames.All)
+            foreach (var ch in await context.Current.ChildrenNames.All)
             {
                 result.AddChild(ch.Name, ch is IDirectoryNode);
             }

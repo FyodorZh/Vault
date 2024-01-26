@@ -9,8 +9,8 @@ namespace Vault.Repository.V1
         
         public override ILockableAspect<IContent> Content { get; }
 
-        public FileNode(IFileData data, IRepositoryCtl repository) 
-            : base(data, repository)
+        public FileNode(IFileData data, DirectoryNode? parent, IRepositoryCtl repository) 
+            : base(data, parent, repository)
         {
             Data = data;
             Content = new FileContentAspect(this);

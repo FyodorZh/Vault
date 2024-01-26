@@ -23,7 +23,7 @@ namespace Vault.FileSystem
     }
     
     public interface IFileSystem<TData> : IFileSystem
-        where TData : class
+        where TData : notnull
     {
         new Task<IEntity<TData>?> GetEntity(EntityName name);
         new Task<IEnumerable<IEntity<TData>>> GetChildren(EntityName name);

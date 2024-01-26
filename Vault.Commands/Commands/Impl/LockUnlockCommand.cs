@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Archivarius;
 using Vault.Repository;
 
@@ -73,7 +74,7 @@ namespace Vault.Commands
             }
         }
             
-        public override Result Process(IProcessorContext context)
+        public override async Task<Result> Process(IProcessorContext context)
         {
             LockUnlockCommandResult result = new LockUnlockCommandResult();
             
@@ -84,17 +85,17 @@ namespace Vault.Commands
                     switch (_scope)
                     {
                         case Scope.All:
-                            result.Content = context.Current.ChildrenContent.Lock();
-                            result.Name = context.Current.ChildrenNames.Lock();
+                            result.Content = await context.Current.ChildrenContent.Lock();
+                            result.Name = await context.Current.ChildrenNames.Lock();
                             break;
                         case Scope.Content:
-                            result.Content = context.Current.ChildrenContent.Lock();
+                            result.Content = await context.Current.ChildrenContent.Lock();
                             break;
                         case Scope.Names:
-                            result.Name = context.Current.ChildrenNames.Lock();
+                            result.Name = await context.Current.ChildrenNames.Lock();
                             break;
                         default:
-                            return Fail("Wrong lock command. Allowed: all/names/content");
+                            return await Fail("Wrong lock command. Allowed: all/names/content");
                     }
 
                     return result;
@@ -114,13 +115,13 @@ namespace Vault.Commands
                             result.Name = context.Current.ChildrenNames.Unlock();
                             break;
                         default:
-                            return Fail("Wrong unlock command. Allowed: all/names/content");
+                            return await Fail("Wrong unlock command. Allowed: all/names/content");
                     }
 
                     return result;
                 }
                 default:
-                    return Fail("Invalid lock/unlock mode");
+                    return await Fail("Invalid lock/unlock mode");
             }
         }
 

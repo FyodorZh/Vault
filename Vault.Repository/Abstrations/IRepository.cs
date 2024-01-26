@@ -1,7 +1,9 @@
+using System.Threading.Tasks;
+
 namespace Vault.Repository
 {
     public interface IRepository
     {
-        IDirectoryNode GetRoot();
+        Task<IDirectoryNode> GetRoot();
     }
 }

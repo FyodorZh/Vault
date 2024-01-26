@@ -1,37 +1,52 @@
 using System;
+using System.Threading.Tasks;
 using Archivarius;
 using Vault.Content;
+using Vault.FileSystem;
 
 namespace Vault.Storage.FileSystem
 {
     public abstract class NodeData : INodeData
     {
-        private NodeId _id;
-        private NodeId _parentId;
-        private IBox<StringContent> _name;
+        protected readonly IEntity _fsEntity;
+        private readonly NodeDataModel _entityDataModel;
 
-        public bool IsValid { get; set; }
-        public NodeId Id => _id;
-        public NodeId ParentId => _parentId;
+        NodeId INodeData.Id => _entityDataModel.Id;
 
-        public IBox<StringContent> Name
+        NodeId INodeData.ParentId => _entityDataModel.ParentId;
+
+        bool INodeData.IsValid => _fsEntity.IsValid;
+
+        IBox<StringContent> INodeData.Name => _entityDataModel.Name;
+
+        protected NodeData(IEntity fsEntity, NodeDataModel dataModel)
         {
-            get => _name;
-            set => _name = value;
+            _fsEntity = fsEntity;
+            _entityDataModel = dataModel;
+        }
+        
+        public IEntity FsEntity => _fsEntity;
+
+        public async Task SetName(Box<StringContent> encryptedName)
+        {
+            _entityDataModel.Name = encryptedName;
+            await _fsEntity.WriteModel(_entityDataModel);
         }
 
-        protected NodeData()
+        public abstract class NodeDataModel : IVersionedDataStruct
         {
-            _name = new Box<StringContent>();
-        }
+            public NodeId Id;
+            public NodeId ParentId;
+            public IBox<StringContent> Name = null!;
+            
+            public virtual void Serialize(ISerializer serializer)
+            {
+                serializer.AddStruct(ref Id);
+                serializer.AddStruct(ref ParentId);
+                serializer.AddClass(ref Name, () => throw new Exception());
+            }
 
-        protected NodeData(NodeId id, NodeId parentId,
-            IBox<StringContent> encryptedName)
-        {
-            IsValid = true;
-            _id = id;
-            _parentId = parentId;
-            _name = encryptedName;
+            public virtual byte Version => 0;
         }
     }
 }

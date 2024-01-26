@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Archivarius;
 using Vault.Content;
 
@@ -24,17 +25,17 @@ namespace Vault.Commands
             _fileContent = fileContent;
         }
 
-        public override Result Process(IProcessorContext context)
+        public override async Task<Result> Process(IProcessorContext context)
         {
-            var child = context.Current.ChildrenNames.FindChild(_fileName);
+            var child = await context.Current.ChildrenNames.FindChild(_fileName);
             if (child != null)
             {
-                return Fail("File or directory already exists");
+                return await Fail("File or directory already exists");
             }
             
-            context.Current.ChildrenContent.AddChildFile(_fileName, _fileContent);
+            await context.Current.ChildrenContent.AddChildFile(_fileName, _fileContent);
 
-            return Ok;
+            return await Ok;
         }
 
         public override void Serialize(ISerializer serializer)

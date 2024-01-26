@@ -1,39 +1,41 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Vault.Content;
 
 namespace Vault.Storage
 {
     public interface IStorage
     {
-        IDirectoryData Root { get; }
+        Task<IDirectoryData> GetRoot();
         
-        INodeData? GetNode(NodeId id);
+        Task<INodeData?> GetNode(NodeId id);
         
-        IEnumerable<INodeData> GetChildren(NodeId parentId);
+        Task<IEnumerable<INodeData>> GetChildren(NodeId parentId);
 
-        IEnumerable<INodeData> GetAllSubChildren(NodeId parentId)
+        async Task<IEnumerable<INodeData>> GetAllSubChildren(NodeId parentId)
         {
-            foreach (var ch in GetChildren(parentId))
+            List<INodeData> list = new List<INodeData>();
+            
+            foreach (var ch in await GetChildren(parentId))
             {
-                yield return ch;
-                foreach (var subCh in GetChildren(ch.Id))
-                {
-                    yield return subCh;
-                }
+                list.Add(ch);
+                list.AddRange(await GetAllSubChildren(ch.Id));
             }
+
+            return list;
         }
 
-        IDirectoryData AddDirectory(
+        Task<IDirectoryData> AddDirectory(
             NodeId parentId, 
             Box<StringContent> encryptedName, 
             Box<DirectoryContent> encryptedContent);
         
-        IFileData AddFile(NodeId parentId, 
+        Task<IFileData> AddFile(NodeId parentId, 
             Box<StringContent> encryptedName, 
             Box<FileContent> encryptedContent);
 
-        bool SetNodeName(NodeId id, Box<StringContent> encryptedName);
-        bool SetDirectoryContent(NodeId id, Box<IDirectoryContent> encryptedContent);
-        bool SetFileContent(NodeId id, Box<IFileContent> encryptedContent);
+        Task<bool> SetNodeName(NodeId id, Box<StringContent> encryptedName);
+        Task<bool> SetDirectoryContent(NodeId id, Box<IDirectoryContent> encryptedContent);
+        Task<bool> SetFileContent(NodeId id, Box<IFileContent> encryptedContent);
     }
 }

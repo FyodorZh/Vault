@@ -15,14 +15,18 @@ namespace Vault.FileSystem
         public Validity IsValid => _isValid;
 
         public EntityName Name => _name;
+        
+        IFileSystem IEntity.FS => FS;
+        public IFileSystem<TData> FS { get; private set; } = null!;
 
         protected InMemoryFileSystemEntity()
         {
             _name = null!;
         }
 
-        void IEntityCtl<TData>.Setup(EntityName name, TData? data)
+        void IEntityCtl<TData>.Setup(IFileSystem<TData> fs, EntityName name, TData? data)
         {
+            FS = fs;
             _name = name;
             _data = data ?? Empty;
         }

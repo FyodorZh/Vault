@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Vault.Content;
 using Vault.Encryption;
 
@@ -88,11 +89,11 @@ namespace Vault.Repository.V1
             return dirContent;
         }
 
-        protected override void LockState()
+        protected override async Task LockState()
         {
-            foreach (var child in _owner.Repository.Children(_owner.Id))
+            foreach (var child in await _owner.Repository.Children(_owner.Id))
             {
-                child.LockAll();
+                await child.LockAll();
             }
             
             _selfChildrenContentEncryption = null;
@@ -104,8 +105,8 @@ namespace Vault.Repository.V1
             _contentEncryptionChain = null;
             _childNameEncryptionChain = null;
             
-            _owner.ChildrenContent.Lock();
-            _owner.ChildrenNames.Lock();
+            await _owner.ChildrenContent.Lock();
+            await _owner.ChildrenNames.Lock();
         }
     }
 }

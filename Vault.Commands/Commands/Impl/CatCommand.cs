@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Archivarius;
 using Vault.Repository;
 
@@ -22,22 +23,22 @@ namespace Vault.Commands
             _fileName = fileName;
         }
 
-        public override Result Process(IProcessorContext context)
+        public override async Task<Result> Process(IProcessorContext context)
         {
-            var child = context.Current.ChildrenNames.FindChild(_fileName);
+            var child = await context.Current.ChildrenNames.FindChild(_fileName);
             if (child == null)
             {
-                return Fail("File not found");
+                return await Fail("File not found");
             }
 
             if (child is not IFileNode file)
             {
-                return Fail("Not a file");
+                return await Fail("Not a file");
             }
 
             if (file.Content.Value == null)
             {
-                return Fail("File content is not available");
+                return await Fail("File content is not available");
             }
 
             return new CatResult(file.Content.Value.ToString());

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Vault.Content;
 using Vault.Storage;
 
@@ -8,12 +9,15 @@ namespace Vault.Repository.V1
         public INodeData Data { get; }
         
         public IRepositoryCtl Repository { get; }
-
-
-        protected Node(INodeData data, IRepositoryCtl repository)
+        
+        IDirectoryNode? INode.Parent => Parent;
+        public DirectoryNode? Parent { get; }
+        
+        protected Node(INodeData data, DirectoryNode? parent, IRepositoryCtl repository)
         {
             Data = data;
             Repository = repository;
+            Parent = parent;
         }
 
         public bool IsValid => Data.IsValid;
@@ -32,13 +36,10 @@ namespace Vault.Repository.V1
         
         public abstract ILockableAspect<IContent> Content { get; }
 
-        public virtual void LockAll()
+        public virtual Task LockAll()
         {
             Content.Lock();
+            return Task.CompletedTask;
         }
-
-        IDirectoryNode? INode.Parent => Parent;
-        public DirectoryNode? Parent =>
-            Data.ParentId.IsValid ? Repository.FindDirectory(Data.ParentId) : null;
     }
 }

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Vault.Content;
 using Vault.Storage;
 
@@ -12,7 +13,7 @@ namespace Vault.Repository
         
         ILockableAspect<IContent> Content { get; }
 
-        void LockAll();
+        Task LockAll();
 
         IDirectoryNode? Parent { get; }
     }

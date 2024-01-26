@@ -50,15 +50,38 @@ namespace Vault.FileSystem
             _depth = 0;
         }
 
+        public EntityName(Span<string> path)
+        {
+            if (path.Length == 0)
+            {
+                _parent = null;
+                _name = "";
+                _depth = 0;
+            }
+            else
+            {
+                var name = path[^1];
+                CheckName(name);
+                _parent = new EntityName(path.Slice(0, path.Length - 1));
+                _name = name;
+                _depth = _parent.Depth + 1;
+            }
+        }
+
         public EntityName(EntityName parent, string name)
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentException(nameof(name));
-            }
+            CheckName(name);
             _parent = parent;
             _name = name;
             _depth = parent.Depth + 1;
+        }
+
+        private static void CheckName(string name)
+        {
+            if (string.IsNullOrEmpty(name) || name.Contains('/'))
+            {
+                throw new ArgumentException(nameof(name));
+            }
         }
 
         public EntityName Sub(string subName)

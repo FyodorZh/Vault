@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Archivarius;
 using Vault.Repository;
 
@@ -22,7 +23,7 @@ namespace Vault.Commands
             _cdParam = param;
         }
 
-        public override Result Process(IProcessorContext context)
+        public override async Task<Result> Process(IProcessorContext context)
         {
             if (_cdParam == "..")
             {
@@ -31,22 +32,22 @@ namespace Vault.Commands
                     context.Current = context.Current.Parent;
                 }
                 
-                return Ok;
+                return await Ok;
             }
 
-            var child = context.Current.ChildrenNames.FindChild(_cdParam);
+            var child = await context.Current.ChildrenNames.FindChild(_cdParam);
             if (child == null)
             {
-                return Fail("Directory not found");
+                return await Fail("Directory not found");
             }
 
             if (child is not IDirectoryNode dir)
             {
-                return Fail("Not a directory!");
+                return await Fail("Not a directory!");
             }
 
             context.Current = dir;
-            return Ok;
+            return await Ok;
         }
 
         public override void Serialize(ISerializer serializer)

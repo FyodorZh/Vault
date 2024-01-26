@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Archivarius;
 using Vault.Encryption;
 using Vault.Repository;
@@ -45,7 +46,7 @@ namespace Vault.Commands
             }
         }
 
-        public override Result Process(IProcessorContext context)
+        public override Task<Result> Process(IProcessorContext context)
         {
             EncryptionSource? nameAndContentEncryption = null;
             EncryptionSource? nameEncryption = null;

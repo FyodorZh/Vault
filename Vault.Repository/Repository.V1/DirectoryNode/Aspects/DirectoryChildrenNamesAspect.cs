@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Vault.Encryption;
 using Vault.Repository.V1;
 
@@ -44,7 +45,7 @@ namespace Vault.Repository
             return base.Unlock();
         }
 
-        public override LockUnlockResult Lock()
+        public override async Task<LockUnlockResult> Lock()
         {
             if (IsLocked)
             {
@@ -63,12 +64,12 @@ namespace Vault.Repository
                 }
             }
             
-            foreach (var ch in _owner.Repository.Children(_owner.Id))
+            foreach (var ch in await _owner.Repository.Children(_owner.Id))
             {
-                ch.LockAll();
+                await ch.LockAll();
             }
             
-            base.Lock();
+            await base.Lock();
             return LockUnlockResult.Success;
         }
         
@@ -85,7 +86,7 @@ namespace Vault.Repository
             }
         }
 
-        public IEnumerable<INode> All
+        public Task<IEnumerable<INode>> All
         {
             get
             {
@@ -98,9 +99,9 @@ namespace Vault.Repository
             }
         }
         
-        public INode? FindChild(string name)
+        public async Task<INode?> FindChild(string name)
         {
-            foreach (var node in All)
+            foreach (var node in await All)
             {
                 if (node.Name == name)
                 {

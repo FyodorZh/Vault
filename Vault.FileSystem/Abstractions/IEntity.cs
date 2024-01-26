@@ -8,6 +8,8 @@ namespace Vault.FileSystem
         Validity IsValid { get; }
         EntityName Name { get; }
 
+        IFileSystem FS { get; }
+        
         Task<IEntityData> ReadAllData();
 
         Task<TModel?> ReadModel<TModel>() where TModel : class, IDataStruct;
@@ -17,6 +19,8 @@ namespace Vault.FileSystem
     public interface IEntity<T> : IEntity
         where T: notnull
     {
+        new IFileSystem<T> FS { get; }
+            
         new Task<IEntityData<T>> ReadAllData();
         
         Task<T> Read();
@@ -24,9 +28,9 @@ namespace Vault.FileSystem
     }
 
     public interface IEntityCtl<T> : IEntity<T>
-        where T: class
+        where T: notnull
     {
-        void Setup(EntityName name, T? data);
+        void Setup(IFileSystem<T> fs, EntityName name, T? data);
         void Invalidate();
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Archivarius;
 using Vault.Content;
 
@@ -40,26 +41,28 @@ namespace Vault.Storage.InMemory
             _nodes.Add(data.Id, data);
         }
 
-        IDirectoryData IStorage.Root => _root;
+        Task<IDirectoryData> IStorage.GetRoot() => Task.FromResult<IDirectoryData>(_root);
 
-        INodeData? IStorage.GetNode(NodeId id)
+        Task<INodeData?> IStorage.GetNode(NodeId id)
         {
             _nodes.TryGetValue(id, out var node);
-            return node;
+            return Task.FromResult<INodeData?>(node);
         }
 
-        IEnumerable<INodeData> IStorage.GetChildren(NodeId id)
+        Task<IEnumerable<INodeData>> IStorage.GetChildren(NodeId id)
         {
+            List<INodeData> list = new List<INodeData>();
             foreach (var node in _nodes.Values)
             {
                 if (node.ParentId == id)
                 {
-                    yield return node;
+                    list.Add(node);
                 }
             }
+            return Task.FromResult<IEnumerable<INodeData>>(list);
         }
         
-        IDirectoryData IStorage.AddDirectory(
+        Task<IDirectoryData> IStorage.AddDirectory(
             NodeId parentId, 
             Box<StringContent> encryptedName, 
             Box<DirectoryContent> encryptedContent)
@@ -71,10 +74,10 @@ namespace Vault.Storage.InMemory
             
             var node = new DirectoryData(_nodeIdSource.GenNew(), parentId, encryptedName, encryptedContent);
             _nodes.Add(node.Id, node);
-            return node;
+            return Task.FromResult<IDirectoryData>(node);
         }
 
-        IFileData IStorage.AddFile(
+        Task<IFileData> IStorage.AddFile(
             NodeId parentId, 
             Box<StringContent> encryptedName, 
             Box<FileContent> encryptedContent)
@@ -86,40 +89,40 @@ namespace Vault.Storage.InMemory
             
             var node = new FileData(_nodeIdSource.GenNew(), parentId, encryptedName, encryptedContent);
             _nodes.Add(node.Id, node);
-            return node;
+            return Task.FromResult<IFileData>(node);
         }
 
-        public bool SetNodeName(NodeId id, Box<StringContent> encryptedName)
+        public Task<bool> SetNodeName(NodeId id, Box<StringContent> encryptedName)
         {
             if (!_nodes.TryGetValue(id, out var node))
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             node.Name = encryptedName;
-            return true;
+            return Task.FromResult(true);
         }
 
-        bool IStorage.SetDirectoryContent(NodeId id, Box<IDirectoryContent> encryptedContent)
+        Task<bool> IStorage.SetDirectoryContent(NodeId id, Box<IDirectoryContent> encryptedContent)
         {
             if (!_nodes.TryGetValue(id, out var node) || node is not DirectoryData dirData)
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             dirData.DirContent = encryptedContent;
-            return true;
+            return Task.FromResult(true);
         }
 
-        bool IStorage.SetFileContent(NodeId id, Box<IFileContent> encryptedContent)
+        Task<bool> IStorage.SetFileContent(NodeId id, Box<IFileContent> encryptedContent)
         {
             if (!_nodes.TryGetValue(id, out var node) || node is not FileData fileData)
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             fileData.FileContent = encryptedContent;
-            return true;
+            return Task.FromResult(true);
         }
 
         public void Serialize(ISerializer serializer)

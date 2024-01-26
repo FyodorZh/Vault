@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Vault.Content;
-using Vault.Encryption;
 using Vault.Storage;
 
 namespace Vault.Repository.V1
@@ -11,26 +11,28 @@ namespace Vault.Repository.V1
         IStorage Storage { get; }
         ICredentialsProvider CredentialsProvider { get; }
         
-        DirectoryNode? FindDirectory(NodeId id);
-        FileNode? FindFile(NodeId id);
-        Node? FindNode(NodeId id) => (Node?)FindDirectory(id) ?? FindFile(id);
+        Task<DirectoryNode?> FindDirectory(NodeId id);
+        Task<FileNode?> FindFile(NodeId id);
+        async Task<Node?> FindNode(NodeId id) => (Node?)await FindDirectory(id) ?? await FindFile(id);
         
-        IEnumerable<NodeId> FindChildren(NodeId parentId);
+        Task<IEnumerable<NodeId>> FindChildren(NodeId parentId);
 
-        IEnumerable<INode> Children(NodeId parentId)
+        async Task<IEnumerable<INode>> Children(NodeId parentId)
         {
-            foreach (var id in FindChildren(parentId))
+            List<INode> list = new List<INode>();
+            foreach (var id in await FindChildren(parentId))
             {
-                yield return FindNode(id) ?? throw new Exception();
+                list.Add(await FindNode(id) ?? throw new Exception());
             }
+            return list;
         }
 
-        IDirectoryNode AddDirectory(
+        Task<IDirectoryNode> AddDirectory(
             NodeId parentId, 
             Box<StringContent> encryptedName, 
             Box<DirectoryContent> encryptedContent);
         
-        IFileNode AddFile(
+        Task<IFileNode> AddFile(
             NodeId parentId, 
             Box<StringContent> encryptedName, 
             Box<FileContent> encryptedContent);
@@ -53,9 +55,9 @@ namespace Vault.Repository.V1
             CredentialsProvider = credentialProvider;
         }
 
-        public IDirectoryNode GetRoot()
+        public async Task<IDirectoryNode> GetRoot()
         {
-            var res = ((IRepositoryCtl)this).FindDirectory(_storage.Root.Id);
+            var res = await ((IRepositoryCtl)this).FindDirectory((await _storage.GetRoot()).Id);
             if (res == null)
             {
                 throw new InvalidOperationException();
@@ -64,7 +66,7 @@ namespace Vault.Repository.V1
             return res;
         }
 
-        DirectoryNode? IRepositoryCtl.FindDirectory(NodeId id)
+        async Task<DirectoryNode?> IRepositoryCtl.FindDirectory(NodeId id)
         {
             if (_directories.TryGetValue(id, out var dir))
             {
@@ -75,19 +77,21 @@ namespace Vault.Repository.V1
                 _directories.Remove(id);
             }
 
-            var data = _storage.GetNode(id) as IDirectoryData;
+            var data = await _storage.GetNode(id) as IDirectoryData;
             if (data == null)
             {
                 return null;
             }
-
-            dir = new DirectoryNode(data, this);
+            
+            var parent = await ((IRepositoryCtl)this).FindDirectory(data.ParentId);
+            
+            dir = new DirectoryNode(data, parent, this);
             _directories.Add(id, dir);
             
             return dir;
         }
         
-        FileNode? IRepositoryCtl.FindFile(NodeId id)
+        async Task<FileNode?> IRepositoryCtl.FindFile(NodeId id)
         {
             if (_files.TryGetValue(id, out var file))
             {
@@ -98,51 +102,59 @@ namespace Vault.Repository.V1
                 _files.Remove(id);
             }
 
-            var data = _storage.GetNode(id) as IFileData;
+            var data = await _storage.GetNode(id) as IFileData;
             if (data == null)
             {
                 return null;
             }
+            
+            var parent = await ((IRepositoryCtl)this).FindDirectory(data.ParentId);
 
-            file = new FileNode(data, this);
+            file = new FileNode(data, parent, this);
             _files.Add(id, file);
             
             return file;
         }
         
-        public IEnumerable<NodeId> FindChildren(NodeId parentId)
+        public async Task<IEnumerable<NodeId>> FindChildren(NodeId parentId)
         {
-            foreach (var child in _storage.GetChildren(parentId))
+            List<NodeId> list = new List<NodeId>();
+            foreach (var child in await _storage.GetChildren(parentId))
             {
-                yield return child.Id;
+                list.Add(child.Id);
             }
+            return list;
         }
 
-        public IDirectoryNode AddDirectory(
+        public async Task<IDirectoryNode> AddDirectory(
             NodeId parentId, 
             Box<StringContent> encryptedName, 
             Box<DirectoryContent> encryptedContent)
         {
-            IDirectoryData? data = _storage.AddDirectory(parentId, encryptedName, encryptedContent);
+            IDirectoryData? data = await _storage.AddDirectory(parentId, encryptedName, encryptedContent);
             if (data == null)
             {
                 throw new InvalidOperationException();
             }
 
-            DirectoryNode node = new DirectoryNode(data, this);
+            var parent = await ((IRepositoryCtl)this).FindDirectory(parentId);
+
+            DirectoryNode node = new DirectoryNode(data, parent, this);
             _directories.Add(node.Id, node);
             return node;
         }
 
-        public IFileNode AddFile(NodeId parentId, Box<StringContent> encryptedName, Box<FileContent> encryptedContent)
+        public async Task<IFileNode> AddFile(NodeId parentId, Box<StringContent> encryptedName, Box<FileContent> encryptedContent)
         {
-            IFileData? data = _storage.AddFile(parentId, encryptedName, encryptedContent);
+            IFileData? data = await _storage.AddFile(parentId, encryptedName, encryptedContent);
             if (data == null)
             {
                 throw new InvalidOperationException();
             }
+            
+            var parent = await ((IRepositoryCtl)this).FindDirectory(parentId);
 
-            FileNode node = new FileNode(data, this);
+            FileNode node = new FileNode(data, parent, this);
             _files.Add(node.Id, node);
             return node;
         }

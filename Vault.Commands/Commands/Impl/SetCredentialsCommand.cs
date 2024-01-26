@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Archivarius;
 using Vault.Repository;
 
@@ -27,7 +28,7 @@ namespace Vault.Commands
             _contentCredentials = contentCredentials;
         }
 
-        public override Result Process(IProcessorContext context)
+        public override Task<Result> Process(IProcessorContext context)
         {
             if (_nameAndContentCredentials != null)
             {

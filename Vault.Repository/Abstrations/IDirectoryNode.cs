@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Vault.Content;
 using Vault.Encryption;
 
@@ -13,15 +14,15 @@ namespace Vault.Repository
     public interface IDirectoryChildrenNamesAspect : ILockableAspect
     {
         IEncryptionChain ChildrenNameEncryptionChain { get; }
-        IEnumerable<INode> All { get; }
-        INode? FindChild(string name);
+        Task<IEnumerable<INode>> All { get; }
+        Task<INode?> FindChild(string name);
     }
     
     public interface IDirectoryChildrenContentAspect : ILockableAspect
     {
         IEncryptionChain ContentEncryptionChain { get; }
-        IFileNode AddChildFile(string name, string content);
-        IDirectoryNode AddChildDirectory(string name);
+        Task<IFileNode> AddChildFile(string name, string content);
+        Task<IDirectoryNode> AddChildDirectory(string name);
     }
     
     public interface IDirectoryNode : INode
@@ -32,6 +33,6 @@ namespace Vault.Repository
         
         IDirectoryChildrenContentAspect ChildrenContent { get; }
 
-        bool SetEncryption(EncryptionSource nameEncryption, EncryptionSource contentEncryption);
+        Task<bool> SetEncryption(EncryptionSource nameEncryption, EncryptionSource contentEncryption);
     }
 }

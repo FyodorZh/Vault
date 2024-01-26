@@ -60,7 +60,7 @@ namespace Vault.FileSystem
             }
 
             TEntity entity = new TEntity();
-            entity.Setup(name, data);
+            entity.Setup(this, name, data);
             _entities.Add(name, entity);
             
             return Task.FromResult<IEntity<TData>?>(entity);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Vault.Content;
 using Vault.Encryption;
 using Vault.Repository;
@@ -10,9 +11,9 @@ using Vault.Storage.InMemory;
 
 public static class VaultEntryPoint
 {
-    public static void Main()
+    public static Task Main()
     {
-        RunAll();
+        return RunAll();
     }
 
     private static readonly List<ICommand> _initCommands = new List<ICommand>()
@@ -25,7 +26,7 @@ public static class VaultEntryPoint
         new CdCommand("..")
     };
 
-    private static void RunAll()
+    private static async Task RunAll()
     {
         DefaultTypeSet.Setup(1, v =>
         {
@@ -50,6 +51,7 @@ public static class VaultEntryPoint
         var commandsFactory = CommandsFactory.ConstructFullFactory();
 
         var commandsProcessor = new CommandsProcessor(storage, Console.ReadLine, Console.Out);
+        await commandsProcessor.Prepare();
         
         var consoleOutput = new OutputTextStream(Console.Out, () => ".", () =>
         {
@@ -66,7 +68,7 @@ public static class VaultEntryPoint
 
         foreach (var cmd in _initCommands)
         {
-            var result = commandsProcessor.Process(cmd);
+            var result = await commandsProcessor.Process(cmd);
             if (result is FailResult fail)
             {
                 fail.WriteTo(consoleOutput);
@@ -81,7 +83,7 @@ public static class VaultEntryPoint
         
         foreach (var cmd in commandSource.GetAll())
         {
-            var result = commandsProcessor.Process(cmd);
+            var result = await commandsProcessor.Process(cmd);
             result.WriteTo(consoleOutput);
             consoleOutput.FinishBlock();
         }

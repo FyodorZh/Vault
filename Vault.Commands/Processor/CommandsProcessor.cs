@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Vault.Encryption;
 using Vault.Repository;
 using Vault.Repository.V1;
@@ -34,7 +35,12 @@ namespace Vault.Commands
             Repository = new RepositoryV1(storage, this);
             _credentialsProvider = credentialsProvider;
             _humanOutputStream = humanOutputStream;
-            Current = Repository.GetRoot();
+            Current = null!;
+        }
+
+        public async Task Prepare()
+        {
+            Current = await Repository.GetRoot();
         }
 
         string? ICredentialsProvider.GetCredentials(IDirectoryNode dir, CredentialsType credentialsType, EncryptionDesc encryptionDesc)
@@ -54,7 +60,7 @@ namespace Vault.Commands
             return _credentialsProvider();
         }
 
-        public Result Process(ICommand cmd)
+        public Task<Result> Process(ICommand cmd)
         {
             try
             {
@@ -62,7 +68,7 @@ namespace Vault.Commands
             }
             catch (Exception ex)
             {
-                return new ExceptionResult(ex);
+                return Task.FromResult<Result>(new ExceptionResult(ex));
             }
         }
     }

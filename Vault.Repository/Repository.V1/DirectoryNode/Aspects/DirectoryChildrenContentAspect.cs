@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Vault.Content;
 using Vault.Encryption;
 using Vault.Repository.V1;
@@ -45,7 +46,7 @@ namespace Vault.Repository
             return base.Unlock();
         }
 
-        public override LockUnlockResult Lock()
+        public override async Task<LockUnlockResult> Lock()
         {
             if (IsLocked)
             {
@@ -64,12 +65,12 @@ namespace Vault.Repository
                 }
             }
             
-            foreach (var ch in _owner.Repository.Children(_owner.Id))
+            foreach (var ch in await _owner.Repository.Children(_owner.Id))
             {
-                ch.LockAll();
+                await ch.LockAll();
             }
             
-            base.Lock();
+            await base.Lock();
             return LockUnlockResult.Success;
         }
 
@@ -86,7 +87,7 @@ namespace Vault.Repository
             }
         }
 
-        public IFileNode AddChildFile(string name, string content)
+        public async Task<IFileNode> AddChildFile(string name, string content)
         {
             Unlock();
             if (IsLocked)
@@ -94,13 +95,13 @@ namespace Vault.Repository
                 throw new Exception();
             }
             
-            var fileNode = _owner.Repository.AddFile(_owner.Id,
+            var fileNode = await _owner.Repository.AddFile(_owner.Id,
                 new Box<StringContent>(new StringContent(name), _owner.ChildrenNames.ChildrenNameEncryptionChain),
                 new Box<FileContent>(new FileContent(content), _owner.ChildrenContent.ContentEncryptionChain));
             return fileNode;
         }
 
-        public IDirectoryNode AddChildDirectory(string name)
+        public Task<IDirectoryNode> AddChildDirectory(string name)
         {
             Unlock();
             if (IsLocked)

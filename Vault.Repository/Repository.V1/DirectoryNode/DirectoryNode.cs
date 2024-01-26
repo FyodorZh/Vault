@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Vault.Content;
 using Vault.Encryption;
 using Vault.Storage;
@@ -25,8 +26,8 @@ namespace Vault.Repository.V1
         public IDirectoryChildrenContentAspect ChildrenContent => _childrenContent;
 
         
-        public DirectoryNode(IDirectoryData data, IRepositoryCtl repository)
-            : base(data, repository)
+        public DirectoryNode(IDirectoryData data, DirectoryNode? parent, IRepositoryCtl repository)
+            : base(data, parent, repository)
         {
             Data = data;
             _encryption = new DirectoryEncryptionAspect(this);
@@ -34,12 +35,12 @@ namespace Vault.Repository.V1
             _childrenContent = new DirectoryChildrenContentAspect(this);
         }
 
-        public override void LockAll()
+        public override async Task LockAll()
         {
-            ChildrenContent.Lock();
-            ChildrenNames.Lock();
-            Encryption.Lock();
-            base.LockAll();
+            await ChildrenContent.Lock();
+            await ChildrenNames.Lock();
+            await Encryption.Lock();
+            await base.LockAll();
         }
 
         private static IReadOnlyList<byte> ReEncrypt(
@@ -57,7 +58,7 @@ namespace Vault.Repository.V1
             return data;
         }
 
-        public bool SetEncryption(EncryptionSource nameEncryption, EncryptionSource contentEncryption)
+        public async Task<bool> SetEncryption(EncryptionSource nameEncryption, EncryptionSource contentEncryption)
         {
             EncryptionSource? nameAndContentEncryption = null;
             if (nameEncryption == contentEncryption)
@@ -83,14 +84,14 @@ namespace Vault.Repository.V1
 
             var parentContentEncryptionChain = Parent?.ChildrenContent.ContentEncryptionChain;
             var parentNamesEncryptionChain = Parent?.ChildrenNames.ChildrenNameEncryptionChain;
-            foreach (var ch in Repository.Storage.GetAllSubChildren(Id))
+            foreach (var ch in await Repository.Storage.GetAllSubChildren(Id))
             {
                 IReadOnlyList<byte> nameData = ReEncrypt(
                     ch.Name.Data, 
                     ch.ParentId == Id ? parentNamesEncryptionChain : parentContentEncryptionChain, 
                     ch.ParentId == Id ? curNameEncryption : curContentEncryption, 
                     ch.ParentId == Id ? nameEncryption : contentEncryption);
-                Repository.Storage.SetNodeName(ch.Id, new Box<StringContent>(nameData));
+                await Repository.Storage.SetNodeName(ch.Id, new Box<StringContent>(nameData));
 
                 if (ch is IDirectoryData dir)
                 {
@@ -99,7 +100,7 @@ namespace Vault.Repository.V1
                         parentContentEncryptionChain, 
                         curContentEncryption, 
                         contentEncryption);
-                    Repository.Storage.SetDirectoryContent(ch.Id, new Box<IDirectoryContent>(contentData));
+                    await Repository.Storage.SetDirectoryContent(ch.Id, new Box<IDirectoryContent>(contentData));
                 }
                 else if (ch is IFileData file)
                 {
@@ -108,7 +109,7 @@ namespace Vault.Repository.V1
                         parentContentEncryptionChain, 
                         curContentEncryption, 
                         contentEncryption);
-                    Repository.Storage.SetFileContent(ch.Id, new Box<IFileContent>(contentData));
+                    await Repository.Storage.SetFileContent(ch.Id, new Box<IFileContent>(contentData));
                 }
                 else
                 {
@@ -121,8 +122,8 @@ namespace Vault.Repository.V1
                 new DirectoryContent(nameEncryption, contentEncryption);
             
             var contentBox = new Box<IDirectoryContent>(newDirContent, Parent?.ChildrenContent.ContentEncryptionChain);
-            Repository.Storage.SetDirectoryContent(Id, contentBox);
-            Content.Lock();
+            await Repository.Storage.SetDirectoryContent(Id, contentBox);
+            await Content.Lock();
 
             return true;
         }
