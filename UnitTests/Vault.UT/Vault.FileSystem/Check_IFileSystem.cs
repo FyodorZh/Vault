@@ -30,14 +30,14 @@ namespace Vault.UT
                 Assert.That(entity, Is.Not.Null);
                 Assert.That(await fs.Add(EntityName.Root.Sub("a"), encode(8)), Is.Null);
                 Assert.That(entity!.Name, Is.EqualTo(EntityName.Root.Sub("a")));
-                Assert.That(entity.IsValid, Is.True);
+                Assert.That((bool)entity.IsValid, Is.True);
                 
                 Assert.That(await entity.Read(), Is.EqualTo(encode(7)));
                 await entity.Write(encode(9));
                 Assert.That(await entity.Read(), Is.EqualTo(encode(9)));
 
                 await fs.Delete(EntityName.Root.Sub("a"));
-                Assert.That(entity.IsValid, Is.False);
+                Assert.That((bool)entity.IsValid, Is.False);
             }
         }
     }
