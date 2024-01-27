@@ -9,7 +9,7 @@ namespace Vault.Repository
         bool IsValid { get; }
         NodeId Id { get; }
 
-        string Name { get; }
+        string GetName();
         
         ILockableAspect<IContent> Content { get; }
 

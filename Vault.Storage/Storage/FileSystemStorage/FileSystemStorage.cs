@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Vault.Content;
+using Vault.Encryption;
 using Vault.FileSystem;
 
 namespace Vault.Storage.FileSystem
@@ -11,7 +12,22 @@ namespace Vault.Storage.FileSystem
         private readonly IFileSystem _fs;
         private readonly INodeIdSource _nodeIdSource;
 
-        private readonly Dictionary<NodeId, NodeData> _nodes = new Dictionary<NodeId, NodeData>(); 
+        private readonly Dictionary<NodeId, NodeData> _nodes = new Dictionary<NodeId, NodeData>();
+
+        public static async Task InitializeFS(IFileSystem fileSystem)
+        {
+            IFileSystem fs = fileSystem;
+            var root = await fs.GetEntity(EntityName.Root) ?? throw new Exception();
+            await root.WriteModel(
+                new DirectoryData.DirectoryDataModel(
+                    new NodeId(""), NodeId.Invalid,
+                    new Box<StringContent>(
+                        new StringContent("root"), VoidEncryptionChain.Instance),
+                    new Box<DirectoryContent>(
+                        new DirectoryContent(new PlaneDataEncryptionSource()), VoidEncryptionChain.Instance)
+                    )
+            );
+        }
         
         public FileSystemStorage(IFileSystem fileSystem, INodeIdSource nodeIdSource)
         {
@@ -31,6 +47,11 @@ namespace Vault.Storage.FileSystem
 
         private async Task<NodeData?> GetNodeInternal(NodeId id)
         {
+            if (!id.IsValid)
+            {
+                return null;
+            }
+            
             if (_nodes.TryGetValue(id, out var nodeData))
             {
                 return nodeData;
@@ -99,7 +120,9 @@ namespace Vault.Storage.FileSystem
             var path = new EntityName(dir.FsEntity.Name, id.ToString());
             id = PathToId(path);
 
-            return await dir.AddDirectory(path, id, encryptedName, encryptedContent);
+            var dirData = await dir.AddDirectory(path, id, encryptedName, encryptedContent);
+            _nodes.Add(id, dirData);
+            return dirData;
         }
 
         public async Task<IFileData> AddFile(NodeId parentId, Box<StringContent> encryptedName, Box<FileContent> encryptedContent)
@@ -114,7 +137,9 @@ namespace Vault.Storage.FileSystem
             var path = new EntityName(dir.FsEntity.Name, id.ToString());
             id = PathToId(path);
 
-            return await dir.AddFile(path, id, encryptedName, encryptedContent);
+            var fileData = await dir.AddFile(path, id, encryptedName, encryptedContent);
+            _nodes.Add(id, fileData);
+            return fileData;
         }
 
         public async Task<bool> SetNodeName(NodeId id, Box<StringContent> encryptedName)
@@ -129,7 +154,7 @@ namespace Vault.Storage.FileSystem
             return false;
         }
 
-        public async Task<bool> SetDirectoryContent(NodeId id, Box<IDirectoryContent> encryptedContent)
+        public async Task<bool> SetDirectoryContent(NodeId id, Box<DirectoryContent> encryptedContent)
         {
             var node = await GetNodeInternal(id);
             if (node is not DirectoryData dir)
@@ -141,7 +166,7 @@ namespace Vault.Storage.FileSystem
             return true;
         }
 
-        public async Task<bool> SetFileContent(NodeId id, Box<IFileContent> encryptedContent)
+        public async Task<bool> SetFileContent(NodeId id, Box<FileContent> encryptedContent)
         {
             var node = await GetNodeInternal(id);
             if (node is not FileData file)
@@ -160,6 +185,10 @@ namespace Vault.Storage.FileSystem
 
         private static EntityName IdToPath(NodeId id)
         {
+            if (!id.IsValid)
+            {
+                throw new Exception("Invalid NodeId");
+            }
             return new EntityName(id.ToString().Split('/'));
         }
     }

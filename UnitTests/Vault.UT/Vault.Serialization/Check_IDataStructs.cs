@@ -23,7 +23,8 @@ namespace Vault.UT
                 typeof(Encryption.EntryPoint).Assembly,
                 typeof(Repository.EntryPoint).Assembly,
                 typeof(Serialization.EntryPoint).Assembly,
-                typeof(Storage.EntryPoint).Assembly
+                typeof(Storage.EntryPoint).Assembly,
+                typeof(FileSystem.EntryPoint).Assembly
             };
             
             foreach (var assembly in allAssemblies)

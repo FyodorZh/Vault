@@ -20,13 +20,13 @@ namespace Vault.Storage.FileSystem
             _dataModel = dataModel;
         }
 
-        public async Task SetContent(Box<IDirectoryContent> encryptedContent)
+        public async Task SetContent(Box<DirectoryContent> encryptedContent)
         {
             _dataModel.Content = encryptedContent;
             await _fsEntity.WriteModel(_dataModel);
         }
 
-        public async Task<IDirectoryData> AddDirectory(
+        public async Task<DirectoryData> AddDirectory(
             EntityName name,
             NodeId id,
             Box<StringContent> encryptedName,
@@ -37,22 +37,18 @@ namespace Vault.Storage.FileSystem
             {
                 throw new Exception();
             }
-            
-            DirectoryDataModel model = new DirectoryDataModel()
-            {
-                Id = id,
-                ParentId = _dataModel.Id,
-                Name = encryptedName,
-                Content = encryptedContent,
-            };
 
-            var dirData = new DirectoryData(_fsEntity, model);
+            DirectoryDataModel model = new DirectoryDataModel(
+                id, _dataModel.Id, encryptedName, encryptedContent);
+
             await dir.WriteModel(model);
+            var dirData = new DirectoryData(_fsEntity, model);
+            
             
             return dirData;
         }
 
-        public async Task<IFileData> AddFile(
+        public async Task<FileData> AddFile(
             EntityName name,
             NodeId id,
             Box<StringContent> encryptedName,
@@ -64,24 +60,29 @@ namespace Vault.Storage.FileSystem
                 throw new Exception();
             }
             
-            FileData.FileDataModel model = new FileData.FileDataModel()
-            {
-                Id = id,
-                ParentId = _dataModel.Id,
-                Name = encryptedName,
-                Content = encryptedContent,
-            };
+            FileData.FileDataModel model = new FileData.FileDataModel(
+                id, _dataModel.Id, encryptedName, encryptedContent);
 
-            var fileData = new FileData(_fsEntity, model);
             await file.WriteModel(model);
-            
+            var fileData = new FileData(_fsEntity, model);
+
             return fileData;
         }
         
         [Guid("84B367B2-5130-45FB-A6EB-C1D289CF39B8")]
         public class DirectoryDataModel : NodeDataModel
         {
-            public IBox<IDirectoryContent> Content = null!;
+            public IBox<DirectoryContent> Content = null!;
+            
+            public DirectoryDataModel()
+            {}
+
+            public DirectoryDataModel(NodeId id, NodeId parentId, 
+                IBox<StringContent> name, IBox<DirectoryContent> content)
+                : base(id, parentId, name)
+            {
+                Content = content;
+            }
             
             public override void Serialize(ISerializer serializer)
             {

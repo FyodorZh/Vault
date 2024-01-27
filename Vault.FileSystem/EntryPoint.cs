@@ -1,4 +1,4 @@
-namespace Vault.Encryption
+namespace Vault.FileSystem
 {
     public static class EntryPoint
     {

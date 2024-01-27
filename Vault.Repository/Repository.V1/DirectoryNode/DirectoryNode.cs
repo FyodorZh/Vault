@@ -43,19 +43,31 @@ namespace Vault.Repository.V1
             await base.LockAll();
         }
 
-        private static IReadOnlyList<byte> ReEncrypt(
+        private static IReadOnlyList<byte>? ReEncrypt(
             IReadOnlyList<byte> data, 
-            IEncryptionChain? parentEncryptionChain,
-            IEncryptionSource? curEncryption,
-            IEncryptionSource? newEncryption)
+            IEncryptionChain parentEncryptionChain,
+            IEncryptionSource curEncryption,
+            IEncryptionSource newEncryption)
         {
-            data = parentEncryptionChain?.Decrypt(data) ?? data;
-            data = curEncryption?.Decrypt(data) ?? data;
+            IReadOnlyList<byte>? decryptedData = parentEncryptionChain.Decrypt(data);
+            if (decryptedData == null)
+            {
+                return null;
+            }
+            decryptedData = curEncryption.Decrypt(decryptedData);
+            if (decryptedData == null)
+            {
+                return null;
+            }
 
-            data = newEncryption?.Encrypt(data) ?? data;
-            data = parentEncryptionChain?.Encrypt(data) ?? data;
+            IReadOnlyList<byte>? encryptedData = newEncryption.Encrypt(decryptedData);
+            if (encryptedData == null)
+            {
+                return null;
+            }
+            encryptedData = parentEncryptionChain.Encrypt(encryptedData);
 
-            return data;
+            return encryptedData;
         }
 
         public async Task<bool> SetEncryption(EncryptionSource nameEncryption, EncryptionSource contentEncryption)
@@ -82,34 +94,46 @@ namespace Vault.Repository.V1
             IEncryptionSource curNameEncryption = Encryption.SelfChildrenNamesEncryption();
             IEncryptionSource curContentEncryption = Encryption.SelfChildrenContentEncryption();
 
-            var parentContentEncryptionChain = Parent?.ChildrenContent.ContentEncryptionChain;
-            var parentNamesEncryptionChain = Parent?.ChildrenNames.ChildrenNameEncryptionChain;
+            var parentContentEncryptionChain = Parent?.ChildrenContent.ContentEncryptionChain ?? VoidEncryptionChain.Instance;
+            var parentNamesEncryptionChain = Parent?.ChildrenNames.ChildrenNameEncryptionChain ?? VoidEncryptionChain.Instance;
             foreach (var ch in await Repository.Storage.GetAllSubChildren(Id))
             {
-                IReadOnlyList<byte> nameData = ReEncrypt(
+                IReadOnlyList<byte>? nameData = ReEncrypt(
                     ch.Name.Data, 
                     ch.ParentId == Id ? parentNamesEncryptionChain : parentContentEncryptionChain, 
                     ch.ParentId == Id ? curNameEncryption : curContentEncryption, 
                     ch.ParentId == Id ? nameEncryption : contentEncryption);
+                if (nameData == null)
+                {
+                    return false;
+                }
                 await Repository.Storage.SetNodeName(ch.Id, new Box<StringContent>(nameData));
 
                 if (ch is IDirectoryData dir)
                 {
-                    IReadOnlyList<byte> contentData = ReEncrypt(
+                    IReadOnlyList<byte>? contentData = ReEncrypt(
                         dir.DirContent.Data, 
                         parentContentEncryptionChain, 
                         curContentEncryption, 
                         contentEncryption);
-                    await Repository.Storage.SetDirectoryContent(ch.Id, new Box<IDirectoryContent>(contentData));
+                    if (contentData == null)
+                    {
+                        return false;
+                    }
+                    await Repository.Storage.SetDirectoryContent(ch.Id, new Box<DirectoryContent>(contentData));
                 }
                 else if (ch is IFileData file)
                 {
-                    IReadOnlyList<byte> contentData = ReEncrypt(
+                    IReadOnlyList<byte>? contentData = ReEncrypt(
                         file.FileContent.Data, 
                         parentContentEncryptionChain, 
                         curContentEncryption, 
                         contentEncryption);
-                    await Repository.Storage.SetFileContent(ch.Id, new Box<IFileContent>(contentData));
+                    if (contentData == null)
+                    {
+                        return false;
+                    }
+                    await Repository.Storage.SetFileContent(ch.Id, new Box<FileContent>(contentData));
                 }
                 else
                 {
@@ -121,7 +145,7 @@ namespace Vault.Repository.V1
                 new DirectoryContent(nameAndContentEncryption) : 
                 new DirectoryContent(nameEncryption, contentEncryption);
             
-            var contentBox = new Box<IDirectoryContent>(newDirContent, Parent?.ChildrenContent.ContentEncryptionChain);
+            var contentBox = new Box<DirectoryContent>(newDirContent, Parent?.ChildrenContent.ContentEncryptionChain ?? VoidEncryptionChain.Instance);
             await Repository.Storage.SetDirectoryContent(Id, contentBox);
             await Content.Lock();
 

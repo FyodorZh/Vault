@@ -46,7 +46,7 @@ namespace Vault.Commands
             }
         }
 
-        public override Task<Result> Process(IProcessorContext context)
+        public override async Task<Result> Process(IProcessorContext context)
         {
             EncryptionSource? nameAndContentEncryption = null;
             EncryptionSource? nameEncryption = null;
@@ -62,7 +62,7 @@ namespace Vault.Commands
             if (nameAndContentEncryption == null && 
                 (nameEncryption == null || contentEncryption == null))
             {
-                return Fail();
+                return await Fail();
             }
             
             if (nameAndContentEncryption is { NeedCredentials: true })
@@ -70,7 +70,7 @@ namespace Vault.Commands
                 string? credential = context.CredentialsProvider.GetCredentials(context.Current, CredentialsType.NamesAndContent, nameAndContentEncryption.GetDescription());
                 if (credential == null)
                 {
-                    return Fail();
+                    return await Fail();
                 }
                 nameAndContentEncryption.AddCredentials(credential);
             }
@@ -79,7 +79,7 @@ namespace Vault.Commands
                 string? credential = context.CredentialsProvider.GetCredentials(context.Current, CredentialsType.Names, nameEncryption.GetDescription());
                 if (credential == null)
                 {
-                    return Fail();
+                    return await Fail();
                 }
                 nameEncryption.AddCredentials(credential);
             }
@@ -88,21 +88,22 @@ namespace Vault.Commands
                 string? credential = context.CredentialsProvider.GetCredentials(context.Current, CredentialsType.Content, contentEncryption.GetDescription());
                 if (credential == null)
                 {
-                    return Fail();
+                    return await Fail();
                 }
                 contentEncryption.AddCredentials(credential);
             }
 
+            bool isOk;
             if (nameAndContentEncryption != null)
             {
-                context.Current.SetEncryption(nameAndContentEncryption, nameAndContentEncryption);
+                isOk = await context.Current.SetEncryption(nameAndContentEncryption, nameAndContentEncryption);
             }
             else
             {
-                context.Current.SetEncryption(nameEncryption!, contentEncryption!);
+                isOk = await context.Current.SetEncryption(nameEncryption!, contentEncryption!);
             }
 
-            return Ok;
+            return await (isOk ? Ok : Fail());
         }
 
         public override void Serialize(ISerializer serializer)

@@ -5,8 +5,10 @@ using Vault.Content;
 using Vault.Encryption;
 using Vault.Repository;
 using Vault.Commands;
+using Vault.FileSystem;
 using Vault.Serialization;
 using Vault.Storage;
+using Vault.Storage.FileSystem;
 using Vault.Storage.InMemory;
 
 public static class VaultEntryPoint
@@ -43,11 +45,18 @@ public static class VaultEntryPoint
             };
         });
         
-        InMemoryStorage storage = new InMemoryStorage(
-            new IncrementalNodeIdSource(),
-            new Box<StringContent>(new StringContent("root")),
-            new Box<DirectoryContent>(new DirectoryContent(new PlaneDataEncryptionSource())));
+        //var storage = new InMemoryStorage(
+        //    new IncrementalNodeIdSource(),
+        //    new Box<StringContent>(new StringContent("root"), VoidEncryptionChain.Instance),
+        //    new Box<DirectoryContent>(new DirectoryContent(new PlaneDataEncryptionSource()), VoidEncryptionChain.Instance));
 
+
+        var fileSystem = new InMemoryTextFileSystem();
+        await FileSystemStorage.InitializeFS(fileSystem);
+        var storage = new FileSystemStorage(
+            fileSystem,
+            new IncrementalNodeIdSource());
+        
         var commandsFactory = CommandsFactory.ConstructFullFactory();
 
         var commandsProcessor = new CommandsProcessor(storage, Console.ReadLine, Console.Out);
@@ -55,11 +64,11 @@ public static class VaultEntryPoint
         
         var consoleOutput = new OutputTextStream(Console.Out, () => ".", () =>
         {
-            string prompt = commandsProcessor.Current.Name;
+            string prompt = commandsProcessor.Current.GetName();
             INode? c = commandsProcessor.Current.Parent;
             while (c != null)
             {
-                prompt = c.Name + "/" + prompt;
+                prompt = c.GetName() + "/" + prompt;
                 c = c.Parent;
             }
 
@@ -75,7 +84,7 @@ public static class VaultEntryPoint
             }
         }
         
-        Console.WriteLine(SerializerJson.Serialize(storage));
+        //Console.WriteLine(SerializerJson.Serialize(fileSystem));
 
         var commandSource = new TextReaderCommandSource(Console.In, commandsFactory);
         commandSource.OnError += ex => Console.WriteLine(ex);

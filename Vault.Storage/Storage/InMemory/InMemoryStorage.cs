@@ -103,7 +103,7 @@ namespace Vault.Storage.InMemory
             return Task.FromResult(true);
         }
 
-        Task<bool> IStorage.SetDirectoryContent(NodeId id, Box<IDirectoryContent> encryptedContent)
+        Task<bool> IStorage.SetDirectoryContent(NodeId id, Box<DirectoryContent> encryptedContent)
         {
             if (!_nodes.TryGetValue(id, out var node) || node is not DirectoryData dirData)
             {
@@ -114,7 +114,7 @@ namespace Vault.Storage.InMemory
             return Task.FromResult(true);
         }
 
-        Task<bool> IStorage.SetFileContent(NodeId id, Box<IFileContent> encryptedContent)
+        Task<bool> IStorage.SetFileContent(NodeId id, Box<FileContent> encryptedContent)
         {
             if (!_nodes.TryGetValue(id, out var node) || node is not FileData fileData)
             {

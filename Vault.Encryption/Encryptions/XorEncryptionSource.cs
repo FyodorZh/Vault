@@ -37,20 +37,31 @@ namespace Vault.Encryption
             return new EncryptionDesc("Xor", true, _initializedCredentials);
         }
 
-        public override IReadOnlyList<byte> Encrypt(IReadOnlyList<byte> plainData)
+        public override IReadOnlyList<byte>? Encrypt(IReadOnlyList<byte> plainData)
         {
-            byte[] res = new byte[plainData.Count];
+            if (!_initializedCredentials)
+            {
+                return null;
+            }
+            
+            byte[] res = new byte[plainData.Count + 1];
             for (int i = plainData.Count - 1; i >= 0; --i)
             {
                 res[i] = (byte)(plainData[i] ^ _xor);
             }
+            res[^1] = _xor;
             return res;
         }
         
-        public override IReadOnlyList<byte> Decrypt(IReadOnlyList<byte> plainData)
+        public override IReadOnlyList<byte>? Decrypt(IReadOnlyList<byte> plainData)
         {
-            byte[] res = new byte[plainData.Count];
-            for (int i = plainData.Count - 1; i >= 0; --i)
+            if (plainData[^1] != _xor)
+            {
+                return null;
+            }
+            
+            byte[] res = new byte[plainData.Count - 1];
+            for (int i = res.Length - 1; i >= 0; --i)
             {
                 res[i] = (byte)(plainData[i] ^ _xor);
             }

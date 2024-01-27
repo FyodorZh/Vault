@@ -19,7 +19,7 @@ namespace Vault.Storage.FileSystem
             _dataModel = dataModel;
         }
 
-        public async Task SetContent(Box<IFileContent> encryptedContent)
+        public async Task SetContent(Box<FileContent> encryptedContent)
         {
             _dataModel.Content = encryptedContent;
             await _fsEntity.WriteModel(_dataModel);
@@ -28,7 +28,16 @@ namespace Vault.Storage.FileSystem
         [Guid("A04D8AFD-0192-4B90-9BEB-2B837EA8B560")]
         public class FileDataModel : NodeDataModel
         {
-            public IBox<IFileContent> Content = null!;
+            public IBox<FileContent> Content = null!;
+            
+            public FileDataModel() {}
+            
+            public FileDataModel(NodeId id, NodeId parentId, 
+                IBox<StringContent> name, IBox<FileContent> content)
+                : base(id, parentId, name)
+            {
+                Content = content;
+            }
             
             public override void Serialize(ISerializer serializer)
             {

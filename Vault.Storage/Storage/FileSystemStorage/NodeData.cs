@@ -38,7 +38,18 @@ namespace Vault.Storage.FileSystem
             public NodeId Id;
             public NodeId ParentId;
             public IBox<StringContent> Name = null!;
-            
+
+            protected NodeDataModel()
+            {
+            }
+
+            protected NodeDataModel(NodeId id, NodeId parentId, IBox<StringContent> name)
+            {
+                Id = id;
+                ParentId = parentId;
+                Name = name;
+            }
+
             public virtual void Serialize(ISerializer serializer)
             {
                 serializer.AddStruct(ref Id);

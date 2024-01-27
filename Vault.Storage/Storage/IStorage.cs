@@ -35,7 +35,7 @@ namespace Vault.Storage
             Box<FileContent> encryptedContent);
 
         Task<bool> SetNodeName(NodeId id, Box<StringContent> encryptedName);
-        Task<bool> SetDirectoryContent(NodeId id, Box<IDirectoryContent> encryptedContent);
-        Task<bool> SetFileContent(NodeId id, Box<IFileContent> encryptedContent);
+        Task<bool> SetDirectoryContent(NodeId id, Box<DirectoryContent> encryptedContent);
+        Task<bool> SetFileContent(NodeId id, Box<FileContent> encryptedContent);
     }
 }

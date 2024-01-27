@@ -16,7 +16,7 @@ namespace Vault.Commands
 
         public override async Task<Result> Process(IProcessorContext context)
         {
-            LsResult result = new LsResult(context.Current.Name);
+            LsResult result = new LsResult(context.Current.GetName());
             
             if (context.Current.Content.Value is DirectoryContent directoryContent)
             {
@@ -35,7 +35,7 @@ namespace Vault.Commands
 
             foreach (var ch in await context.Current.ChildrenNames.All)
             {
-                result.AddChild(ch.Name, ch is IDirectoryNode);
+                result.AddChild(ch.GetName(), ch is IDirectoryNode);
             }
             
             return result;

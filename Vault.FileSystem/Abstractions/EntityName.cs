@@ -1,9 +1,11 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Archivarius;
 
 namespace Vault.FileSystem
 {
+    [DebuggerDisplay("Name='{FullName}'")]
     [Guid("DB8D4134-3A0E-4B15-9673-B99FD5E8E4E1")]
     public sealed class EntityName : IEquatable<EntityName>, IVersionedDataStruct
     {
@@ -52,7 +54,7 @@ namespace Vault.FileSystem
 
         public EntityName(Span<string> path)
         {
-            if (path.Length == 0)
+            if (path.Length == 0 || path.Length == 1 && path[0] == "")
             {
                 _parent = null;
                 _name = "";

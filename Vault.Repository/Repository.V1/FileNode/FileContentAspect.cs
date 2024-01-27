@@ -1,4 +1,5 @@
 using Vault.Content;
+using Vault.Encryption;
 
 namespace Vault.Repository.V1
 {
@@ -18,7 +19,7 @@ namespace Vault.Repository.V1
         
         protected sealed override IFileContent? UnlockState()
         {
-            return _owner.Data.FileContent.Deserialize(_owner.Parent?.ChildrenContent.ContentEncryptionChain);
+            return _owner.Data.FileContent.Deserialize(_owner.Parent?.ChildrenContent.ContentEncryptionChain ?? VoidEncryptionChain.Instance);
         }
     }
 }

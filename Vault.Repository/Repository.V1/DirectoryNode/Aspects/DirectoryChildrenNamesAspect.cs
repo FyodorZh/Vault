@@ -103,7 +103,7 @@ namespace Vault.Repository
         {
             foreach (var node in await All)
             {
-                if (node.Name == name)
+                if (node.GetName() == name)
                 {
                     return node;
                 }

@@ -1,9 +1,11 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Archivarius;
 
 namespace Vault.FileSystem
 {
+    [DebuggerDisplay("Path='{Name.FullName}'; Data={_data}")]
     public abstract class InMemoryFileSystemEntity<TData> : 
         IEntityCtl<TData>, IEntityData<TData>, IDataStruct
         where TData : class

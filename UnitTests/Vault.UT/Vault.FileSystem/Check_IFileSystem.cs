@@ -23,6 +23,8 @@ namespace Vault.UT
         {
             Assert.That(await fs.GetChildren(EntityName.Root), Is.Empty);
             Assert.That(await fs.Delete(EntityName.Root), Is.False);
+            
+            Assert.That(await fs.GetEntity(EntityName.Root), Is.Not.Null);
 
             {
                 Assert.That(await fs.GetEntity(EntityName.Root.Sub("a")), Is.Null);

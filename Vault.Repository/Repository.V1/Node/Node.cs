@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Vault.Content;
+using Vault.Encryption;
 using Vault.Storage;
 
 namespace Vault.Repository.V1
@@ -24,14 +25,11 @@ namespace Vault.Repository.V1
 
         public NodeId Id => Data.Id;
 
-        public string Name
+        public string GetName()
         {
-            get
-            {
-                var chain = Parent?.ChildrenNames.ChildrenNameEncryptionChain;
-                string? name = Data.Name.Deserialize(chain)?.Content;
-                return name ?? Id.ToString();
-            }
+            var chain = Parent?.ChildrenNames.ChildrenNameEncryptionChain ?? VoidEncryptionChain.Instance;
+            string? name = Data.Name.Deserialize(chain)?.Content;
+            return name ?? Id.ToString();
         }
         
         public abstract ILockableAspect<IContent> Content { get; }

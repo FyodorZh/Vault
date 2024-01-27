@@ -71,7 +71,7 @@ namespace Vault.Repository.V1
 
         protected override IDirectoryContent? UnlockState()
         {
-            IDirectoryContent? dirContent = _owner.Data.DirContent.Deserialize(_owner.Parent?.ChildrenContent.ContentEncryptionChain);
+            IDirectoryContent? dirContent = _owner.Data.DirContent.Deserialize(_owner.Parent?.ChildrenContent.ContentEncryptionChain ?? VoidEncryptionChain.Instance);
             if (dirContent == null)
             {
                 return null;

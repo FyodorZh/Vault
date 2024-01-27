@@ -10,8 +10,8 @@ namespace Vault.Encryption
         void ClearCredentials();
         
         EncryptionDesc GetDescription();
-        IReadOnlyList<byte> Encrypt(IReadOnlyList<byte> plainData);
-        IReadOnlyList<byte> Decrypt(IReadOnlyList<byte> encryptedData);
+        IReadOnlyList<byte>? Encrypt(IReadOnlyList<byte> plainData);
+        IReadOnlyList<byte>? Decrypt(IReadOnlyList<byte> encryptedData);
     }
     
     public abstract class EncryptionSource : IEncryptionSource, IVersionedDataStruct
@@ -21,8 +21,8 @@ namespace Vault.Encryption
         public abstract void ClearCredentials();
         
         public abstract EncryptionDesc GetDescription();
-        public abstract IReadOnlyList<byte> Encrypt(IReadOnlyList<byte> plainData);
-        public abstract IReadOnlyList<byte> Decrypt(IReadOnlyList<byte> encryptedData);
+        public abstract IReadOnlyList<byte>? Encrypt(IReadOnlyList<byte> plainData);
+        public abstract IReadOnlyList<byte>? Decrypt(IReadOnlyList<byte> encryptedData);
 
         public abstract void Serialize(ISerializer serializer);
         public virtual byte Version => 0;

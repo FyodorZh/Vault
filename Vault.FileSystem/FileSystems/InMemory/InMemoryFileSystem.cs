@@ -5,13 +5,19 @@ using Archivarius;
 
 namespace Vault.FileSystem
 {
-    public abstract class InMemoryFileSystem<TData, TEntity> : 
-        IFileSystem, IFileSystem<TData>, IVersionedDataStruct
+    public abstract class InMemoryFileSystem<TData, TEntity> : IFileSystem<TData>, IVersionedDataStruct
         where TData : class
         where TEntity : class, IEntityCtl<TData>, IDataStruct, new()
     {
         private Dictionary<EntityName, TEntity> _entities = new Dictionary<EntityName, TEntity>();
-        
+
+        protected InMemoryFileSystem()
+        {
+            var root = new TEntity();
+            root.Setup(this, EntityName.Root, null);
+            _entities.Add(EntityName.Root, root);
+        }
+
         async Task<IEntity?> IFileSystem.GetEntity(EntityName name)
         {
             return await ((IFileSystem<TData>)this).GetEntity(name);
@@ -68,6 +74,11 @@ namespace Vault.FileSystem
         
         Task<bool> IFileSystem.Delete(EntityName name)
         {
+            if (name == EntityName.Root)
+            {
+                return Task.FromResult(false);
+            }
+            
             if (_entities.TryGetValue(name, out var entity))
             {
                 entity.Invalidate();

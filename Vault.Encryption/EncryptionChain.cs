@@ -7,8 +7,8 @@ namespace Vault.Encryption
     {
         bool IsValid { get; }
         void Destroy();
-        IReadOnlyList<byte> Encrypt(IReadOnlyList<byte> data);
-        IReadOnlyList<byte> Decrypt(IReadOnlyList<byte> data);
+        IReadOnlyList<byte>? Encrypt(IReadOnlyList<byte> data);
+        IReadOnlyList<byte>? Decrypt(IReadOnlyList<byte> data);
     }
 
     public class VoidEncryptionChain : IEncryptionChain
@@ -21,12 +21,12 @@ namespace Vault.Encryption
         {
         }
 
-        public IReadOnlyList<byte> Encrypt(IReadOnlyList<byte> data)
+        public IReadOnlyList<byte>? Encrypt(IReadOnlyList<byte> data)
         {
             return data;
         }
 
-        public IReadOnlyList<byte> Decrypt(IReadOnlyList<byte> data)
+        public IReadOnlyList<byte>? Decrypt(IReadOnlyList<byte> data)
         {
             return data;
         }
@@ -52,26 +52,44 @@ namespace Vault.Encryption
             _encryption = null;
         }
 
-        public IReadOnlyList<byte> Encrypt(IReadOnlyList<byte> data)
+        public IReadOnlyList<byte>? Encrypt(IReadOnlyList<byte> data)
         {
             if (!SelfIsValid)
             {
                 throw new Exception();
             }
 
-            data = _encryption!.Encrypt(data);
-            return _base?.Encrypt(data) ?? data;
+            var encryptedData = _encryption!.Encrypt(data);
+            if (encryptedData == null)
+            {
+                return null;
+            }
+            return _base?.Encrypt(encryptedData) ?? encryptedData;
         }
 
-        public IReadOnlyList<byte> Decrypt(IReadOnlyList<byte> data)
+        public IReadOnlyList<byte>? Decrypt(IReadOnlyList<byte> data)
         {
             if (!SelfIsValid)
             {
                 throw new Exception();
             }
 
-            data = _base?.Decrypt(data) ?? data;
-            return _encryption!.Decrypt(data);
+            IReadOnlyList<byte>? planeData;
+            if (_base != null)
+            {
+                planeData = _base.Decrypt(data);
+                if (planeData == null)
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                planeData = data;
+            }
+            
+            planeData = _encryption!.Decrypt(planeData);
+            return planeData;
         }
     }
 }

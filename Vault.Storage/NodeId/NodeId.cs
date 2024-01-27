@@ -1,8 +1,10 @@
 using System;
+using System.Diagnostics;
 using Archivarius;
 
 namespace Vault.Storage
 {
+    [DebuggerDisplay("Id='{_id}'")]
     public struct NodeId : IEquatable<NodeId>, IDataStruct
     {
         private string? _id;
