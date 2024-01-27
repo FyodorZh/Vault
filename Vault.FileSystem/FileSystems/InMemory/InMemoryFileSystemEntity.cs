@@ -108,5 +108,20 @@ namespace Vault.FileSystem
         {
             return GetModel<TModel>();
         }
+
+        private IDataStruct? DBG_As_Model
+        {
+            get
+            {
+                try
+                {
+                    return GetModel<IDataStruct>();
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
     }
 }

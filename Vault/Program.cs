@@ -9,7 +9,6 @@ using Vault.FileSystem;
 using Vault.Serialization;
 using Vault.Storage;
 using Vault.Storage.FileSystem;
-using Vault.Storage.InMemory;
 
 public static class VaultEntryPoint
 {
@@ -44,12 +43,6 @@ public static class VaultEntryPoint
                 typeof(XorEncryptionSource)
             };
         });
-        
-        //var storage = new InMemoryStorage(
-        //    new IncrementalNodeIdSource(),
-        //    new Box<StringContent>(new StringContent("root"), VoidEncryptionChain.Instance),
-        //    new Box<DirectoryContent>(new DirectoryContent(new PlaneDataEncryptionSource()), VoidEncryptionChain.Instance));
-
 
         var fileSystem = new InMemoryTextFileSystem();
         await FileSystemStorage.InitializeFS(fileSystem);
