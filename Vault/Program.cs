@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Vault.Commands;
 using Vault.Content;
 using Vault.Encryption;
-using Vault.Repository;
-using Vault.Commands;
 using Vault.FileSystem;
+using Vault.Repository;
 using Vault.Serialization;
 using Vault.Storage;
 using Vault.Storage.FileSystem;
+
+namespace Vault;
 
 public static class VaultEntryPoint
 {
